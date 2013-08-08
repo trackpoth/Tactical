@@ -1,4 +1,4 @@
-// CutreRPG.cpp: archivo de proyecto principal
+// Tactical: archivo de proyecto principal
 
 #include "stdafx.h"
 #include <stdio.h>
@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string>
 #include <windows.h>
+#include "player.h"
 
 using namespace std;
 
@@ -17,7 +18,6 @@ using namespace std;
 int enemylife = 410;
 int enemymaxlife = 410;
 int playerlife = 460;
-int playermaxlife = 460;
 int enemyattack = 18;
 int playerattack = 21;
 int playermagicattack = 18;
@@ -58,6 +58,9 @@ bool successfulhit;
 bool successfulhit2;
 clock_t t;
 bool runawayfrombattle;
+
+	//Inicialización de objetos
+player mainplayer;
 
 void clear(){
 	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -119,8 +122,8 @@ void itemmenu(){
 		if(smallhealthpill > 0){
 			smallhealthpill--;
 			playerlife += smallhealthpillvalue;
-			if(playerlife >= playermaxlife){
-				playerlife = playermaxlife;
+			if(playerlife >= playermaxlifeclone){
+				playerlife = playermaxlifeclone;
 			}
 			printf("Used a Small Health Pill and life was restored by 50 points! %d remaining\n",smallhealthpill);
 			}
@@ -181,7 +184,9 @@ void battlemenu(){
 		cout << "None\n" << endl;
 	}
 	cout << playername;
-    printf("'s life = %d/%d\n",playerlife,playermaxlife);
+    printf("'s life = %d/",playerlife);
+	mainplayer.saymaxlife();
+	cout << endl;
 	cout << playername;
     printf("'s SP = %d/%d\n",playersp,playermaxsp);
 	cout << playername;
@@ -232,11 +237,11 @@ void battle(){
 
 		STARTBATTLE:
 
-		srand(seed);
 		t = clock();
 		if(t >= 10000){
 			t-=9999;
 		}
+		srand(seed);
 
 		// Comprueba si has ganado o perdido la batalla
 		escapebattle();
@@ -368,8 +373,8 @@ void battle(){
 				if(playermp >= 6){
 					playermp -= 6;
 					playerlife += 60;
-					if(playerlife >= playermaxlife){
-						playerlife = playermaxlife;
+					if(playerlife >= playermaxlifeclone){
+						playerlife = playermaxlifeclone;
 					}
 					cout << "Used Meditate and life was restored by 60 points!" << endl;
 				}
@@ -435,7 +440,7 @@ void battle(){
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	while(1){
-		cout << "Welcome to CutreRPG Alpha 0.3.3!" << endl;
+		cout << "Welcome to CutreRPG Alpha 0.3.4.1!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
