@@ -1,5 +1,3 @@
-// Tactical: archivo de proyecto principal
-
 #include "stdafx.h"
 #include <stdio.h>
 #include <conio.h>
@@ -17,24 +15,24 @@ using namespace std;
 	// Definición de los parámetros del jugador y del enemigo
 int enemylife = 410;
 int enemymaxlife = 410;
-int playerlife = 460;
 int enemyattack = 18;
+int enemytype = 1;
+
+int playerlife = 460;
 int playerattack = 21;
 int playermagicattack = 18;
-int damagepillpower = 31;
 int playersp = 10;
 int playermaxsp = 10;
 int playermp = 16;
 int playermaxmp = 16;
-int enemytype = 1;
 
 	// Defininición de los valores que determinan la frecuencia y el poder de los ataques críticos
 int subcriticalcheckerone;
 int subcriticalcheckertwo;
 
 int playercriticalchecker = 20;
-int playercriticalpower = 42;
-int playercriticalpill = 52;
+int playercriticalpower;
+float playercriticalmultiplier = 1.5;
 int enemycriticalchecker = 20;
 int enemycriticalpower = 36;
 
@@ -52,7 +50,6 @@ bool battlechecker = true;
 char movement;
 int seed;
 string playername;
-char namechecker;
 int distanceenemy = 3;
 bool successfulhit;
 bool successfulhit2;
@@ -194,7 +191,7 @@ void battlemenu(){
 	cout << playername;
 	printf("'s attack");
 	if(damagepilleffect == true){
-		printf(" = %d (Damage Pill +10 attack)\n",damagepillpower);
+		printf(" = %d (Damage Pill +10 attack)\n",playerattack + 10);
 	}
 	if(damagepilleffect == false){
 		printf(" = %d\n",playerattack);
@@ -217,16 +214,16 @@ void battlemenu(){
 	if(distanceenemy == 5){
 		cout << "Very far" << endl;
 	}
-	printf("\nType 'a' to attack the enemy\n");
-	printf("Type 'i' to open the item bag\n");
-	printf("Type 's' to show the special moves list\n");
-	printf("Type 'm' to show the magic learned\n");
-	printf("Type 'c' to get closer to the enemy\n");
+	printf("\nType '1' to attack the enemy\n");
+	printf("Type '2' to open the item bag\n");
+	printf("Type '3' to show the special moves list\n");
+	printf("Type '4' to show the magic learned\n");
+	printf("Type '5' to get closer to the enemy\n");
 	if(distanceenemy == 5){
-		printf("Type 'e' to run away from the battle\n");
+		printf("Type '6' to run away from the battle\n");
 	}
 	else{
-		printf("Type 'e' to move away from the enemy\n");
+		printf("Type '6' to move away from the enemy\n");
 	}
 	printf("Type any other key to skip the turn\n");
 }
@@ -236,6 +233,13 @@ void battle(){
 	while(battlechecker == true){
 
 		STARTBATTLE:
+
+		if(damagepilleffect == false){
+			playercriticalpower = (playerattack * playercriticalmultiplier);
+		}
+		else{
+			playercriticalpower = ((playerattack * playercriticalmultiplier) + 10);
+		}
 
 		t = clock();
 		if(t >= 10000){
@@ -250,7 +254,6 @@ void battle(){
 
 		// Muestra el menú con parte de los parámetros y sus explicaciones, junto con las acciones que puede hacer el jugador
 		battlemenu();
-
 
 		// Comprueba si la distancia frente al enemigo es lo suficientemente corta como para realizar un ataque físico
 		if(distanceenemy == 1 || distanceenemy == 2){
@@ -267,7 +270,7 @@ void battle(){
 		clear();
 
 		switch(movement){
-		case 'a':
+		case '1':
 			seed = t;
 			subcriticalcheckerone = rand() % 100;
 			if(successfulhit == true){
@@ -276,7 +279,7 @@ void battle(){
 						cout << "\a";
 						enemylife -= playercriticalpower;
 						cout << playername;
-						printf(" made a critical hit!\n",playercriticalpower);
+						printf(" made a critical hit, causing %d damage!\n",playercriticalpower);
 					}
 					else{
 						enemylife -= playerattack;
@@ -287,14 +290,14 @@ void battle(){
 				if(damagepilleffect == true){
 					if(subcriticalcheckerone <= playercriticalchecker){
 						cout << "\a";
-						enemylife -= playercriticalpill;
+						enemylife -= (playercriticalpower + 10);
 						cout << playername;
-						printf(" made a critical hit!\n",playercriticalpill);
+						printf(" made a critical hit, causing %d damage!\n",playercriticalpower);
 					}
 					else{
-						enemylife -= damagepillpower;
+						enemylife -= (playerattack + 10);
 						cout << playername;
-						printf(" inflicted %d damage to the enemy\n",damagepillpower);
+						printf(" inflicted %d damage to the enemy\n",playerattack + 10);
 					}
 				}
 			}
@@ -302,19 +305,19 @@ void battle(){
 				cout << "You are too far from the enemy to perform that move!" << endl;
 			}
 			break;
-		case 'i':
+		case '2':
 			itemmenu();break;
-		case 's': 	
+		case '3': 	
 			printf("List of Special moves:\n\n");
-			printf("Piercing eye [2 SP]['p' to use]\n");
+			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
-			printf("Quick eye [5 SP]['q' to use]\n");
+			printf("Quick eye [5 SP]['2' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
 			printf("\nType any other key to go back to the main menu\n");
 			cin >> movement;
 			clear();
 			switch(movement){
-			case 'p' : 
+			case '1' : 
 				if(playersp >= 2){
 					playersp--;
 					playersp--;
@@ -325,7 +328,7 @@ void battle(){
 					cout << "You haven't enough SP left to perform this move!" << endl;
 				}
 				break;
-			case 'q' :
+			case '2' :
 				if(playersp >= 5){
 					playersp = (playersp - 5);
 					piercingeyeeffect = true;
@@ -340,7 +343,7 @@ void battle(){
 			default : goto STARTBATTLE;
 				}
 			break;
-		case 'c' : 
+		case '5' : 
 			if(distanceenemy == 1){
 				cout << "You can't get closer to the enemy!" << endl;
 			}
@@ -349,7 +352,7 @@ void battle(){
 				cout << "Got closer to the enemy" << endl;
 			}
 			break;
-		case 'e' : 
+		case '6' : 
 			if(distanceenemy == 5){
 				runawayfrombattle = true;
 				goto STARTBATTLE;
@@ -359,17 +362,17 @@ void battle(){
 				cout << "Moved a bit away from the enemy" << endl;
 			}
 			break;
-		case 'm' :
+		case '4' :
 			printf("List of Magic learned:\n\n");
-			printf("Meditate [6 MP]['m' to use]\n");
+			printf("Meditate [6 MP]['1' to use]\n");
 			printf("-- Heals the player by 60 life points\n");
-			printf("Fire [4 MP]['f' to use]\n");
+			printf("Fire [4 MP]['2' to use]\n");
 			printf("-- Harms the enemy using the Fire Element\n");
 			printf("\nType any other key to go back to the main menu\n");
 			cin >> movement;
 			clear();
 			switch(movement){
-			case 'm' : 
+			case '1' : 
 				if(playermp >= 6){
 					playermp -= 6;
 					playerlife += 60;
@@ -382,7 +385,7 @@ void battle(){
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case 'f' : 
+			case '2' : 
 				if(playermp >= 4){
 					playermp -= 4;
 					if(enemytype == 1){
@@ -440,7 +443,7 @@ void battle(){
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	while(1){
-		cout << "Welcome to CutreRPG Alpha 0.3.4.1!" << endl;
+		cout << "Welcome to CutreRPG Alpha 0.3.4.2!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
@@ -457,11 +460,16 @@ int main(){
 				cout << "?\a\n\n";
 			}
 		}
-		cout << "Type 'y' to say yes" << endl;
+		cout << "Type '1' to say yes" << endl;
 		cout << "Type any other key to input a different name" << endl;
-		cin >> namechecker;
-		switch (namechecker){
-		case 'y' : clear();cout << "Name applied correctly" << endl;printf("You found an enemy!\n\n");battle();break;
+		cin >> movement;
+		switch (movement){
+		case '1' : 
+			clear();
+			cout << "Name applied correctly" << endl;
+			printf("You found an enemy!\n\n");
+			battle();
+			break;
 		}
 		clear();
 	}
