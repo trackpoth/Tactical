@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 int playermaxlifeclone = 460;
 
 class player
