@@ -10,52 +10,6 @@
 
 using namespace std;
 
-// Definición de variables principales
-
-	// Definición de los parámetros del jugador y del enemigo
-int enemylife = 410;
-int enemymaxlife = 410;
-int enemyattack = 18;
-int enemytype = 1;
-
-int playerlife = 460;
-int playerattack = 21;
-int playermagicattack = 18;
-int playersp = 10;
-int playermaxsp = 10;
-int playermp = 16;
-int playermaxmp = 16;
-
-	// Defininición de los valores que determinan la frecuencia y el poder de los ataques críticos
-int subcriticalcheckerone;
-int subcriticalcheckertwo;
-
-int playercriticalchecker = 20;
-int playercriticalpower;
-float playercriticalmultiplier = 1.5;
-int enemycriticalchecker = 20;
-int enemycriticalpower = 36;
-
-	// Cantidad de objetos que posee el jugador
-int smallhealthpill = 2;
-int smallhealthpillvalue = 100;
-int damagepill = 2;
-
-	// Efectos varios provocados por determinadas causas
-bool damagepilleffect;
-bool piercingeyeeffect;
-
-	// Otros argumentos con funciones secundarias
-bool battlechecker = true;
-char movement;
-int seed;
-string playername;
-int distanceenemy = 3;
-bool successfulhit;
-bool successfulhit2;
-clock_t t;
-bool runawayfrombattle;
-
 	//Inicialización de objetos
 player mainplayer;
 
@@ -107,28 +61,26 @@ void escapebattle(){
 }
 
 void itemmenu(){
-	printf("You have %d Small Health Pill(s) (+100 life)\n",smallhealthpill);
+	printf("You have %d Small Health Pill(s) (+%d life)\n",smallhealthpill,smallhealthpillvalue);
 	printf("You have %d Damage Pill(s) (+10 attack until the end of the battle)\n",damagepill);
-	printf("\nType 's' to use a Small Health Pill\n");
-	printf("Type 'd' to use a Damage Pill\n");
+	printf("\nType '1' to use a Small Health Pill\n");
+	printf("Type '2' to use a Damage Pill\n");
 	printf("Type any other key to go back to the main menu and skip the turn\n");
 	cin >> movement;
 	clear();
 	switch(movement){
-	case 's' : 
+	case '1' : 
 		if(smallhealthpill > 0){
 			smallhealthpill--;
 			playerlife += smallhealthpillvalue;
-			if(playerlife >= playermaxlifeclone){
-				playerlife = playermaxlifeclone;
-			}
-			printf("Used a Small Health Pill and life was restored by 50 points! %d remaining\n",smallhealthpill);
-			}
+			mainplayer.limitplayerlife();
+			printf("Used a Small Health Pill and life was restored by %d points! %d remaining\n",smallhealthpillvalue,smallhealthpill);
+		}
 		else{
 			printf("You haven't any Small Health Pills left!\n");
 		}
 		break;
-	case 'd' : 
+	case '2' : 
 		if(damagepill > 0){
 			damagepill--;
 			damagepilleffect = true;
@@ -191,10 +143,14 @@ void battlemenu(){
 	cout << playername;
 	printf("'s attack");
 	if(damagepilleffect == true){
-		printf(" = %d (Damage Pill +10 attack)\n",playerattack + 10);
+		cout << " = ";
+		mainplayer.sayattack();
+		cout << " (Damage Pill +10 attack)" << endl;
 	}
 	if(damagepilleffect == false){
-		printf(" = %d\n",playerattack);
+		cout << " = ";
+		mainplayer.sayattack();
+		cout << endl;
 	}
 	cout << playername;
 	printf("'s magic attack = %d\n",playermagicattack);
@@ -234,12 +190,7 @@ void battle(){
 
 		STARTBATTLE:
 
-		if(damagepilleffect == false){
-			playercriticalpower = (playerattack * playercriticalmultiplier);
-		}
-		else{
-			playercriticalpower = ((playerattack * playercriticalmultiplier) + 10);
-		}
+		mainplayer.determinecriticalpower();
 
 		t = clock();
 		if(t >= 10000){
@@ -274,32 +225,7 @@ void battle(){
 			seed = t;
 			subcriticalcheckerone = rand() % 100;
 			if(successfulhit == true){
-				if(damagepilleffect == false){
-					if(subcriticalcheckerone <= playercriticalchecker){
-						cout << "\a";
-						enemylife -= playercriticalpower;
-						cout << playername;
-						printf(" made a critical hit, causing %d damage!\n",playercriticalpower);
-					}
-					else{
-						enemylife -= playerattack;
-						cout << playername;
-						printf(" inflicted %d damage to the enemy\n",playerattack);
-					}
-				}
-				if(damagepilleffect == true){
-					if(subcriticalcheckerone <= playercriticalchecker){
-						cout << "\a";
-						enemylife -= (playercriticalpower + 10);
-						cout << playername;
-						printf(" made a critical hit, causing %d damage!\n",playercriticalpower);
-					}
-					else{
-						enemylife -= (playerattack + 10);
-						cout << playername;
-						printf(" inflicted %d damage to the enemy\n",playerattack + 10);
-					}
-				}
+				mainplayer.attackenemy();
 			}
 			else{
 				cout << "You are too far from the enemy to perform that move!" << endl;
@@ -376,9 +302,7 @@ void battle(){
 				if(playermp >= 6){
 					playermp -= 6;
 					playerlife += 60;
-					if(playerlife >= playermaxlifeclone){
-						playerlife = playermaxlifeclone;
-					}
+					mainplayer.limitplayerlife();
 					cout << "Used Meditate and life was restored by 60 points!" << endl;
 				}
 				else{
@@ -443,7 +367,7 @@ void battle(){
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	while(1){
-		cout << "Welcome to CutreRPG Alpha 0.3.4.2!" << endl;
+		cout << "Welcome to CutreRPG Alpha 0.3.4.3!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
