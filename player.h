@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "enemy.h"
 #include <stdio.h>
 #include <conio.h>
 #include <iostream>
@@ -16,14 +15,12 @@ using namespace std;
 int enemymaxlife = 410;
 int enemyattack = 18;
 int enemytype = 1;
-int enemylife = 410;
 
 int playermagicattack = 18;
 int playersp = 10;
 int playermaxsp = 10;
 int playermp = 16;
 int playermaxmp = 16;
-int playerlife = 460;
 
 	// Defininición de los valores que determinan la frecuencia y el poder de los ataques críticos
 int subcriticalcheckerone;
@@ -56,51 +53,37 @@ bool runawayfrombattle;
 string playername;
 bool successfulhit;
 
-class player
+void clear(){
+	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hndl, &csbi);
+	DWORD written;
+	DWORD n = csbi.dwSize.X * csbi.dwCursorPosition.Y + csbi.dwCursorPosition.X + 1;	
+	COORD curhome = {0,0};
+	FillConsoleOutputCharacter(hndl, ' ', n, curhome, &written);
+	csbi.srWindow.Bottom -= csbi.srWindow.Top;
+	csbi.srWindow.Top = 0;
+	SetConsoleWindowInfo(hndl, TRUE, &csbi.srWindow);
+	SetConsoleCursorPosition(hndl, curhome);
+}
+
+class warrior
 {
 public:
-	player();
-	void saymaxlife();
-	void sayattack();
-	void limitplayerlife();
-	void determinecriticalpower();
-	void attackenemy();
-
-private:
+	warrior();
+	int playerlife;
+	int enemylife;
 	int playerattack;
-	int playermaxlife;
+	void enemyattacked();
+	void playerattacked();
 };
 
-player::player()
-{
-	playermaxlife = 460;
+warrior::warrior(){
 	playerattack = 21;
+	playerlife = 460;
 }
 
-void player::saymaxlife(){
-	cout << playermaxlife;
-}
-
-void player::limitplayerlife(){
-	if(playerlife >= playermaxlife){
-		playerlife = playermaxlife;
-	}
-}
-
-void player::sayattack(){
-	cout << playerattack;
-}
-
-void player::determinecriticalpower(){
-	if(damagepilleffect == false){
-		playercriticalpower = (playerattack * playercriticalmultiplier);
-	}
-	else{
-		playercriticalpower = ((playerattack * playercriticalmultiplier) + 10);
-	}
-}
-
-void player::attackenemy(){
+void warrior::enemyattacked(){
 	if(damagepilleffect == false){
 		if(subcriticalcheckerone <= playercriticalchecker){
 			cout << "\a";
@@ -126,5 +109,129 @@ void player::attackenemy(){
 			cout << playername;
 			printf(" inflicted %d damage to the enemy\n",playerattack + 10);
 		}
+	}
+}
+
+void warrior::playerattacked(){
+	if(subcriticalcheckertwo <= enemycriticalchecker){
+		playerlife -= enemycriticalpower;
+		printf("The enemy made a critical hit!\n\n");
+	}
+	else{
+		playerlife -= enemyattack;
+		printf("The enemy inflicted %d damage\n\n",enemyattack);
+	}
+}
+
+class player : public warrior
+{
+public:
+	player();
+	void saymaxlife();
+	void sayattack();
+	void saylife();
+	void limitplayerlife();
+	void determinecriticalpower();
+	void defeatchecker();
+	void smallhealthpilltaken();
+	void meditateused();
+
+protected:
+	int playermaxlife;
+};
+
+player::player()
+{
+	playermaxlife = 460;
+}
+
+void player::saymaxlife(){
+	cout << playermaxlife;
+}
+
+void player::sayattack(){
+	cout << playerattack;
+}
+
+void player::saylife(){
+	cout << playerlife;
+}
+
+void player::limitplayerlife(){
+	if(playerlife >= playermaxlife){
+		playerlife = playermaxlife;
+	}
+}
+
+void player::determinecriticalpower(){
+	if(damagepilleffect == false){
+		playercriticalpower = (playerattack * playercriticalmultiplier);
+	}
+	else{
+		playercriticalpower = ((playerattack * playercriticalmultiplier) + 10);
+	}
+}
+
+void player::defeatchecker(){
+	if(playerlife <= 0){
+		clear();
+		cout << playername;
+		cout << " has lost!\a" << endl;
+		battlechecker = false;
+		_getch();
+		exit(0);
+	}
+}
+
+void player::smallhealthpilltaken(){
+	smallhealthpill--;
+	playerlife += smallhealthpillvalue;
+	printf("Used a Small Health Pill and life was restored by %d points! %d remaining\n",smallhealthpillvalue,smallhealthpill);
+}
+
+void player::meditateused(){
+	playermp -= 6;
+	playerlife += 60;
+	cout << "Used Meditate and life was restored by 60 points!" << endl;
+}
+
+class enemy : public warrior
+{
+public:
+	enemy();
+	void victorychecker();
+	void saylife();
+	void firereceived();
+};
+
+enemy::enemy()
+{
+	enemylife = 410;
+}
+
+void enemy::victorychecker(){
+	if(enemylife <= 0){
+		clear();
+		cout << playername;
+		cout << " won the battle!\a" << endl;
+		battlechecker = false;
+		_getch();
+		exit(0);
+	}
+}
+
+void enemy::saylife(){
+	cout << enemylife;
+}
+
+void enemy::firereceived(){
+	playermp -= 4;
+	if(enemytype == 1){
+		enemylife = (enemylife - playermagicattack * 2);
+		printf("You dealt %d damage to the enemy by using Fire! It was very effective!\n",playermagicattack * 2);
+	}
+	else{
+		enemylife -= playermagicattack;
+		printf("You dealt %d damage to the enemy by using Fire!\n",playermagicattack);
 	}
 }

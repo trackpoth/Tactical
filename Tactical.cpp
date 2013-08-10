@@ -12,41 +12,15 @@ using namespace std;
 
 	//Inicialización de objetos
 player mainplayer;
-
-void clear(){
-	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(hndl, &csbi);
-	DWORD written;
-	DWORD n = csbi.dwSize.X * csbi.dwCursorPosition.Y + csbi.dwCursorPosition.X + 1;	
-	COORD curhome = {0,0};
-	FillConsoleOutputCharacter(hndl, ' ', n, curhome, &written);
-	csbi.srWindow.Bottom -= csbi.srWindow.Top;
-	csbi.srWindow.Top = 0;
-	SetConsoleWindowInfo(hndl, TRUE, &csbi.srWindow);
-	SetConsoleCursorPosition(hndl, curhome);
-}
+enemy commonenemy;
+warrior attack;
 
 void defeat(){
-	if(playerlife <= 0){
-		clear();
-		cout << playername;
-		cout << " has lost!\a" << endl;
-		battlechecker = false;
-		_getch();
-		exit(0);
-	}
+	mainplayer.defeatchecker();
 }
 
 void victory(){
-	if(enemylife <= 0){
-		clear();
-		cout << playername;
-		cout << " won the battle!\a" << endl;
-		battlechecker = false;
-		_getch();
-		exit(0);
-	}
+	commonenemy.victorychecker();
 }
 
 void escapebattle(){
@@ -71,10 +45,8 @@ void itemmenu(){
 	switch(movement){
 	case '1' : 
 		if(smallhealthpill > 0){
-			smallhealthpill--;
-			playerlife += smallhealthpillvalue;
+			mainplayer.smallhealthpilltaken();
 			mainplayer.limitplayerlife();
-			printf("Used a Small Health Pill and life was restored by %d points! %d remaining\n",smallhealthpillvalue,smallhealthpill);
 		}
 		else{
 			printf("You haven't any Small Health Pills left!\n");
@@ -97,10 +69,15 @@ void itemmenu(){
 void battlemenu(){
 	cout << "Grass Common Bandit" << endl;
 	if(piercingeyeeffect == false){
-		printf("Life = %d\n",enemylife);
+		cout << "Life = ";
+		commonenemy.saylife();
+		cout << endl;
 	}
 	else{
-		printf("Life = %d/%d\n",enemylife,enemymaxlife);
+		cout << "Life = ";
+		commonenemy.saylife();
+		cout << "/";
+		cout << enemymaxlife << endl;
 		printf("Attack = %d\n",enemyattack);
 	}
 	if(piercingeyeeffect == true){
@@ -133,7 +110,9 @@ void battlemenu(){
 		cout << "None\n" << endl;
 	}
 	cout << playername;
-    printf("'s life = %d/",playerlife);
+	cout << "'s life = ";
+	mainplayer.saylife();
+	cout << "/";
 	mainplayer.saymaxlife();
 	cout << endl;
 	cout << playername;
@@ -188,7 +167,7 @@ void battlemenu(){
 void battle(){
 	while(battlechecker == true){
 
-		STARTBATTLE:
+STARTBATTLE:
 
 		mainplayer.determinecriticalpower();
 
@@ -225,7 +204,7 @@ void battle(){
 			seed = t;
 			subcriticalcheckerone = rand() % 100;
 			if(successfulhit == true){
-				mainplayer.attackenemy();
+				commonenemy.enemyattacked();
 			}
 			else{
 				cout << "You are too far from the enemy to perform that move!" << endl;
@@ -300,10 +279,8 @@ void battle(){
 			switch(movement){
 			case '1' : 
 				if(playermp >= 6){
-					playermp -= 6;
-					playerlife += 60;
+					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
-					cout << "Used Meditate and life was restored by 60 points!" << endl;
 				}
 				else{
 					cout << "You haven't enough MP left to perform this move!" << endl;
@@ -311,15 +288,7 @@ void battle(){
 				break;
 			case '2' : 
 				if(playermp >= 4){
-					playermp -= 4;
-					if(enemytype == 1){
-						enemylife = (enemylife - playermagicattack * 2);
-						printf("You dealt %d damage to the enemy by using Fire! It was very effective!\n",playermagicattack * 2);
-					}
-					else{
-						enemylife -= playermagicattack;
-						printf("You dealt %d damage to the enemy by using Fire!\n",playermagicattack);
-					}
+					commonenemy.firereceived();
 				}
 				else{
 					cout << "You haven't enough MP left to perform this move!" << endl;
@@ -347,14 +316,7 @@ void battle(){
 		seed = t;
 		subcriticalcheckertwo = rand() % 100;
 		if(successfulhit2 == true){
-			if(subcriticalcheckertwo <= enemycriticalchecker){
-				playerlife -= enemycriticalpower;
-				printf("The enemy made a critical hit!\n\n");
-			}
-			else{
-				playerlife -= enemyattack;
-				printf("The enemy inflicted %d damage\n\n",enemyattack);
-			}
+			mainplayer.playerattacked();
 		}
 		else{
 			cout << "The enemy got closer to " << playername << endl << endl;
