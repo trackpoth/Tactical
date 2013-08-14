@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <stdio.h>
 #include <conio.h>
 #include <iostream>
@@ -7,13 +6,14 @@
 #include <string>
 #include <windows.h>
 #include "player.h"
+#include "dialogues.h"
 
 using namespace std;
 
 	//Inicialización de objetos
-player mainplayer;
-enemy commonenemy;
 warrior attack;
+
+bool start;
 
 void defeat(){
 	mainplayer.defeatchecker();
@@ -28,23 +28,22 @@ void escapebattle(){
 		clear();
 		cout << playername;
 		cout << " ran away!\a" << endl;
-		battlechecker = false;
 		_getch();
 		exit(0);
 	}
 }
 
 void itemmenu(){
-	printf("You have %d Small Health Pill(s) (+%d life)\n",smallhealthpill,smallhealthpillvalue);
-	printf("You have %d Damage Pill(s) (+10 attack until the end of the battle)\n",damagepill);
+	printf("You have %d Small Health Pill(s) (+%d life)\n",mainplayer.saysmallhealthpill(),mainplayer.saysmallhealthpillvalue());
+	printf("You have %d Damage Pill(s) (+10 attack until the end of the battle)\n",mainplayer.saydamagepill());
 	printf("\nType '1' to use a Small Health Pill\n");
 	printf("Type '2' to use a Damage Pill\n");
 	printf("Type any other key to go back to the main menu and skip the turn\n");
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' : 
-		if(smallhealthpill > 0){
+	case '1' :
+		if(mainplayer.saysmallhealthpill() > 0){
 			mainplayer.smallhealthpilltaken();
 			mainplayer.limitplayerlife();
 		}
@@ -52,11 +51,9 @@ void itemmenu(){
 			printf("You haven't any Small Health Pills left!\n");
 		}
 		break;
-	case '2' : 
-		if(damagepill > 0){
-			damagepill--;
-			damagepilleffect = true;
-			printf("Used a Damage Pill and attack was increased by 10 points! %d remaining\n",damagepill);
+	case '2' :
+		if(mainplayer.saydamagepill() > 0){
+			mainplayer.damagepilltaken();
 		}
 		else{
 			cout << "You haven't any Damage Pills left!" << endl;
@@ -67,22 +64,19 @@ void itemmenu(){
 }
 
 void battlemenu(){
-	cout << "Grass Common Bandit" << endl;
+	cout << "Grass Human" << endl;
 	if(piercingeyeeffect == false){
 		cout << "Life = ";
-		commonenemy.saylife();
+		cout << commonenemy.saylife();
 		cout << endl;
 	}
 	else{
-		cout << "Life = ";
-		commonenemy.saylife();
-		cout << "/";
-		cout << enemymaxlife << endl;
-		printf("Attack = %d\n",enemyattack);
+		cout << "Life = " << commonenemy.saylife() << "/" << commonenemy.saymaxlife() << endl;
+		printf("Attack = %d\n",commonenemy.sayattack());
 	}
 	if(piercingeyeeffect == true){
 		cout << "Weak to: ";
-		if(enemytype == 1){
+		if(commonenemy.saytype() == 1){
 			cout << "Fire (x2)" << endl;
 		}
 		else{
@@ -92,7 +86,7 @@ void battlemenu(){
 			exit(1);
 		}
 		cout << "Resistant to: ";
-		if(enemytype == 1){
+		if(commonenemy.saytype() == 1){
 			cout << "Nothing" << endl;
 		}
 		else{
@@ -111,28 +105,34 @@ void battlemenu(){
 	}
 	cout << playername;
 	cout << "'s life = ";
-	mainplayer.saylife();
+	cout << mainplayer.saylife();
 	cout << "/";
-	mainplayer.saymaxlife();
+	cout << mainplayer.saymaxlife();
 	cout << endl;
 	cout << playername;
-    printf("'s SP = %d/%d\n",playersp,playermaxsp);
+	cout << "'s SP = " << mainplayer.saysp() << "/";
+	cout << mainplayer.saymaxsp();
+	cout << endl;
 	cout << playername;
-    printf("'s MP = %d/%d\n",playermp,playermaxmp);
+	cout << "'s MP = " << mainplayer.saymp() << "/";
+	cout << mainplayer.saymaxmp();
+	cout << endl;
 	cout << playername;
 	printf("'s attack");
 	if(damagepilleffect == true){
 		cout << " = ";
-		mainplayer.sayattack();
+		cout << mainplayer.attackparameter();
 		cout << " (Damage Pill +10 attack)" << endl;
 	}
 	if(damagepilleffect == false){
 		cout << " = ";
-		mainplayer.sayattack();
+		cout << mainplayer.attackparameter();
 		cout << endl;
 	}
 	cout << playername;
-	printf("'s magic attack = %d\n",playermagicattack);
+	cout << "'s magic attack = ";
+	cout << mainplayer.saymagicattack();
+	cout << endl;
 	printf("Distance from the enemy: ");
 	if(distanceenemy == 1){
 		cout << "Very short" << endl;
@@ -165,7 +165,17 @@ void battlemenu(){
 
 
 void battle(){
-	while(battlechecker == true){
+	clear();
+	if(start == true){
+		cout << "Name applied correctly" << endl;
+		start = false;
+	}
+	cout << "Press always any key to show the next lines of text" << endl << endl;
+	dialogue = 0;
+	dialogues();
+	clear();
+
+	while(1){
 
 STARTBATTLE:
 
@@ -212,7 +222,7 @@ STARTBATTLE:
 			break;
 		case '2':
 			itemmenu();break;
-		case '3': 	
+		case '3':
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
@@ -222,10 +232,10 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
-				if(playersp >= 2){
-					playersp--;
-					playersp--;
+			case '1' :
+				if(mainplayer.saysp() >= 2){
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
 					piercingeyeeffect = true;
 					cout << "Used Piercing Eye!" << endl;
 				}
@@ -234,10 +244,14 @@ STARTBATTLE:
 				}
 				break;
 			case '2' :
-				if(playersp >= 5){
-					playersp = (playersp - 5);
+				if(mainplayer.saysp() >= 5){
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
 					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl; 
+					cout << "Used Quick Eye!\n" << endl;
 					goto STARTBATTLE;
 					break;
 				}
@@ -248,7 +262,7 @@ STARTBATTLE:
 			default : goto STARTBATTLE;
 				}
 			break;
-		case '5' : 
+		case '5' :
 			if(distanceenemy == 1){
 				cout << "You can't get closer to the enemy!" << endl;
 			}
@@ -257,7 +271,7 @@ STARTBATTLE:
 				cout << "Got closer to the enemy" << endl;
 			}
 			break;
-		case '6' : 
+		case '6' :
 			if(distanceenemy == 5){
 				runawayfrombattle = true;
 				goto STARTBATTLE;
@@ -277,8 +291,8 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
-				if(playermp >= 6){
+			case '1' :
+				if(mainplayer.saymp() >= 6){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
 				}
@@ -286,15 +300,15 @@ STARTBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case '2' : 
-				if(playermp >= 4){
-					commonenemy.firereceived();
+			case '2' :
+				if(mainplayer.saymp() >= 4){
+					commonenemy.fireattacked();
 				}
 				else{
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			default : 
+			default :
 				goto STARTBATTLE;
 			}
 			break;
@@ -329,7 +343,7 @@ STARTBATTLE:
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	while(1){
-		cout << "Welcome to CutreRPG Alpha 0.3.4.3!" << endl;
+		cout << "Welcome to Tactical Alpha 1.0!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
@@ -350,10 +364,8 @@ int main(){
 		cout << "Type any other key to input a different name" << endl;
 		cin >> movement;
 		switch (movement){
-		case '1' : 
-			clear();
-			cout << "Name applied correctly" << endl;
-			printf("You found an enemy!\n\n");
+		case '1' :
+			start = true;
 			battle();
 			break;
 		}
