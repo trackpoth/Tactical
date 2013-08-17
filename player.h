@@ -67,10 +67,22 @@ public:
 	int saysmallhealthpill();
 	int saysmallhealthpillvalue();
 	int saydamagepill();
+	int sayresistance();
+	int saymaxresistance();
+	int sayultra();
+	int saymaxultra();
 
 	void decreaseplayersp();
 	void decreaseplayermp();
+	void decreaseresistance();
+	void decreasetenresistance();
+	void increaseresistance();
+	void increaseultrar();
+	void increaseultra();
+	void decreaseultra();
 	void limitplayerlife();
+	void limitresistance();
+	void limitultra();
 	void determinecriticalpower();
 	void defeatchecker();
 	void smallhealthpilltaken();
@@ -93,6 +105,10 @@ protected:
 	int smallhealthpill;
 	int smallhealthpillvalue;
 	int damagepill;
+	int playerresistance;
+	int playermaxresistance;
+	int playerultra;
+	int playermaxultra;
 };
 
 player::player()
@@ -110,6 +126,10 @@ player::player()
 	smallhealthpill = 2;
 	smallhealthpillvalue = 100;
 	damagepill = 2;
+	playerresistance = 80;
+	playermaxresistance = 80;
+	playerultra = 100;
+	playermaxultra = 200;
 }
 
 int player::attackparameter(){
@@ -164,6 +184,22 @@ int player::saydamagepill(){
 	return damagepill;
 }
 
+int player::sayresistance(){
+	return playerresistance;
+}
+
+int player::saymaxresistance(){
+	return playermaxresistance;
+}
+
+int player::sayultra(){
+	return playerultra;
+}
+
+int player::saymaxultra(){
+	return playermaxultra;
+}
+
 void player::decreaseplayersp(){
 	playersp--;
 }
@@ -172,9 +208,45 @@ void player::decreaseplayermp(){
 	playermp--;
 }
 
+void player::decreaseresistance(){
+	playerresistance--;
+}
+
+void player::decreasetenresistance(){
+	playerresistance -= 10;
+}
+
+void player::increaseresistance(){
+	playerresistance++;
+}
+
+void player::increaseultrar(){
+	playerultra += (playerresistance / 15);
+}
+
+void player::increaseultra(){
+	playerultra++;
+}
+
+void player::decreaseultra(){
+	playerultra -= 50;
+}
+
 void player::limitplayerlife(){
 	if(playerlife >= playermaxlife){
 		playerlife = playermaxlife;
+	}
+}
+
+void player::limitresistance(){
+	if(playerresistance >= playermaxresistance){
+		playerresistance = playermaxresistance;
+	}
+}
+
+void player::limitultra(){
+	if(playerultra >= playermaxultra){
+		playerultra = playermaxultra;
 	}
 }
 
@@ -191,7 +263,7 @@ void player::defeatchecker(){
 	if(playerlife <= 0){
 		clear();
 		cout << playername;
-		cout << " has lost!\a" << endl;
+		cout << " has been defeated!\a" << endl;
 		_getch();
 		exit(0);
 	}
@@ -230,7 +302,8 @@ public:
 
 	void victorychecker();
 	void enemyattacked();
-	void fireattacked();
+	void receivedultra();
+	void iceattacked();
 
 protected:
 	int enemylife;
@@ -308,18 +381,26 @@ void enemy::enemyattacked(){
 	}
 }
 
-void enemy::fireattacked(){
-	mainplayer.decreaseplayermp();
+void enemy::receivedultra(){
+	enemylife -= mainplayer.attackparameter();
+	enemylife -= mainplayer.attackparameter();
+	enemylife -= mainplayer.attackparameter();
+	mainplayer.decreaseultra();
+	mainplayer.decreaseultra();
+	cout << playername << " USED ULTRA KICK IN THE NUTS! " << mainplayer.attackparameter() * 3 << " DAMAGE WAS DEALT!" << endl;
+}
+
+void enemy::iceattacked(){
 	mainplayer.decreaseplayermp();
 	mainplayer.decreaseplayermp();
 	mainplayer.decreaseplayermp();
 	if(enemytype == 1){
 		enemylife = (enemylife - mainplayer.saymagicattack() * 2);
-		printf("You dealt %d damage to the enemy by using Fire! It was very effective!\n",mainplayer.saymagicattack() * 2);
+		printf("You dealt %d damage to the enemy by using Ice! It was very effective!\n",mainplayer.saymagicattack() * 2);
 	}
 	else{
 		enemylife -= mainplayer.saymagicattack();
-		printf("You dealt %d damage to the enemy by using Fire!\n",mainplayer.saymagicattack());
+		printf("You dealt %d damage to the enemy by using Ice!\n",mainplayer.saymagicattack());
 	}
 }
 
@@ -366,7 +447,7 @@ enemy commonenemy;
 void player::playerattacked(){
 	if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
 		playerlife -= commonenemy.saycriticalpower();
-		printf("The enemy made a critical hit!\n\n");
+		printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower());
 	}
 	else{
 		playerlife -= commonenemy.sayattack();
