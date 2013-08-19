@@ -7,13 +7,59 @@
 #include <windows.h>
 #include "player.h"
 #include "dialogues.h"
+#include "weapons.h"
 
 using namespace std;
 
-	//Inicialización de objetos
-warrior attack;
-
 bool start;
+
+void enemy::enemyattacked(){
+	if(damagepilleffect == false){
+		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
+			cout << "\a";
+			enemylife -= mainplayer.saycriticalpower();
+			enemylife -= weapons.sayattack();
+			cout << playername;
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayattack());
+		}
+		else{
+			enemylife -= mainplayer.attackparameter();
+			enemylife -= weapons.sayattack();
+			cout << playername;
+			cout << " inflicted ";
+			cout << mainplayer.attackparameter() + weapons.sayattack();
+			cout << " to the enemy" << endl;
+		}
+	}
+	if(damagepilleffect == true){
+		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
+			cout << "\a";
+			enemylife -= mainplayer.saycriticalpower();
+			enemylife -= weapons.sayattack();
+			cout << playername;
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayattack());
+		}
+		else{
+			enemylife -= mainplayer.attackparameter() + weapons.sayattack();
+			enemylife -= 10;
+			cout << playername;
+			printf(" inflicted %d damage to the enemy\n",mainplayer.attackparameter() + weapons.sayattack() + 10);
+		}
+	}
+}
+
+void randomseed(){
+	t = clock();
+	if(t >= 10000){
+		t-=9999;
+	}
+	seed = t;
+	srand(seed);
+}
+
+void enemy::randomizetype(){
+	enemytype = rand() % 7 + 1;
+}
 
 void defeat(){
 	mainplayer.defeatchecker();
@@ -63,8 +109,41 @@ void itemmenu(){
 	}
 }
 
+void equipment(){
+	cout << "Melee weapon: ";
+	if(weapons.sayattack1equipped() == 1){
+		cout << "Tennis Racket [3 AT]" << endl;
+	}
+	cout << endl << "Type any key to go back to the battle menu" << endl;
+	cin >> movement;
+	switch(movement){
+	default:;
+	}
+}
+
 void battlemenu(){
-	cout << "Grass Human" << endl;
+	if(commonenemy.saytype() == 1){
+		cout << "Grass ";
+	}
+	if(commonenemy.saytype() == 2){
+		cout << "Normal ";
+	}
+	if(commonenemy.saytype() == 3){
+		cout << "Dark ";
+	}
+	if(commonenemy.saytype() == 4){
+		cout << "Light ";
+	}
+	if(commonenemy.saytype() == 5){
+		cout << "Fire ";
+	}
+	if(commonenemy.saytype() == 6){
+		cout << "Water ";
+	}
+	if(commonenemy.saytype() == 7){
+		cout << "Ice ";
+	}
+	cout << "Human" << endl;
 	if(piercingeyeeffect == false){
 		cout << "Life = ";
 		cout << commonenemy.saylife();
@@ -77,13 +156,25 @@ void battlemenu(){
 	if(piercingeyeeffect == true){
 		cout << "Weak to: ";
 		if(commonenemy.saytype() == 1){
-			cout << "Fire (x2)" << endl;
+			cout << "[Darkness (x1.5)] [Fire (x1.5)] [Ice (x1.5)] " << endl;
 		}
-		else{
-			clear();
-			cout << "CRITICAL ERROR: 'ENEMY TYPE CORRUPT'" << endl;
-			_getch();
-			exit(1);
+		if(commonenemy.saytype() == 2){
+			cout << "[Darkness (x1.5)] [Fire (x1.5)]" << endl;
+		}
+		if(commonenemy.saytype() == 3){
+			cout << "[Light (x1.5)] [Fire (x1.5)]" << endl;
+		}
+		if(commonenemy.saytype() == 4){
+			cout << "[Darkness (x1.5)] [Water (x1.5)] [Grass (x1.5)]" << endl;
+		}
+		if(commonenemy.saytype() == 5){
+			cout << "[Darkness (x1.5)] [Water (x2)]" << endl;
+		}
+		if(commonenemy.saytype() == 6){
+			cout << "[Ice (x1.5)] [Grass (x2)]" << endl;
+		}
+		if(commonenemy.saytype() == 7){
+			cout << "[Water (x1.5)] [Fire (x1.5)]" << endl;
 		}
 	}
 	printf("Effects = ");
@@ -97,21 +188,19 @@ void battlemenu(){
 	cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
 	cout << " | SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
 	cout << " | MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
-	cout << "Attack";
-	if(damagepilleffect == true){
-		cout << " = " << mainplayer.attackparameter() << " +10 (Damage Pill) | ";
-	}
-	if(damagepilleffect == false){
-		cout << " = " << mainplayer.attackparameter() << " | ";
-	}
-	cout << "Magic attack = " << mainplayer.saymagicattack() << endl;
+	cout << "Attack = " << mainplayer.attackparameter() << " + " << weapons.sayattack();
+	cout << " | ";
+	cout << "Magic attack = " << mainplayer.saymagicattack();
+	cout << " | Ranged attack = " << mainplayer.sayrangedattack();
+	cout << " | Defense = " << mainplayer.saydefense() << endl;
 	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << endl;
-	cout << "Ultra meter = " << mainplayer.sayultra();
-	if(mainplayer.sayultra() >= 100){
-		cout << " [ULTRA AVAILABLE! '8' to enter the Ultra Attacks menu]" << endl;
+	cout << "Ultra meter = " << mainplayer.sayultra() << endl;
+	cout << "Effects = ";
+	if(damagepilleffect == true){
+		cout << "[Damage Pill] " << endl;
 	}
 	else{
-		cout << endl;
+		cout << "None" << endl;
 	}
 	printf("Distance from the enemy: ");
 	if(distanceenemy == 1){
@@ -129,19 +218,16 @@ void battlemenu(){
 	if(distanceenemy == 5){
 		cout << "Very far" << endl;
 	}
-	printf("\nType '1' to attack the enemy\n");
-	printf("Type '2' to open the item bag\n");
-	printf("Type '3' to show the special moves list\n");
-	printf("Type '4' to show the magic learned\n");
-	printf("Type '5' to get closer to the enemy, or ");
-	if(distanceenemy == 5){
-		printf("type '6' to run away from the battle\n");
+	printf("\n[1] Attack\n");
+	printf("[2] Items\n");
+	printf("[3] Special\n");
+	printf("[4] Magic\n");
+	printf("[5] Move\n");
+	printf("[6] Rest\n");
+	if(mainplayer.sayultra() >= 100){
+		cout << "[7] ULTRA" << endl;
 	}
-	else{
-		printf("type '6' to move away from the enemy\n");
-	}
-	printf("Type '7' to rest\n");
-	printf("Type any other key to skip the turn\n");
+	printf("[p] Equipment & Options\n");
 }
 
 
@@ -155,17 +241,17 @@ void battle(){
 	dialogue = 0;
 	dialogues();
 	clear();
+	randomseed();
+	commonenemy.randomizetype();
 	while(1){
 
 STARTBATTLE:
 
 		mainplayer.determinecriticalpower();
+		commonenemy.determinecriticalpower();
+		weapons.determineattack();
 
-		t = clock();
-		if(t >= 10000){
-			t-=9999;
-		}
-		srand(seed);
+		randomseed();
 
 		escapebattle();
 		victory();
@@ -183,25 +269,50 @@ STARTBATTLE:
 		}
 
 		cin >> movement;
-		clear();
+
+		switch(movement){
+		case '5':
+		case '1':
+			break;
+		default :
+			clear();
+			break;
+		}
 
 		switch(movement){
 		case '1':
-			seed = t;
 			subcriticalcheckerone = rand() % 100;
-			if(successfulhit == true && mainplayer.sayresistance() >= 2){
-				commonenemy.enemyattacked();
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				mainplayer.increaseultrar();
-			}
-			else{
-				if(mainplayer.sayresistance() < 2){
-					cout << "You are too tired to perform that move!" << endl;
+			cout << "Do you want to use your melee weapon [1] or your ranged weapon? [2]" << endl;
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(successfulhit == true && mainplayer.sayresistance() >= 2){
+					commonenemy.enemyattacked();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultrar();
 				}
 				else{
-					cout << "You are too far from the enemy to perform that move!" << endl;
+					if(mainplayer.sayresistance() < 2){
+						cout << "You are too tired to perform that move!" << endl;
+					}
+					else{
+						cout << "You are too far from the enemy to perform that move!" << endl;
+					}
 				}
+				break;
+			case '2' :
+				if(mainplayer.sayresistance() >= 1){
+					commonenemy.rangedattacked();
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultra();
+				}
+				else{
+					cout << "You are too tired to perform that move!" << endl;
+				}
+				break;
+			default : goto STARTBATTLE;break;
 			}
 			break;
 		case '2':
@@ -263,42 +374,50 @@ STARTBATTLE:
 				}
 			break;
 		case '5' :
-			if(distanceenemy == 1){
-				cout << "You can't get closer to the enemy!" << endl;
-			}
-			else{
-				if(mainplayer.sayresistance() >= 3){
-					distanceenemy--;
-					cout << "Got closer to the enemy" << endl;
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
+			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(distanceenemy == 1){
+					cout << "You can't get closer to the enemy!" << endl;
 				}
 				else{
+					if(mainplayer.sayresistance() >= 3){
+						distanceenemy--;
+						cout << "Got closer to the enemy" << endl;
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+					}
+					else{
+						cout << "You are too tired to move!" << endl;
+					}
+				}
+				break;
+			case '2' :
+				if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
+					runawayfrombattle = true;
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					goto STARTBATTLE;
+				}
+				if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
+					cout << "You are too tired to escape!" << endl;
+				}
+				if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
 					cout << "You are too tired to move!" << endl;
 				}
-			}
-			break;
-		case '6' :
-			if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
-				runawayfrombattle = true;
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				goto STARTBATTLE;
-			}
-			if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
-				cout << "You are too tired to escape!" << endl;
-			}
-			if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
-				cout << "You are too tired to move!" << endl;
-			}
-			if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
-				distanceenemy++;
-				cout << "Moved a bit away from the enemy" << endl;
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
+				if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
+					distanceenemy++;
+					cout << "Moved a bit away from the enemy" << endl;
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+				}
+				break;
+			default : goto STARTBATTLE;break;
 			}
 			break;
 		case '4' :
@@ -332,14 +451,14 @@ STARTBATTLE:
 				goto STARTBATTLE;
 			}
 			break;
-		case '7' :
+		case '6' :
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.limitresistance();
 			cout << "That was a good rest! Resistance +3 points" << endl;
 			break;
-		case '8' :
+		case '7' :
 			if(mainplayer.sayultra() >= 100){
 				cout << "List of Ultra Attacks:" << endl << endl;
 				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 20 Resistance]['1' to use]" << endl << endl;
@@ -365,6 +484,7 @@ STARTBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
+		case 'p' : equipment();goto STARTBATTLE;break;
 		default: cout << "Skipped the turn" << endl;break;
 		}
 
@@ -379,7 +499,6 @@ STARTBATTLE:
 		}
 
 		 // El enemigo ejecuta su turno
-		seed = t;
 		subcriticalcheckertwo = rand() % 100;
 		if(successfulhit2 == true){
 			mainplayer.playerattacked();
@@ -397,8 +516,9 @@ STARTBATTLE:
 
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
+	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.1!" << endl;
+		cout << "Welcome to Tactical Alpha 1.2!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();

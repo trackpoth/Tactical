@@ -62,6 +62,7 @@ public:
 	int saymaxmp();
 	int saymp();
 	int saymagicattack();
+	int sayrangedattack();
 	int saycriticalchecker();
 	int saycriticalpower();
 	int saysmallhealthpill();
@@ -71,6 +72,7 @@ public:
 	int saymaxresistance();
 	int sayultra();
 	int saymaxultra();
+	int saydefense();
 
 	void decreaseplayersp();
 	void decreaseplayermp();
@@ -96,6 +98,7 @@ protected:
 	int playermaxmp;
 	int playerattack;
 	int playermagicattack;
+	int playerrangedattack;
 	int playerlife;
 	int playersp;
 	int playermp;
@@ -109,6 +112,7 @@ protected:
 	int playermaxresistance;
 	int playerultra;
 	int playermaxultra;
+	int playerdefense;
 };
 
 player::player()
@@ -116,8 +120,9 @@ player::player()
 	playermaxlife = 460;
 	playermaxsp = 10;
 	playermaxmp = 16;
-	playerattack = 21;
-	playermagicattack = 18;
+	playerattack = 18;
+	playermagicattack = 16;
+	playerrangedattack = 14;
 	playerlife = 460;
 	playersp = 10;
 	playermp = 16;
@@ -130,6 +135,7 @@ player::player()
 	playermaxresistance = 80;
 	playerultra = 100;
 	playermaxultra = 200;
+	playerdefense = 2;
 }
 
 int player::attackparameter(){
@@ -162,6 +168,10 @@ int player::saymp(){
 
 int player::saymagicattack(){
 	return playermagicattack;
+}
+
+int player::sayrangedattack(){
+	return playerrangedattack;
 }
 
 int player::saycriticalchecker(){
@@ -198,6 +208,10 @@ int player::sayultra(){
 
 int player::saymaxultra(){
 	return playermaxultra;
+}
+
+int player::saydefense(){
+	return playerdefense;
 }
 
 void player::decreaseplayersp(){
@@ -302,8 +316,11 @@ public:
 
 	void victorychecker();
 	void enemyattacked();
+	void rangedattacked();
 	void receivedultra();
 	void iceattacked();
+	void determinecriticalpower();
+	void randomizetype();
 
 protected:
 	int enemylife;
@@ -321,7 +338,6 @@ enemy::enemy()
 	enemytype = 1;
 	enemyattack = 14;
 	enemycriticalchecker = 20;
-	enemycriticalpower = 36;
 }
 
 int enemy::saymaxlife(){
@@ -348,35 +364,37 @@ int enemy::saycriticalpower(){
 	return enemycriticalpower;
 }
 
-void enemy::enemyattacked(){
+void enemy::rangedattacked(){
 	if(damagepilleffect == false){
 		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
 			cout << "\a";
-			enemylife -= mainplayer.saycriticalpower();
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= 10;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower());
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + 10);
 		}
 		else{
-			enemylife -= mainplayer.attackparameter();
+			enemylife -= mainplayer.sayrangedattack();
 			cout << playername;
 			cout << " inflicted ";
-			cout << mainplayer.attackparameter(); 
+			cout << mainplayer.sayrangedattack(); 
 			cout << " to the enemy" << endl;
 		}
 	}
 	if(damagepilleffect == true){
 		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
 			cout << "\a";
-			enemylife -= mainplayer.saycriticalpower();
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= 10;
 			enemylife -= 10;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower());
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + 20);
 		}
 		else{
-			enemylife -= mainplayer.attackparameter();
+			enemylife -= mainplayer.sayrangedattack();
 			enemylife -= 10;
 			cout << playername;
-			printf(" inflicted %d damage to the enemy\n",mainplayer.attackparameter() + 10);
+			printf(" inflicted %d damage to the enemy\n",mainplayer.sayrangedattack() + 10);
 		}
 	}
 }
@@ -394,13 +412,21 @@ void enemy::iceattacked(){
 	mainplayer.decreaseplayermp();
 	mainplayer.decreaseplayermp();
 	mainplayer.decreaseplayermp();
-	if(enemytype == 1){
-		enemylife = (enemylife - mainplayer.saymagicattack() * 2);
-		printf("You dealt %d damage to the enemy by using Ice! It was very effective!\n",mainplayer.saymagicattack() * 2);
+	if(enemytype == 1 || enemytype == 6){
+		enemylife = (enemylife - mainplayer.saymagicattack() * 1.5);
+		cout << "You dealt " << mainplayer.saymagicattack() * 1.5 << " damage to the enemy by using Ice! It was very effective!" << endl;
 	}
-	else{
-		enemylife -= mainplayer.saymagicattack();
-		printf("You dealt %d damage to the enemy by using Ice!\n",mainplayer.saymagicattack());
+	if(enemytype == 5){
+		enemylife = (enemylife - mainplayer.saymagicattack() * 0.5);
+		cout << "You dealt " << mainplayer.saymagicattack() * 0.5 << " damage to the enemy by using Ice. It wasn't very effective..." << endl;
+	}
+	if(enemytype == 7){
+		enemylife = (enemylife + mainplayer.saymagicattack());
+		cout << "You healed the enemy " << mainplayer.saymagicattack() << " life points by using Ice!" << endl;
+	}
+	if(enemytype == 2 || enemytype == 3 || enemytype == 4){
+		enemylife = (enemylife - mainplayer.saymagicattack());
+		cout << "You dealt " << mainplayer.saymagicattack() << " damage to the enemy by using Ice!" << endl;
 	}
 }
 
@@ -412,7 +438,7 @@ void enemy::victorychecker(){
 			_getch();
 			cout << "You: What in the heavens were you doing?" << endl;
 			_getch();
-			cout << "Hippie: I was looking for my Hipercube" << endl;
+			cout << "Hippie: I was looking for my Hypercube" << endl;
 			_getch();
 			cout << "You: Your what!?" << endl;
 			_getch();
@@ -442,15 +468,19 @@ void enemy::victorychecker(){
 	}
 }
 
+void enemy::determinecriticalpower(){
+	enemycriticalpower = enemyattack * 1.5;
+}
+
 enemy commonenemy;
 
 void player::playerattacked(){
 	if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
-		playerlife -= commonenemy.saycriticalpower();
-		printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower());
+		playerlife -= (commonenemy.saycriticalpower() - mainplayer.saydefense());
+		printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
 	}
 	else{
-		playerlife -= commonenemy.sayattack();
-		printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack());
+		playerlife -= (commonenemy.sayattack() - mainplayer.saydefense());
+		printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
 	}
 }
