@@ -75,6 +75,7 @@ public:
 	int saydefense();
 
 	void decreaseplayersp();
+	void increaseplayersp();
 	void decreaseplayermp();
 	void decreaseresistance();
 	void decreasetenresistance();
@@ -85,7 +86,9 @@ public:
 	void limitplayerlife();
 	void limitresistance();
 	void limitultra();
+	void limitsp();
 	void determinecriticalpower();
+	void determinemaxsp();
 	void defeatchecker();
 	void smallhealthpilltaken();
 	void damagepilltaken();
@@ -96,6 +99,7 @@ protected:
 	int playermaxlife;
 	int playermaxsp;
 	int playermaxmp;
+	int playermaxspbase;
 	int playerattack;
 	int playermagicattack;
 	int playerrangedattack;
@@ -119,10 +123,11 @@ player::player()
 {
 	playermaxlife = 460;
 	playermaxsp = 10;
+	playermaxspbase = 10;
 	playermaxmp = 16;
 	playerattack = 18;
 	playermagicattack = 16;
-	playerrangedattack = 14;
+	playerrangedattack = 104;
 	playerlife = 460;
 	playersp = 10;
 	playermp = 16;
@@ -218,6 +223,10 @@ void player::decreaseplayersp(){
 	playersp--;
 }
 
+void player::increaseplayersp(){
+	playersp++;
+}
+
 void player::decreaseplayermp(){
 	playermp--;
 }
@@ -261,6 +270,12 @@ void player::limitresistance(){
 void player::limitultra(){
 	if(playerultra >= playermaxultra){
 		playerultra = playermaxultra;
+	}
+}
+
+void player::limitsp(){
+	if(playersp >= playermaxsp){
+		playersp = playermaxsp;
 	}
 }
 
@@ -311,6 +326,7 @@ public:
 	int saylife();
 	int saytype();
 	int sayattack();
+	int saydefense();
 	int saycriticalchecker();
 	int saycriticalpower();
 
@@ -320,23 +336,27 @@ public:
 	void receivedultra();
 	void iceattacked();
 	void determinecriticalpower();
+	void limitlife();
 	void randomizetype();
+	void randomizeparameters();
 
 protected:
 	int enemylife;
 	int enemymaxlife;
 	int enemytype;
 	int enemyattack;
+	int enemydefense;
 	int enemycriticalchecker;
 	int enemycriticalpower;
 };
 
 enemy::enemy()
 {
-	enemylife = 210;
-	enemymaxlife = 210;
+	enemylife = 180;
+	enemymaxlife = 180;
 	enemytype = 1;
-	enemyattack = 14;
+	enemyattack = 12;
+	enemydefense = 1;
 	enemycriticalchecker = 20;
 }
 
@@ -356,47 +376,16 @@ int enemy::sayattack(){
 	return enemyattack;
 }
 
+int enemy::saydefense(){
+	return enemydefense;
+}
+
 int enemy::saycriticalchecker(){
 	return enemycriticalchecker;
 }
 
 int enemy::saycriticalpower(){
 	return enemycriticalpower;
-}
-
-void enemy::rangedattacked(){
-	if(damagepilleffect == false){
-		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
-			cout << "\a";
-			enemylife -= mainplayer.sayrangedattack();
-			enemylife -= 10;
-			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + 10);
-		}
-		else{
-			enemylife -= mainplayer.sayrangedattack();
-			cout << playername;
-			cout << " inflicted ";
-			cout << mainplayer.sayrangedattack(); 
-			cout << " to the enemy" << endl;
-		}
-	}
-	if(damagepilleffect == true){
-		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
-			cout << "\a";
-			enemylife -= mainplayer.sayrangedattack();
-			enemylife -= 10;
-			enemylife -= 10;
-			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + 20);
-		}
-		else{
-			enemylife -= mainplayer.sayrangedattack();
-			enemylife -= 10;
-			cout << playername;
-			printf(" inflicted %d damage to the enemy\n",mainplayer.sayrangedattack() + 10);
-		}
-	}
 }
 
 void enemy::receivedultra(){
@@ -470,6 +459,12 @@ void enemy::victorychecker(){
 
 void enemy::determinecriticalpower(){
 	enemycriticalpower = enemyattack * 1.5;
+}
+
+void enemy::limitlife(){
+	if(enemylife >= enemymaxlife){
+		enemylife = enemymaxlife;
+	}
 }
 
 enemy commonenemy;

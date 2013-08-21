@@ -10,26 +10,29 @@ class weapon
 {
 public:
 	weapon();
-	int sayattack1();
+	float sayattack1();
 	int sayattack1equipped();
 
-	int sayattack();
+	float sayattack();
+	int sayrealattack();
 	void determineattack();
+	void determinerealattack();
 
 private:
-	int attack1;
+	float attack1;
 	int attack1equipped;
 	
-	int attack;
+	float attack;
+	int realattack;
 };
 
 weapon::weapon()
 {
-	attack1 = 3;
+	attack1 = 0.02;
 	attack1equipped = true;
 }
 
-int weapon::sayattack1(){
+float weapon::sayattack1(){
 	return attack1;
 }
 
@@ -37,8 +40,12 @@ int weapon::sayattack1equipped(){
 	return attack1equipped;
 }
 
-int weapon::sayattack(){
+float weapon::sayattack(){
 	return attack;
+}
+
+int weapon::sayrealattack(){
+	return realattack;
 }
 
 void weapon::determineattack(){
@@ -48,3 +55,59 @@ void weapon::determineattack(){
 }
 
 weapon weapons;
+
+class ranged
+{
+public:
+	ranged();
+	float sayattack1();
+	int saysp1();
+	int sayattack1equipped();
+
+	float sayattack();
+	int sayrealattack();
+	void determineattack();
+	void determinerealattack();
+private:
+	float attack1;
+	int sp1;
+	int attack1equipped;
+	
+	float attack;
+	int realattack;
+};
+
+ranged::ranged()
+{
+	attack1 = 0.02;
+	sp1 = 1;
+	attack1equipped = true;
+}
+
+float ranged::sayattack1(){
+	return attack1;
+}
+
+int ranged::saysp1(){
+	return sp1;
+}
+
+int ranged::sayattack1equipped(){
+	return attack1equipped;
+}
+
+float ranged::sayattack(){
+	return attack;
+}
+
+int ranged::sayrealattack(){
+	return realattack;
+}
+
+void ranged::determineattack(){
+	if(attack1equipped == 1){
+		attack = attack1;
+	}
+}
+
+ranged rangedweapon;

@@ -18,16 +18,18 @@ void enemy::enemyattacked(){
 		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
 			cout << "\a";
 			enemylife -= mainplayer.saycriticalpower();
-			enemylife -= weapons.sayattack();
+			enemylife -= weapons.sayrealattack();
+			enemylife += enemydefense;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayattack());
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayrealattack() - enemydefense);
 		}
 		else{
 			enemylife -= mainplayer.attackparameter();
-			enemylife -= weapons.sayattack();
+			enemylife -= weapons.sayrealattack();
+			enemylife += enemydefense;
 			cout << playername;
 			cout << " inflicted ";
-			cout << mainplayer.attackparameter() + weapons.sayattack();
+			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense);
 			cout << " to the enemy" << endl;
 		}
 	}
@@ -35,15 +37,61 @@ void enemy::enemyattacked(){
 		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
 			cout << "\a";
 			enemylife -= mainplayer.saycriticalpower();
-			enemylife -= weapons.sayattack();
+			enemylife -= weapons.sayrealattack();
+			enemylife += enemydefense;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayattack());
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayrealattack() - enemydefense);
 		}
 		else{
-			enemylife -= mainplayer.attackparameter() + weapons.sayattack();
+			enemylife -= mainplayer.attackparameter();
+			enemylife -= weapons.sayrealattack();
+			enemylife += enemydefense;
 			enemylife -= 10;
 			cout << playername;
-			printf(" inflicted %d damage to the enemy\n",mainplayer.attackparameter() + weapons.sayattack() + 10);
+			printf(" inflicted %d damage to the enemy\n",mainplayer.attackparameter() + weapons.sayrealattack() + 10 - enemydefense);
+		}
+	}
+}
+
+void enemy::rangedattacked(){
+	if(damagepilleffect == false){
+		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
+			cout << "\a";
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= rangedweapon.sayrealattack();
+			enemylife -= 10;
+			enemylife += enemydefense;
+			cout << playername;
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + rangedweapon.sayrealattack() + 10 - enemydefense);
+		}
+		else{
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= rangedweapon.sayrealattack();
+			enemylife += enemydefense;
+			cout << playername;
+			cout << " inflicted ";
+			cout << mainplayer.sayrangedattack() + rangedweapon.sayrealattack() - enemydefense;
+			cout << " to the enemy" << endl;
+		}
+	}
+	if(damagepilleffect == true){
+		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
+			cout << "\a";
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= rangedweapon.sayrealattack();
+			enemylife += enemydefense;
+			enemylife -= 10;
+			enemylife -= 10;
+			cout << playername;
+			printf(" made a critical hit, causing %d damage!\n",mainplayer.sayrangedattack() + rangedweapon.sayrealattack() + 20 - enemydefense);
+		}
+		else{
+			enemylife -= mainplayer.sayrangedattack();
+			enemylife -= rangedweapon.sayrealattack();
+			enemylife += enemydefense;
+			enemylife -= 10;
+			cout << playername;
+			printf(" inflicted %d damage to the enemy\n",mainplayer.sayrangedattack() + rangedweapon.sayrealattack() + 10 - enemydefense);
 		}
 	}
 }
@@ -59,6 +107,25 @@ void randomseed(){
 
 void enemy::randomizetype(){
 	enemytype = rand() % 7 + 1;
+}
+
+void enemy::randomizeparameters(){
+	enemymaxlife += rand() % 30 + 2;
+	enemyattack += rand() % 5 + 1;
+	enemydefense += rand() % 3;
+	enemylife = enemymaxlife;
+}
+
+void weapon::determinerealattack(){
+	realattack = (attack * mainplayer.attackparameter());
+}
+
+void ranged::determinerealattack(){
+	realattack = (attack * mainplayer.sayrangedattack());
+}
+
+void player::determinemaxsp(){
+	playermaxsp = (playermaxspbase + rangedweapon.saysp1());
 }
 
 void defeat(){
@@ -112,7 +179,11 @@ void itemmenu(){
 void equipment(){
 	cout << "Melee weapon: ";
 	if(weapons.sayattack1equipped() == 1){
-		cout << "Tennis Racket [3 AT]" << endl;
+		cout << "Tennis Racket [2% +AT]" << endl;
+	}
+	cout << "Ranged weapon: ";
+	if(rangedweapon.sayattack1equipped() == 1){
+		cout << "Shitshot [2% +RAT]" << endl;
 	}
 	cout << endl << "Type any key to go back to the battle menu" << endl;
 	cin >> movement;
@@ -151,7 +222,7 @@ void battlemenu(){
 	}
 	else{
 		cout << "Life = " << commonenemy.saylife() << "/" << commonenemy.saymaxlife() << endl;
-		printf("Attack = %d\n",commonenemy.sayattack());
+		printf("AT = %d | DEF = %d\n",commonenemy.sayattack(),commonenemy.saydefense());
 	}
 	if(piercingeyeeffect == true){
 		cout << "Weak to: ";
@@ -188,12 +259,12 @@ void battlemenu(){
 	cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
 	cout << " | SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
 	cout << " | MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
-	cout << "Attack = " << mainplayer.attackparameter() << " + " << weapons.sayattack();
+	cout << "AT = " << mainplayer.attackparameter() << " + " << weapons.sayattack() * 100 << "%";
 	cout << " | ";
-	cout << "Magic attack = " << mainplayer.saymagicattack();
-	cout << " | Ranged attack = " << mainplayer.sayrangedattack();
-	cout << " | Defense = " << mainplayer.saydefense() << endl;
-	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << endl;
+	cout << "MAT = " << mainplayer.saymagicattack();
+	cout << " | RAT = " << mainplayer.sayrangedattack() << " + " << rangedweapon.sayattack() * 100 << "%";
+	cout << " | DEF = " << mainplayer.saydefense() << endl;
+	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << " | ";
 	cout << "Ultra meter = " << mainplayer.sayultra() << endl;
 	cout << "Effects = ";
 	if(damagepilleffect == true){
@@ -243,6 +314,7 @@ void battle(){
 	clear();
 	randomseed();
 	commonenemy.randomizetype();
+	commonenemy.randomizeparameters();
 	while(1){
 
 STARTBATTLE:
@@ -250,6 +322,10 @@ STARTBATTLE:
 		mainplayer.determinecriticalpower();
 		commonenemy.determinecriticalpower();
 		weapons.determineattack();
+		weapons.determinerealattack();
+		rangedweapon.determineattack();
+		rangedweapon.determinerealattack();
+		mainplayer.determinemaxsp();
 
 		randomseed();
 
@@ -455,21 +531,21 @@ STARTBATTLE:
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
-			mainplayer.limitresistance();
-			cout << "That was a good rest! Resistance +3 points" << endl;
+			mainplayer.increaseplayersp();
+			cout << "That was a good rest! Stats recovered a little bit" << endl;
 			break;
 		case '7' :
 			if(mainplayer.sayultra() >= 100){
 				cout << "List of Ultra Attacks:" << endl << endl;
-				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 20 Resistance]['1' to use]" << endl << endl;
-				cout << "Type any other key to go back to the battle menu" << endl;
+				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 10 Resistance]['1' to use]" << endl;
+				cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
+				cout << endl << "Type any other key to go back to the battle menu" << endl;
 				cin >> movement;
 				clear();
 				switch(movement){
 					case '1' :
-						if(mainplayer.sayresistance() >= 20){
+						if(mainplayer.sayresistance() >= 10){
 							commonenemy.receivedultra();
-							mainplayer.decreasetenresistance();
 							mainplayer.decreasetenresistance();
 						}
 						else{
@@ -510,6 +586,10 @@ STARTBATTLE:
 
 		mainplayer.increaseultra();
 		mainplayer.limitultra();
+		mainplayer.limitresistance();
+		mainplayer.limitplayerlife();
+		mainplayer.limitsp();
+		commonenemy.limitlife();
 	}
 }
 
@@ -518,7 +598,7 @@ int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.2!" << endl;
+		cout << "Welcome to Tactical Alpha 1.2.1!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
