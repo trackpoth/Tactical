@@ -27,6 +27,10 @@ bool successfulhit;
 string playername;
 bool firstbattle = true;
 
+int section = 1;
+int zone = 1;
+int traveling;
+
 void clear(){
 	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -127,9 +131,9 @@ player::player()
 	playermaxmp = 16;
 	playerattack = 18;
 	playermagicattack = 16;
-	playerrangedattack = 104;
+	playerrangedattack = 14;
 	playerlife = 460;
-	playersp = 10;
+	playersp = 11;
 	playermp = 16;
 	playercriticalchecker = 20;
 	playercriticalmultiplier = 1.5;
@@ -339,6 +343,7 @@ public:
 	void limitlife();
 	void randomizetype();
 	void randomizeparameters();
+	void restoreparameters();
 
 protected:
 	int enemylife;
@@ -419,44 +424,6 @@ void enemy::iceattacked(){
 	}
 }
 
-void enemy::victorychecker(){
-	if(enemylife <= 0){
-		clear();
-		if(firstbattle == true){
-			cout << "Hippie: Wow, that did hurt!" << endl;
-			_getch();
-			cout << "You: What in the heavens were you doing?" << endl;
-			_getch();
-			cout << "Hippie: I was looking for my Hypercube" << endl;
-			_getch();
-			cout << "You: Your what!?" << endl;
-			_getch();
-			cout << "Hippie: You don't know what's an Hypercube, don't you?" << endl;
-			_getch();
-			cout << "Hippie: It's a cube with 4 dimensions, but I think someone stole it" << endl;
-			_getch();
-			cout << "You: (...)" << endl;
-			_getch();
-			cout << "Hippie: Can you find the thief?" << endl;
-			_getch();
-			cout << "You: Yeah, why not. I'll look for the imaginary cube of a guy I've just met" << endl;
-			_getch();
-			cout << "Hippie: Thank you! I think he went that way!" << endl;
-			_getch();
-			cout << "You: Oh my god..." << endl;
-			_getch();
-			firstbattle = false;
-			exit(0);
-		}
-		else{
-			cout << playername;
-			cout << " won the battle!\a" << endl;
-			_getch();
-			exit(0);
-		}
-	}
-}
-
 void enemy::determinecriticalpower(){
 	enemycriticalpower = enemyattack * 1.5;
 }
@@ -465,6 +432,10 @@ void enemy::limitlife(){
 	if(enemylife >= enemymaxlife){
 		enemylife = enemymaxlife;
 	}
+}
+
+void enemy::restoreparameters(){
+	enemylife == enemymaxlife;
 }
 
 enemy commonenemy;

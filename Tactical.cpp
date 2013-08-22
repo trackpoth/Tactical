@@ -12,6 +12,7 @@
 using namespace std;
 
 bool start;
+int eventtype;
 
 void enemy::enemyattacked(){
 	if(damagepilleffect == false){
@@ -110,8 +111,8 @@ void enemy::randomizetype(){
 }
 
 void enemy::randomizeparameters(){
-	enemymaxlife += rand() % 30 + 2;
-	enemyattack += rand() % 5 + 1;
+	enemymaxlife += rand() % 35 + 2;
+	enemyattack += rand() % 3 + 1;
 	enemydefense += rand() % 3;
 	enemylife = enemymaxlife;
 }
@@ -128,12 +129,9 @@ void player::determinemaxsp(){
 	playermaxsp = (playermaxspbase + rangedweapon.saysp1());
 }
 
+
 void defeat(){
 	mainplayer.defeatchecker();
-}
-
-void victory(){
-	commonenemy.victorychecker();
 }
 
 void escapebattle(){
@@ -185,6 +183,8 @@ void equipment(){
 	if(rangedweapon.sayattack1equipped() == 1){
 		cout << "Shitshot [2% +RAT]" << endl;
 	}
+	cout << endl << "Sector = " << section << endl;
+	cout << "Zone = " << zone << endl;
 	cout << endl << "Type any key to go back to the battle menu" << endl;
 	cin >> movement;
 	switch(movement){
@@ -298,23 +298,103 @@ void battlemenu(){
 	if(mainplayer.sayultra() >= 100){
 		cout << "[7] ULTRA" << endl;
 	}
-	printf("[p] Equipment & Options\n");
+	printf("[p] Other stats\n");
 }
 
+void enemy::victorychecker(){
+	if(enemylife <= 0){
+		damagepilleffect = false;
+		piercingeyeeffect = false;
+		clear();
+		zone++;
+		if(zone > 10){
+			section++;
+			zone = 1;
+		}
+		if(firstbattle == true){
+			cout << "Hippie: Wow, that did hurt!" << endl;
+			_getch();
+			cout << "You: What in the heavens were you doing?" << endl;
+			_getch();
+			cout << "Hippie: I was looking for my Hypercube" << endl;
+			_getch();
+			cout << "You: Your what!?" << endl;
+			_getch();
+			cout << "Hippie: You don't know what's an Hypercube, don't you?" << endl;
+			_getch();
+			cout << "Hippie: It's a cube with 4 dimensions, but I think someone stole it" << endl;
+			_getch();
+			cout << "You: (...)" << endl;
+			_getch();
+			cout << "Hippie: Can you find the thief?" << endl;
+			_getch();
+			cout << "You: Yeah, why not. I'll look for the imaginary cube of a guy I've just met" << endl;
+			_getch();
+			cout << "Hippie: Thank you! I think he went that way!" << endl;
+			_getch();
+			cout << "You: Oh my god..." << endl;
+			_getch();
+			firstbattle = false;
+		}
+		else{
+			cout << playername;
+			cout << " won the battle!\a" << endl;
+			_getch();
+		}
+		clear();
+TRAVELING:
+		randomseed();
+		cout << "Where do you want to go? West [1], North [2] or East? [3]" << endl;
+		cin >> movement;
+		switch(movement){
+		case '1' :
+			cout << "Heading west..." << endl;
+			break;
+		case '2' :
+			cout << "Heading north..." << endl;
+			break;
+		case '3' :
+			cout << "Heading east..." << endl;
+			break;
+		default : clear();goto TRAVELING;
+		}
+		randomseed();
+		traveling = rand() % 101;
+		if(traveling >= 0 && traveling <= 100){
+			eventtype = 1;
+		}
+	}
+}
 
 void battle(){
+EVENT:
 	clear();
 	if(start == true){
 		cout << "Name applied correctly" << endl;
-		start = false;
 	}
 	cout << "Press always any key to show the next lines of text" << endl << endl;
-	dialogue = 0;
-	dialogues();
-	clear();
-	randomseed();
-	commonenemy.randomizetype();
-	commonenemy.randomizeparameters();
+	if(start == true){
+		dialogue = 1;
+		dialogues();
+		clear();
+		randomseed();
+		commonenemy.randomizetype();
+		commonenemy.randomizeparameters();
+		start = false;
+	}
+	else{
+		if(eventtype == 1){
+			dialogue = 0;
+		}
+		dialogues();
+		clear();
+		if(dialogue == 0){
+			randomseed();
+			commonenemy.randomizetype();
+			commonenemy.randomizeparameters();
+			commonenemy.restoreparameters();
+		}
+	}
 	while(1){
 
 STARTBATTLE:
@@ -330,7 +410,10 @@ STARTBATTLE:
 		randomseed();
 
 		escapebattle();
-		victory();
+		commonenemy.victorychecker();
+		if(commonenemy.saylife() <= 0){
+			goto EVENT;
+		}
 		defeat();
 
 		battlemenu();
