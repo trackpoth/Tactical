@@ -19,7 +19,7 @@ void dialogues(){
 	if(dialogue == 1){
 		cout << "(You hear very loud noises at the top of the hill)" << endl;
 		cout << "Type '1' to investigate" << endl;
-		cout << "Type any other key to ignore it and keep playing Tetris in a stolen Gameboy" << endl;
+		cout << "Type any other key to ignore it and keep playing Teetrix in a stolen Game Box" << endl;
 		cin >> decision;
 		switch(decision){
 		default :

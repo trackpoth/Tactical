@@ -29,7 +29,7 @@ bool firstbattle = true;
 
 int section = 1;
 int zone = 1;
-int traveling;
+int travel;
 
 void clear(){
 	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -77,6 +77,10 @@ public:
 	int sayultra();
 	int saymaxultra();
 	int saydefense();
+	int saytp();
+	int saytpincrease();
+	int saysquares();
+	int saysquaresincrease();
 
 	void decreaseplayersp();
 	void increaseplayersp();
@@ -98,8 +102,22 @@ public:
 	void damagepilltaken();
 	void meditateused();
 	void playerattacked();
+	void increasetp();
+	void decreasetp();
+	void increaseattack();
+	void increasemaxlife();
+	void increasemaxsp();
+	void increasemaxmp();
+	void increasemagicattack();
+	void increaserangedattack();
+	void increasedefense();
+	void increasemaxresistance();
+	void randomtpincrease();
+	void upgrading();
+	void shop();
 
 protected:
+	// Player's parameters
 	int playermaxlife;
 	int playermaxsp;
 	int playermaxmp;
@@ -113,38 +131,67 @@ protected:
 	int playercriticalchecker;
 	float playercriticalmultiplier;
 	int playercriticalpower;
-	int smallhealthpill;
-	int smallhealthpillvalue;
-	int damagepill;
 	int playerresistance;
 	int playermaxresistance;
 	int playerultra;
 	int playermaxultra;
 	int playerdefense;
+
+	// Player's items
+	int smallhealthpill;
+	int smallhealthpillvalue;
+	int smallhealthpillworth;
+	int damagepill;
+	int damagepillworth;
+	
+	// Player's money
+	int squares;
+	int squaresincrease;
+
+	// Player's train points related parameters
+	int playertp;
+	int tpincrease;
+	int attacktpmeter;
+	int ratmeter;
+	int matmeter;
+	int lifemeter;
+	int defensemeter;
+	int spmeter;
+	int mpmeter;
+	int resmeter;
 };
 
 player::player()
 {
 	playermaxlife = 460;
-	playermaxsp = 10;
-	playermaxspbase = 10;
-	playermaxmp = 16;
+	playermaxspbase = 13;
+	playermaxmp = 11;
 	playerattack = 18;
 	playermagicattack = 16;
 	playerrangedattack = 14;
 	playerlife = 460;
-	playersp = 11;
-	playermp = 16;
+	playersp = 14;
+	playermp = 11;
 	playercriticalchecker = 20;
 	playercriticalmultiplier = 1.5;
 	smallhealthpill = 2;
 	smallhealthpillvalue = 100;
-	damagepill = 2;
-	playerresistance = 80;
-	playermaxresistance = 80;
+	smallhealthpillworth = 8;
+	damagepill = 1;
+	damagepillworth = 24;
+	playerresistance = 90;
+	playermaxresistance = 90;
 	playerultra = 100;
 	playermaxultra = 200;
 	playerdefense = 2;
+	attacktpmeter = 10;
+	ratmeter = 10;
+	matmeter = 10;
+	lifemeter = 15;
+	defensemeter = 12;
+	spmeter = 90;
+	mpmeter = 120;
+	resmeter = 50;
 }
 
 int player::attackparameter(){
@@ -221,6 +268,22 @@ int player::saymaxultra(){
 
 int player::saydefense(){
 	return playerdefense;
+}
+
+int player::saytp(){
+	return playertp;
+}
+
+int player::saytpincrease(){
+	return tpincrease;
+}
+
+int player::saysquares(){
+	return squares;
+}
+
+int player::saysquaresincrease(){
+	return squaresincrease;
 }
 
 void player::decreaseplayersp(){
@@ -315,12 +378,219 @@ void player::damagepilltaken(){
 }
 
 void player::meditateused(){
-	playermp -= 6;
+	playermp -= 5;
 	playerlife += 60;
 	cout << "Used Meditate and life was restored by 60 points!" << endl;
 }
 
+void player::increasetp(){
+	playertp++;
+}
+
+void player::decreasetp(){
+	playertp--;
+}
+
+void player::increaseattack(){
+	playerattack++;
+}
+
+void player::increasedefense(){
+	playerdefense++;
+}
+
+void player::increasemagicattack(){
+	playermagicattack++;
+}
+
+void player::increasemaxlife(){
+	playermaxlife += 10;
+	playerlife += 10;
+}
+
+void player::increasemaxmp(){
+	playermaxmp++;
+	playermp++;
+}
+
+void player::increasemaxsp(){
+	playermaxsp++;
+	playersp;
+}
+
+void player::increaserangedattack(){
+	playerrangedattack++;
+}
+
+void player::increasemaxresistance(){
+	playermaxresistance++;
+	playerresistance++;
+}
+
+void player::randomtpincrease(){
+	tpincrease = rand() % 150 + 50;
+	playertp += tpincrease;
+	squaresincrease = rand() % 25 + 5;
+	squares += squaresincrease;
+}
+
 player mainplayer;
+
+void player::upgrading(){
+UPGRADING:
+	cout << "Parameter upgrading center" << endl;
+	cout << "Current TP: " << playertp << endl << endl;
+	cout << "Attack (AT): " << playerattack << " -> " << playerattack + 1 << endl;
+	cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
+	cout << "Magic attack (MAT): " << playermagicattack << " -> " << playermagicattack + 1 << endl;
+	cout << "Defense (DEF): " << playerdefense << " -> " << playerdefense + 1 << endl;
+	cout << "Max Life: " << playermaxlife << " -> " << playermaxlife + 10 << endl;
+	cout << "Max SP: " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
+	cout << "Max MP: " << playermaxmp << " -> " << playermaxmp + 1 << endl;
+	cout << "Resistance: " << playermaxresistance << " -> " << playermaxresistance + 2 << endl;
+	cout << endl << "[1] Upgrade AT (-" << attacktpmeter << " TP)" << endl;
+	cout << "[2] Upgrade RAT (-" << ratmeter << " TP)" << endl;
+	cout << "[3] Upgrade MAT (-" << matmeter << " TP)" << endl;
+	cout << "[4] Upgrade DEF (-" << defensemeter << " TP)" << endl;
+	cout << "[5] Upgrade Max Life (-" << lifemeter << " TP)" << endl;
+	cout << "[6] Upgrade Max SP (-" << spmeter << " TP)" << endl;
+	cout << "[7] Upgrade Max MP (-" << mpmeter << " TP)" << endl;
+	cout << "[8] Upgrade Resistance (-" << resmeter << " TP)" << endl;
+	cout << "Type any other key to go back to the menu" << endl;
+	cin >> movement;
+	clear();
+	switch(movement){
+	case '1' :
+		if(playertp >= attacktpmeter){
+			playertp -= attacktpmeter;
+			playerattack++;
+			if(attacktpmeter >= 60){
+			}
+			else{
+				attacktpmeter += 2;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '2' :
+		if(playertp >= ratmeter){
+			playertp -= ratmeter;
+			playerrangedattack++;
+			if(ratmeter >= 70){
+			}
+			else{
+				ratmeter += 3;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '3' :
+		if(playertp >= matmeter){
+			playertp -= matmeter;
+			playermagicattack++;
+			if(matmeter >= 70){
+			}
+			else{
+				matmeter += 3;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '4' :
+		if(playertp >= defensemeter){
+			playertp -= defensemeter;
+			playerdefense++;
+			if(defensemeter >= 60){
+				if(defensemeter >= 80){
+				}
+				else{
+					defensemeter += 2;
+				}
+			}
+			else{
+				defensemeter += 3;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '5' :
+		if(playertp >= lifemeter){
+			playertp -= lifemeter;
+			playermaxlife += 10;
+			playerlife += 10;
+			if(lifemeter >= 85){
+			}
+			else{
+				lifemeter += 5;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '6' :
+		if(playertp >= spmeter){
+			playertp -= spmeter;
+			playermaxspbase++;
+			playersp++;
+			if(spmeter >= 210){
+			}
+			else{
+				spmeter += 15;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '7' :
+		if(playertp >= mpmeter){
+			playertp -= mpmeter;
+			playermaxmp++;
+			playermp++;
+			if(mpmeter >= 240){
+			}
+			else{
+				mpmeter += 15;
+			}
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	case '8' :
+		if(playertp >= resmeter){
+			playertp -= resmeter;
+			if(resmeter >= 90){
+			}
+			else{
+				resmeter += 4;
+			}
+			playermaxresistance += 2;
+			playerresistance += 2;
+			goto UPGRADING;
+		}
+		else{
+			cout << "You do not have enough Train Points for that!" << endl << endl;
+		}
+		break;
+	}
+}
 
 class enemy : public warrior
 {
@@ -357,10 +627,10 @@ protected:
 
 enemy::enemy()
 {
-	enemylife = 180;
-	enemymaxlife = 180;
+	enemylife = 120;
+	enemymaxlife = 120;
 	enemytype = 1;
-	enemyattack = 12;
+	enemyattack = 10;
 	enemydefense = 1;
 	enemycriticalchecker = 20;
 }
@@ -435,18 +705,31 @@ void enemy::limitlife(){
 }
 
 void enemy::restoreparameters(){
-	enemylife == enemymaxlife;
+	enemylife = enemymaxlife;
 }
 
 enemy commonenemy;
 
 void player::playerattacked(){
 	if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
-		playerlife -= (commonenemy.saycriticalpower() - mainplayer.saydefense());
-		printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
+		if(mainplayer.saydefense() >= commonenemy.saycriticalpower()){
+			playerlife -= 1;
+			printf("You only took 1 damage because of your high defense!\n\n");
+		}
+		else{
+			playerlife -= commonenemy.saycriticalpower();
+			playerlife += mainplayer.saydefense();
+			printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
+		}
 	}
 	else{
-		playerlife -= (commonenemy.sayattack() - mainplayer.saydefense());
-		printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
+		if(mainplayer.saydefense() >= commonenemy.sayattack()){
+			playerlife -= 1;
+			printf("You only took 1 damage because of your high defense!\n\n");
+		}
+		else{
+			playerlife -= (commonenemy.sayattack() - mainplayer.saydefense());
+			printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
+		}
 	}
 }

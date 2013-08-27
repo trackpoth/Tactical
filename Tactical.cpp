@@ -12,7 +12,17 @@
 using namespace std;
 
 bool start;
+
 int eventtype;
+int eventgenerator;
+
+int shoptype;
+int shopsubtype;
+float shopvalue;
+int shopitema;
+int shopitemb;
+int shopitemc;
+int shopitemd;
 
 void enemy::enemyattacked(){
 	if(damagepilleffect == false){
@@ -106,6 +116,66 @@ void randomseed(){
 	srand(seed);
 }
 
+void player::shop(){
+	cout << "You see a shop near you" << endl;
+	_getch();
+	randomseed();
+	cout << "It's a Small Item Shop!" << endl;
+	shopsubtype = 1;
+	if(shopsubtype = 1){
+		shopvalue = 1.5;
+	}
+	_getch();
+	randomseed();
+	clear();
+SHOP:
+	cout << "Small Item Shop" << endl;
+	cout << "Squares = " << squares << endl << endl;
+	cout << "Small Health Pill" << endl;
+	cout << "-" << smallhealthpillworth * shopvalue << " Squares/ud | In your pocket: " << smallhealthpill << endl;
+	cout << "--Heals " << smallhealthpillvalue << " life points" << endl << endl;
+	cout << "Damage Pill" << endl;
+	cout << "-" << damagepillworth * shopvalue << " Squares/ud | In your pocket: " << damagepill << endl;
+	cout << "--Adds 10 AT / MAT until the end of the battle" << endl;
+	cout << endl << "Type '1' to buy item 1" << endl;
+	cout << "Type '2' to buy item 2" << endl;
+	cout << "Type any other key to leave the shop" << endl;
+	cin >> movement;
+	clear();
+	switch(movement){
+	case '1' :
+		if(squares >= smallhealthpillworth * shopvalue){
+			squares -= smallhealthpillworth * shopvalue;
+			smallhealthpill++;
+			goto SHOP;
+		}
+		else{
+			cout << "You haven't enough squares to buy that item!" << endl << endl;
+			goto SHOP;
+		}
+		break;
+	case '2' :
+		if(squares >= damagepillworth * shopvalue){
+			squares -= damagepillworth * shopvalue;
+			damagepill++;
+			goto SHOP;
+		}
+		else{
+			cout << "You haven't enough squares to buy that item!" << endl << endl;
+			goto SHOP;
+		}
+		break;
+	default :
+		cout << "Exit the shop? [1] Yes [Any other key] No" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+			case '1' : break;
+			default : goto SHOP;
+		}
+	}
+}
+
 void enemy::randomizetype(){
 	enemytype = rand() % 7 + 1;
 }
@@ -129,7 +199,6 @@ void player::determinemaxsp(){
 	playermaxsp = (playermaxspbase + rangedweapon.saysp1());
 }
 
-
 void defeat(){
 	mainplayer.defeatchecker();
 }
@@ -145,11 +214,18 @@ void escapebattle(){
 }
 
 void itemmenu(){
-	printf("You have %d Small Health Pill(s) (+%d life)\n",mainplayer.saysmallhealthpill(),mainplayer.saysmallhealthpillvalue());
-	printf("You have %d Damage Pill(s) (+10 attack until the end of the battle)\n",mainplayer.saydamagepill());
-	printf("\nType '1' to use a Small Health Pill\n");
-	printf("Type '2' to use a Damage Pill\n");
-	printf("Type any other key to go back to the main menu and skip the turn\n");
+	if(mainplayer.saysmallhealthpill() > 0){
+		printf("Small Health Pill x%d [1 to use]\n",mainplayer.saysmallhealthpill());
+		cout << "-Heals " << mainplayer.saysmallhealthpillvalue() << " life points" << endl;
+	}
+	if(mainplayer.saydamagepill() > 0){
+		printf("Damage Pill x%d [2 to use]\n",mainplayer.saydamagepill());
+		cout << "-Adds 10 AT / MAT until the end of the battle" << endl;
+	}
+	if(mainplayer.saysmallhealthpill() <= 0 && mainplayer.saydamagepill() <= 0){
+		cout << "No items in the bag!" << endl;
+	}
+	printf("\nType any other key to go back to the main menu and skip the turn\n");
 	cin >> movement;
 	clear();
 	switch(movement){
@@ -159,7 +235,7 @@ void itemmenu(){
 			mainplayer.limitplayerlife();
 		}
 		else{
-			printf("You haven't any Small Health Pills left!\n");
+			printf("Closed the item bag without using items\n");
 		}
 		break;
 	case '2' :
@@ -167,7 +243,7 @@ void itemmenu(){
 			mainplayer.damagepilltaken();
 		}
 		else{
-			cout << "You haven't any Damage Pills left!" << endl;
+			cout << "Closed the item bag without using items" << endl;
 		}
 		break;
 	default : cout << "Closed the item bag without using items" << endl;
@@ -181,15 +257,87 @@ void equipment(){
 	}
 	cout << "Ranged weapon: ";
 	if(rangedweapon.sayattack1equipped() == 1){
-		cout << "Shitshot [2% +RAT]" << endl;
+		cout << "Bullshot [2% +RAT][+1 SP]" << endl;
 	}
 	cout << endl << "Sector = " << section << endl;
 	cout << "Zone = " << zone << endl;
-	cout << endl << "Type any key to go back to the battle menu" << endl;
+	cout << endl << "Squares = " << mainplayer.saysquares() << endl;
+	cout << endl << "Type 't' to enter the parameter upgrading center" << endl;
+	cout << "Type any key to go back to the menu" << endl;
 	cin >> movement;
+	clear();
 	switch(movement){
+	case 't' :
+		mainplayer.upgrading();
 	default:;
 	}
+}
+
+void traveling(){
+TRAVELING:
+	clear();
+	randomseed();
+	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl;
+	// northwest = most efficient while searching safe places & shops, but also bosses can be found more often
+	// north = default, everything can happen
+	// northeast = most efficient while searching enemies and bosses, better loot
+	cout << "[4] Equipment & stats" << endl;
+	cin >> movement;
+	clear();
+	zone++;
+	if(zone > 10){
+		section++;
+		zone = 1;
+	}
+	switch(movement){
+	case '1' :
+		cout << "Heading west..." << endl;
+		Sleep(1000);
+		eventgenerator = 1;
+		break;
+	case '2' :
+		cout << "Heading north..." << endl;
+		Sleep(1000);
+		eventgenerator = 2;
+		break;
+	case '3' :
+		cout << "Heading east..." << endl;
+		Sleep(1000);
+		eventgenerator = 3;
+		break;
+	case '4' :
+		equipment();
+		goto TRAVELING;
+	default : clear();goto TRAVELING;
+	}
+	randomseed();
+	travel = rand() % 101;
+	if(eventgenerator == 1){
+		if(travel >= 0 && travel <= 65){
+			eventtype = 1;
+		}
+		if(travel >= 66 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	if(eventgenerator == 2){
+		if(travel >= 0 && travel <= 85){
+			eventtype = 1;
+		}
+		if(travel >= 86 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	if(eventgenerator == 3){
+		if(travel >= 0 && travel <= 90){
+			eventtype = 1;
+		}
+		if(travel >= 91 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	// eventype 1 = battle
+	// eventype 2 = shop
 }
 
 void battlemenu(){
@@ -298,18 +446,18 @@ void battlemenu(){
 	if(mainplayer.sayultra() >= 100){
 		cout << "[7] ULTRA" << endl;
 	}
-	printf("[p] Other stats\n");
+	printf("[p] Other\n");
 }
 
 void enemy::victorychecker(){
 	if(enemylife <= 0){
 		damagepilleffect = false;
 		piercingeyeeffect = false;
+		randomseed();
 		clear();
-		zone++;
-		if(zone > 10){
-			section++;
-			zone = 1;
+		if(firstbattle == false){
+			cout << playername;
+			cout << " won the battle!\a" << endl;
 		}
 		if(firstbattle == true){
 			cout << "Hippie: Wow, that did hurt!" << endl;
@@ -334,35 +482,32 @@ void enemy::victorychecker(){
 			_getch();
 			cout << "You: Oh my god..." << endl;
 			_getch();
+			cout << endl << "(As he finishes and goes down the hill, you start thinking)" << endl;
+			_getch();
+			cout << "You: Maybe... if the Hypercube is real...  and if I find it... " << endl;
+			_getch();
+			cout << "You: I would be able to go to the fourth dimension..." << endl;
+			_getch();
+			cout << "You: In the fourth dimension everything should be one dimension higher..." << endl;
+			_getch();
+			cout << "You: So if I bring my Game Box... I would be able to play teetrix in 3D!" << endl;
+			_getch();
+			cout << "You: Wow! That would be AWESOME!" << endl;
+			_getch();
+			cout << "You: Okay! I'll do it! Hypercube, I'll find you!" << endl;
+			_getch();
+			cout << "You: But where do I go?" << endl;
+			_getch();
 			firstbattle = false;
 		}
-		else{
-			cout << playername;
-			cout << " won the battle!\a" << endl;
-			_getch();
-		}
+		_getch();
+		randomseed();
+		mainplayer.randomtpincrease();
+		cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
+		cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
+		_getch();
 		clear();
-TRAVELING:
-		randomseed();
-		cout << "Where do you want to go? West [1], North [2] or East? [3]" << endl;
-		cin >> movement;
-		switch(movement){
-		case '1' :
-			cout << "Heading west..." << endl;
-			break;
-		case '2' :
-			cout << "Heading north..." << endl;
-			break;
-		case '3' :
-			cout << "Heading east..." << endl;
-			break;
-		default : clear();goto TRAVELING;
-		}
-		randomseed();
-		traveling = rand() % 101;
-		if(traveling >= 0 && traveling <= 100){
-			eventtype = 1;
-		}
+		traveling();
 	}
 }
 
@@ -383,10 +528,16 @@ EVENT:
 		start = false;
 	}
 	else{
+
 		if(eventtype == 1){
 			dialogue = 0;
+			dialogues();
 		}
-		dialogues();
+		if(eventtype == 2){
+			mainplayer.shop();
+			traveling();
+			goto EVENT;
+		}
 		clear();
 		if(dialogue == 0){
 			randomseed();
@@ -410,11 +561,11 @@ STARTBATTLE:
 		randomseed();
 
 		escapebattle();
+		defeat();
 		commonenemy.victorychecker();
 		if(commonenemy.saylife() <= 0){
 			goto EVENT;
 		}
-		defeat();
 
 		battlemenu();
 
@@ -480,7 +631,7 @@ STARTBATTLE:
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
-			printf("Quick eye [5 SP]['2' to use]\n");
+			printf("Quick eye [4 SP]['2' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
 			printf("\nType any other key to go back to the main menu\n");
 			cin >> movement;
@@ -506,8 +657,7 @@ STARTBATTLE:
 				}
 				break;
 			case '2' :
-				if(mainplayer.saysp() >= 5 && mainplayer.sayresistance() >= 3){
-					mainplayer.decreaseplayersp();
+				if(mainplayer.saysp() >= 4 && mainplayer.sayresistance() >= 3){
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
@@ -581,7 +731,7 @@ STARTBATTLE:
 			break;
 		case '4' :
 			printf("List of Magic learned:\n\n");
-			printf("Meditate [6 MP]['1' to use]\n");
+			printf("Meditate [5 MP]['1' to use]\n");
 			printf("-- Heals the player by 60 life points\n");
 			printf("Ice [3 MP]['2' to use]\n");
 			printf("-- Harms the enemy using the Ice Element\n");
@@ -590,7 +740,7 @@ STARTBATTLE:
 			clear();
 			switch(movement){
 			case '1' :
-				if(mainplayer.saymp() >= 6){
+				if(mainplayer.saymp() >= 5){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
 				}
@@ -611,6 +761,9 @@ STARTBATTLE:
 			}
 			break;
 		case '6' :
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
@@ -681,7 +834,7 @@ int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.2.1!" << endl;
+		cout << "Welcome to Tactical Alpha 1.4!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();
