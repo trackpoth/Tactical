@@ -24,6 +24,113 @@ int shopitemb;
 int shopitemc;
 int shopitemd;
 
+int battletype;
+
+// Funciones de alta importancia que pueden ser llamadas desde cualquier parte del programa
+
+void randomseed(){
+	t = clock();
+	if(t >= 10000){
+		t-=9999;
+	}
+	seed = t;
+	srand(seed);
+}
+
+void equipment(){
+	cout << "Melee weapon: ";
+	if(weapons.sayattack1equipped() == 1){
+		cout << "Tennis Racket [2% +AT]" << endl;
+	}
+	cout << "Ranged weapon: ";
+	if(rangedweapon.sayattack1equipped() == 1){
+		cout << "Bullshot [2% +RAT][+1 SP]" << endl;
+	}
+	cout << endl << "Sector = " << section << endl;
+	cout << "Zone = " << zone << endl;
+	cout << endl << "Squares = " << mainplayer.saysquares() << endl;
+	cout << endl << "Type 't' to enter the parameter upgrading center" << endl;
+	cout << "Type any key to go back to the menu" << endl;
+	cin >> movement;
+	clear();
+	switch(movement){
+	case 't' :
+		mainplayer.upgrading();
+	default:;
+	}
+}
+
+void traveling(){
+TRAVELING:
+	clear();
+	randomseed();
+	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl;
+	cout << "Northwest = More shops" << endl;
+	cout << "North = Anything can happen" << endl;
+	cout << "Northeast = More enemies" << endl;
+	cout << "[4] Equipment & stats" << endl;
+	cin >> movement;
+	clear();
+	switch(movement){
+	case '1' :
+		cout << "Heading west..." << endl;
+		Sleep(1000);
+		eventgenerator = 1;
+		break;
+	case '2' :
+		cout << "Heading north..." << endl;
+		Sleep(1000);
+		eventgenerator = 2;
+		break;
+	case '3' :
+		cout << "Heading east..." << endl;
+		Sleep(1000);
+		eventgenerator = 3;
+		break;
+	case '4' :
+		equipment();
+		goto TRAVELING;
+	default : clear();goto TRAVELING;
+	}
+	zone++;
+	if(zone > 10){
+		section++;
+		zone = 1;
+	}
+	randomseed();
+	travel = rand() % 101;
+	if(eventgenerator == 1){
+		if(travel >= 0 && travel <= 65){
+			eventtype = 1;
+		}
+		if(travel >= 66 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	if(eventgenerator == 2){
+		if(travel >= 0 && travel <= 85){
+			eventtype = 1;
+		}
+		if(travel >= 86 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	if(eventgenerator == 3){
+		if(travel >= 0 && travel <= 90){
+			eventtype = 1;
+		}
+		if(travel >= 91 && travel <= 100){
+			eventtype = 2;
+		}
+	}
+	// eventype 1 = battle
+	// eventype 2 = shop
+}
+
+
+
+// Funciones procedentes de clases
+
 void enemy::enemyattacked(){
 	if(damagepilleffect == false){
 		if(subcriticalcheckerone <= mainplayer.saycriticalchecker()){
@@ -107,15 +214,6 @@ void enemy::rangedattacked(){
 	}
 }
 
-void randomseed(){
-	t = clock();
-	if(t >= 10000){
-		t-=9999;
-	}
-	seed = t;
-	srand(seed);
-}
-
 void player::shop(){
 	cout << "You see a shop near you" << endl;
 	_getch();
@@ -178,6 +276,8 @@ SHOP:
 
 void enemy::randomizetype(){
 	enemytype = rand() % 7 + 1;
+	enemyint = rand() % 3 + 1;
+	healthdrink = rand() % 1;
 }
 
 void enemy::randomizeparameters(){
@@ -199,17 +299,102 @@ void player::determinemaxsp(){
 	playermaxsp = (playermaxspbase + rangedweapon.saysp1());
 }
 
+void enemy::victorychecker(){
+	if(enemylife <= 0 || runawayfrombattle == true){
+		damagepilleffect = false;
+		piercingeyeeffect = false;
+		randomseed();
+		clear();
+		if(firstbattle == false && runawayfrombattle == false){
+			cout << playername;
+			cout << " won the battle!\a" << endl;
+		}
+		if(firstbattle == false && runawayfrombattle == true){
+			cout << playername << " ran away!" << endl;
+		}
+		if(firstbattle == true && runawayfrombattle == false){
+			cout << "Hippie: Wow, that did hurt!" << endl;
+			_getch();
+			cout << "You: What in the heavens were you doing?" << endl;
+			_getch();
+			cout << "Hippie: I was looking for my Hypercube" << endl;
+			_getch();
+			cout << "You: Your what!?" << endl;
+			_getch();
+			cout << "Hippie: You don't know what's an Hypercube, don't you?" << endl;
+			_getch();
+			cout << "Hippie: It's a cube with 4 dimensions, but I think someone stole it" << endl;
+			_getch();
+			cout << "You: (...)" << endl;
+			_getch();
+			cout << "Hippie: Can you find the thief?" << endl;
+			_getch();
+			cout << "You: Yeah, why not. I'll look for the imaginary cube of a guy I've just met" << endl;
+			_getch();
+			cout << "Hippie: Thank you! I think he went that way!" << endl;
+			_getch();
+			cout << "You: Oh my god..." << endl;
+			_getch();
+			cout << endl << "(As he finishes and goes down the hill, you start thinking)" << endl;
+			_getch();
+			cout << "You: Maybe... if the Hypercube is real...  and if I find it... " << endl;
+			_getch();
+			cout << "You: I would be able to go to the fourth dimension..." << endl;
+			_getch();
+			cout << "You: In the fourth dimension everything should be one dimension higher..." << endl;
+			_getch();
+			cout << "You: So if I bring my Game Box... I would be able to play teetrix in 3D!" << endl;
+			_getch();
+			cout << "You: Wow! That would be AWESOME!" << endl;
+			_getch();
+			cout << "You: Okay! I'll do it! Hypercube, I'll find you!" << endl;
+			_getch();
+			cout << "You: But where do I go?" << endl;
+			_getch();
+			firstbattle = false;
+		}
+		if(firstbattle == true && runawayfrombattle == true){
+			cout << "You run away as quickly as you can" << endl;
+			_getch();
+			cout << "THE END" << endl;
+			_getch();
+			cout << "(Maybe you shouldn't escape this battle...)" << endl;
+			_getch();
+			exit(0);
+		}
+		_getch();
+		randomseed();
+		if(runawayfrombattle == false){
+			mainplayer.randomtpincrease();
+			cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
+			cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
+			_getch();
+		}
+		clear();
+		traveling();
+	}
+}
+
+
+
+// Funciones normales
+
 void defeat(){
 	mainplayer.defeatchecker();
 }
 
 void escapebattle(){
 	if(runawayfrombattle == true){
+		damagepilleffect = false;
+		piercingeyeeffect = false;
+		runawayfrombattle = false;
+		randomseed();
 		clear();
 		cout << playername;
 		cout << " ran away!\a" << endl;
 		_getch();
-		exit(0);
+		clear();
+		traveling();
 	}
 }
 
@@ -248,96 +433,6 @@ void itemmenu(){
 		break;
 	default : cout << "Closed the item bag without using items" << endl;
 	}
-}
-
-void equipment(){
-	cout << "Melee weapon: ";
-	if(weapons.sayattack1equipped() == 1){
-		cout << "Tennis Racket [2% +AT]" << endl;
-	}
-	cout << "Ranged weapon: ";
-	if(rangedweapon.sayattack1equipped() == 1){
-		cout << "Bullshot [2% +RAT][+1 SP]" << endl;
-	}
-	cout << endl << "Sector = " << section << endl;
-	cout << "Zone = " << zone << endl;
-	cout << endl << "Squares = " << mainplayer.saysquares() << endl;
-	cout << endl << "Type 't' to enter the parameter upgrading center" << endl;
-	cout << "Type any key to go back to the menu" << endl;
-	cin >> movement;
-	clear();
-	switch(movement){
-	case 't' :
-		mainplayer.upgrading();
-	default:;
-	}
-}
-
-void traveling(){
-TRAVELING:
-	clear();
-	randomseed();
-	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl;
-	// northwest = most efficient while searching safe places & shops, but also bosses can be found more often
-	// north = default, everything can happen
-	// northeast = most efficient while searching enemies and bosses, better loot
-	cout << "[4] Equipment & stats" << endl;
-	cin >> movement;
-	clear();
-	zone++;
-	if(zone > 10){
-		section++;
-		zone = 1;
-	}
-	switch(movement){
-	case '1' :
-		cout << "Heading west..." << endl;
-		Sleep(1000);
-		eventgenerator = 1;
-		break;
-	case '2' :
-		cout << "Heading north..." << endl;
-		Sleep(1000);
-		eventgenerator = 2;
-		break;
-	case '3' :
-		cout << "Heading east..." << endl;
-		Sleep(1000);
-		eventgenerator = 3;
-		break;
-	case '4' :
-		equipment();
-		goto TRAVELING;
-	default : clear();goto TRAVELING;
-	}
-	randomseed();
-	travel = rand() % 101;
-	if(eventgenerator == 1){
-		if(travel >= 0 && travel <= 65){
-			eventtype = 1;
-		}
-		if(travel >= 66 && travel <= 100){
-			eventtype = 2;
-		}
-	}
-	if(eventgenerator == 2){
-		if(travel >= 0 && travel <= 85){
-			eventtype = 1;
-		}
-		if(travel >= 86 && travel <= 100){
-			eventtype = 2;
-		}
-	}
-	if(eventgenerator == 3){
-		if(travel >= 0 && travel <= 90){
-			eventtype = 1;
-		}
-		if(travel >= 91 && travel <= 100){
-			eventtype = 2;
-		}
-	}
-	// eventype 1 = battle
-	// eventype 2 = shop
 }
 
 void battlemenu(){
@@ -449,68 +544,6 @@ void battlemenu(){
 	printf("[p] Other\n");
 }
 
-void enemy::victorychecker(){
-	if(enemylife <= 0){
-		damagepilleffect = false;
-		piercingeyeeffect = false;
-		randomseed();
-		clear();
-		if(firstbattle == false){
-			cout << playername;
-			cout << " won the battle!\a" << endl;
-		}
-		if(firstbattle == true){
-			cout << "Hippie: Wow, that did hurt!" << endl;
-			_getch();
-			cout << "You: What in the heavens were you doing?" << endl;
-			_getch();
-			cout << "Hippie: I was looking for my Hypercube" << endl;
-			_getch();
-			cout << "You: Your what!?" << endl;
-			_getch();
-			cout << "Hippie: You don't know what's an Hypercube, don't you?" << endl;
-			_getch();
-			cout << "Hippie: It's a cube with 4 dimensions, but I think someone stole it" << endl;
-			_getch();
-			cout << "You: (...)" << endl;
-			_getch();
-			cout << "Hippie: Can you find the thief?" << endl;
-			_getch();
-			cout << "You: Yeah, why not. I'll look for the imaginary cube of a guy I've just met" << endl;
-			_getch();
-			cout << "Hippie: Thank you! I think he went that way!" << endl;
-			_getch();
-			cout << "You: Oh my god..." << endl;
-			_getch();
-			cout << endl << "(As he finishes and goes down the hill, you start thinking)" << endl;
-			_getch();
-			cout << "You: Maybe... if the Hypercube is real...  and if I find it... " << endl;
-			_getch();
-			cout << "You: I would be able to go to the fourth dimension..." << endl;
-			_getch();
-			cout << "You: In the fourth dimension everything should be one dimension higher..." << endl;
-			_getch();
-			cout << "You: So if I bring my Game Box... I would be able to play teetrix in 3D!" << endl;
-			_getch();
-			cout << "You: Wow! That would be AWESOME!" << endl;
-			_getch();
-			cout << "You: Okay! I'll do it! Hypercube, I'll find you!" << endl;
-			_getch();
-			cout << "You: But where do I go?" << endl;
-			_getch();
-			firstbattle = false;
-		}
-		_getch();
-		randomseed();
-		mainplayer.randomtpincrease();
-		cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
-		cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
-		_getch();
-		clear();
-		traveling();
-	}
-}
-
 void battle(){
 EVENT:
 	clear();
@@ -528,7 +561,6 @@ EVENT:
 		start = false;
 	}
 	else{
-
 		if(eventtype == 1){
 			dialogue = 0;
 			dialogues();
@@ -560,12 +592,14 @@ STARTBATTLE:
 
 		randomseed();
 
-		escapebattle();
 		defeat();
 		commonenemy.victorychecker();
-		if(commonenemy.saylife() <= 0){
+		if(commonenemy.saylife() <= 0 || runawayfrombattle == true){
+			runawayfrombattle = false;
+			distanceenemy = 3;
 			goto EVENT;
 		}
+
 
 		battlemenu();
 
@@ -577,6 +611,8 @@ STARTBATTLE:
 			successfulhit = false;
 			successfulhit2 = false;
 		}
+
+		// El jugador ejecuta su turno
 
 		cin >> movement;
 
@@ -796,11 +832,15 @@ STARTBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
-		case 'p' : equipment();goto STARTBATTLE;break;
-		default: cout << "Skipped the turn" << endl;break;
+		case 'p' :
+			equipment();
+			goto STARTBATTLE;
+			break;
+		default:
+			cout << "Skipped the turn" << endl;
+			break;
 		}
 
-		// Comprueba de nuevo si la distancia frente al enemigo es lo suficientemente corta como para realizar un ataque físico
 		if(distanceenemy == 1 || distanceenemy == 2){
 			successfulhit = true;
 			successfulhit2 = true;
@@ -811,14 +851,8 @@ STARTBATTLE:
 		}
 
 		 // El enemigo ejecuta su turno
-		subcriticalcheckertwo = rand() % 100;
-		if(successfulhit2 == true){
-			mainplayer.playerattacked();
-		}
-		else{
-			cout << "The enemy got closer to " << playername << endl << endl;
-			distanceenemy--;
-		}
+		mainplayer.playerattacked();
+
 
 		mainplayer.increaseultra();
 		mainplayer.limitultra();
@@ -834,7 +868,7 @@ int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.4!" << endl;
+		cout << "Welcome to Tactical Alpha 1.5 PRERELEASE!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();

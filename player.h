@@ -27,6 +27,9 @@ bool successfulhit;
 string playername;
 bool firstbattle = true;
 
+int movementint;
+int movementfinal;
+
 int section = 1;
 int zone = 1;
 int travel;
@@ -603,6 +606,8 @@ public:
 	int saydefense();
 	int saycriticalchecker();
 	int saycriticalpower();
+	int sayint();
+	bool sayhealthdrink();
 
 	void victorychecker();
 	void enemyattacked();
@@ -614,6 +619,7 @@ public:
 	void randomizetype();
 	void randomizeparameters();
 	void restoreparameters();
+	void healthdrinktaken();
 
 protected:
 	int enemylife;
@@ -623,6 +629,8 @@ protected:
 	int enemydefense;
 	int enemycriticalchecker;
 	int enemycriticalpower;
+	int enemyint;
+	bool healthdrink;
 };
 
 enemy::enemy()
@@ -661,6 +669,14 @@ int enemy::saycriticalchecker(){
 
 int enemy::saycriticalpower(){
 	return enemycriticalpower;
+}
+
+int enemy::sayint(){
+	return enemyint;
+}
+
+bool enemy::sayhealthdrink(){
+	return healthdrink;
 }
 
 void enemy::receivedultra(){
@@ -708,28 +724,140 @@ void enemy::restoreparameters(){
 	enemylife = enemymaxlife;
 }
 
+void enemy::healthdrinktaken(){
+	healthdrink = false;
+	enemylife += (enemymaxlife * 0.5);
+	if(enemylife >= enemymaxlife){
+		enemylife = enemymaxlife;
+	}
+}
+
 enemy commonenemy;
 
 void player::playerattacked(){
-	if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
-		if(mainplayer.saydefense() >= commonenemy.saycriticalpower()){
-			playerlife -= 1;
-			printf("You only took 1 damage because of your high defense!\n\n");
+
+	movementint = rand() % 101;
+
+	// 1: 50%  2: 45%  3: 5%
+	if(commonenemy.sayint() == 1){
+		if(movementint >= 0 && movementint <= 50){
+			movementfinal = 1;
 		}
-		else{
-			playerlife -= commonenemy.saycriticalpower();
-			playerlife += mainplayer.saydefense();
-			printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
+		if(movementint >= 51 && movementint <= 95){
+			movementfinal = 2;
+		}
+		if(movementint >= 96 && movementint <= 100){
+			movementfinal = 3;
 		}
 	}
-	else{
-		if(mainplayer.saydefense() >= commonenemy.sayattack()){
-			playerlife -= 1;
-			printf("You only took 1 damage because of your high defense!\n\n");
+
+	// 1: 35%  2: 55%  3: 10%
+	if(commonenemy.sayint() == 2){
+		if(movementint >= 0 && movementint <= 35){
+			movementfinal = 1;
+		}
+		if(movementint >= 36 && movementint <= 90){
+			movementfinal = 2;
+		}
+		if(movementint >= 91 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 15%  2: 65%  3: 20%
+	if(commonenemy.sayint() == 3){
+		if(movementint >= 0 && movementint <= 15){
+			movementfinal = 1;
+		}
+		if(movementint >= 16 && movementint <= 80){
+			movementfinal = 2;
+		}
+		if(movementint >= 81 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 5%  2: 55%  3: 40%
+	if(commonenemy.sayint() == 4){
+		if(movementint >= 0 && movementint <= 5){
+			movementfinal = 1;
+		}
+		if(movementint >= 6 && movementint <= 60){
+			movementfinal = 2;
+		}
+		if(movementint >= 61 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 2: 25%  3: 75%
+	if(commonenemy.sayint() == 5){
+		if(movementint >= 0 && movementint <= 25){
+			movementfinal = 2;
+		}
+		if(movementint >= 26 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// movementfinal == 1: No hace nada
+	// movementfinal == 2: Ataca físicamente acercándose si está muy lejos
+	// movementfinal == 3: Mira su vida actual y si es demasiado baja usa un objeto curativo, si no es así tiene el mismo efecto que movementfinal 2.
+ATTACK:
+	if(movementfinal == 1){
+		cout << "The enemy doesn't do anything!" << endl << endl;
+	}
+
+	if(movementfinal == 2){
+		if(successfulhit2 == true){
+			subcriticalcheckertwo = rand() % 101;
+
+			// El enemigo ejecuta un ataque físico
+
+			if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
+
+				// Crítico defensa superior a ataque
+				if(playerdefense >= commonenemy.saycriticalpower()){
+					playerlife -= 1;
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Crítico defensa inferior a ataque
+				else{
+					playerlife -= commonenemy.saycriticalpower();
+					playerlife += playerdefense;
+					printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
+				}
+			}
+			else{
+
+				// Normal defensa superior a ataque
+				if(playerdefense >= commonenemy.sayattack()){
+					playerlife -= 1;
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Normal defensa inferior a ataque
+				else{
+					playerlife -= (commonenemy.sayattack() - playerdefense);
+					printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
+				}
+			}
 		}
 		else{
-			playerlife -= (commonenemy.sayattack() - mainplayer.saydefense());
-			printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
+			cout << "The enemy got closer to " << playername << endl << endl;
+			distanceenemy--;
+		}
+	}
+
+	if(movementfinal == 3){
+		if(commonenemy.saylife() <= commonenemy.saymaxlife() * 0.3 && commonenemy.sayhealthdrink() == true){
+			commonenemy.healthdrinktaken();
+			cout << "The enemy used a Health Drink!" << endl << endl;
+		}
+		else{
+			movementfinal = 2;
+			goto ATTACK;
 		}
 	}
 }
