@@ -24,8 +24,6 @@ int shopitemb;
 int shopitemc;
 int shopitemd;
 
-int battletype;
-
 // Funciones de alta importancia que pueden ser llamadas desde cualquier parte del programa
 
 void randomseed(){
@@ -35,6 +33,44 @@ void randomseed(){
 	}
 	seed = t;
 	srand(seed);
+}
+
+void itemmenu(){
+	cout << playername << "'s life: " << mainplayer.saylife() << "/" << mainplayer.saymaxlife() << endl << endl;
+	if(mainplayer.saysmallhealthpill() > 0){
+		printf("Small Health Pill x%d [1 to use]\n",mainplayer.saysmallhealthpill());
+		cout << "-Heals " << mainplayer.saysmallhealthpillvalue() << " life points" << endl;
+	}
+	if(mainplayer.saydamagepill() > 0){
+		printf("Damage Pill x%d [2 to use]\n",mainplayer.saydamagepill());
+		cout << "-Adds 10 AT / MAT until the end of the battle" << endl;
+	}
+	if(mainplayer.saysmallhealthpill() <= 0 && mainplayer.saydamagepill() <= 0){
+		cout << "No items in the bag!" << endl;
+	}
+	printf("\nType any other key to go back to the main menu and skip the turn\n");
+	cin >> movement;
+	clear();
+	switch(movement){
+	case '1' :
+		if(mainplayer.saysmallhealthpill() > 0){
+			mainplayer.smallhealthpilltaken();
+			mainplayer.limitplayerlife();
+		}
+		else{
+			printf("Closed the item bag without using items\n");
+		}
+		break;
+	case '2' :
+		if(mainplayer.saydamagepill() > 0){
+			mainplayer.damagepilltaken();
+		}
+		else{
+			cout << "Closed the item bag without using items" << endl;
+		}
+		break;
+	default : cout << "Closed the item bag without using items" << endl;
+	}
 }
 
 void equipment(){
@@ -64,11 +100,12 @@ void traveling(){
 TRAVELING:
 	clear();
 	randomseed();
-	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl;
-	cout << "Northwest = More shops" << endl;
+	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl << endl;
+	cout << "Northwest = More shops, more bosses" << endl;
 	cout << "North = Anything can happen" << endl;
 	cout << "Northeast = More enemies" << endl;
-	cout << "[4] Equipment & stats" << endl;
+	cout << endl << "[4] Equipment & stats" << endl;
+	cout << "[5] Item bag" << endl;
 	cin >> movement;
 	clear();
 	switch(movement){
@@ -90,6 +127,9 @@ TRAVELING:
 	case '4' :
 		equipment();
 		goto TRAVELING;
+	case '5' :
+		itemmenu();
+		goto TRAVELING;
 	default : clear();goto TRAVELING;
 	}
 	zone++;
@@ -100,31 +140,47 @@ TRAVELING:
 	randomseed();
 	travel = rand() % 101;
 	if(eventgenerator == 1){
-		if(travel >= 0 && travel <= 65){
+
+		// 1: 55%  2: 35%  3: 10%
+		if(travel >= 0 && travel <= 55){
 			eventtype = 1;
 		}
-		if(travel >= 66 && travel <= 100){
+		if(travel >= 56 && travel <= 90){
 			eventtype = 2;
+		}
+		if(travel >= 91 && travel <= 100){
+			eventtype = 3;
 		}
 	}
 	if(eventgenerator == 2){
-		if(travel >= 0 && travel <= 85){
+
+		// 1: 75%  2: 20%  3: 5%
+		if(travel >= 0 && travel <= 75){
 			eventtype = 1;
 		}
-		if(travel >= 86 && travel <= 100){
+		if(travel >= 76 && travel <= 95){
 			eventtype = 2;
+		}
+		if(travel >= 96 && travel <= 100){
+			eventtype = 3;
 		}
 	}
 	if(eventgenerator == 3){
-		if(travel >= 0 && travel <= 90){
+
+		// 1: 80%  2: 5%  3: 15%
+		if(travel >= 0 && travel <= 80){
 			eventtype = 1;
 		}
-		if(travel >= 91 && travel <= 100){
+		if(travel >= 81 && travel <= 85){
 			eventtype = 2;
+		}
+		if(travel >= 86 && travel <= 100){
+			eventtype = 3;
 		}
 	}
 	// eventype 1 = battle
 	// eventype 2 = shop
+	// eventype 3 = boss
 }
 
 
@@ -365,10 +421,19 @@ void enemy::victorychecker(){
 		_getch();
 		randomseed();
 		if(runawayfrombattle == false){
-			mainplayer.randomtpincrease();
-			cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
-			cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
-			_getch();
+			if(battletype == 1){
+				mainplayer.randomtpincrease();
+				cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
+				cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
+				_getch();
+			}
+			if(battletype == 2){
+				mainplayer.randomtpincreaseboss();
+				cout << endl << playername << "'s Train Points were increased by " << mainplayer.saytpincrease() << "!" << endl;
+				cout << playername << "'s Squares were increased by " << mainplayer.saysquaresincrease() << "!" << endl;
+				_getch();
+				battletype = 1;
+			}
 		}
 		clear();
 		traveling();
@@ -398,105 +463,12 @@ void escapebattle(){
 	}
 }
 
-void itemmenu(){
-	if(mainplayer.saysmallhealthpill() > 0){
-		printf("Small Health Pill x%d [1 to use]\n",mainplayer.saysmallhealthpill());
-		cout << "-Heals " << mainplayer.saysmallhealthpillvalue() << " life points" << endl;
-	}
-	if(mainplayer.saydamagepill() > 0){
-		printf("Damage Pill x%d [2 to use]\n",mainplayer.saydamagepill());
-		cout << "-Adds 10 AT / MAT until the end of the battle" << endl;
-	}
-	if(mainplayer.saysmallhealthpill() <= 0 && mainplayer.saydamagepill() <= 0){
-		cout << "No items in the bag!" << endl;
-	}
-	printf("\nType any other key to go back to the main menu and skip the turn\n");
-	cin >> movement;
-	clear();
-	switch(movement){
-	case '1' :
-		if(mainplayer.saysmallhealthpill() > 0){
-			mainplayer.smallhealthpilltaken();
-			mainplayer.limitplayerlife();
-		}
-		else{
-			printf("Closed the item bag without using items\n");
-		}
-		break;
-	case '2' :
-		if(mainplayer.saydamagepill() > 0){
-			mainplayer.damagepilltaken();
-		}
-		else{
-			cout << "Closed the item bag without using items" << endl;
-		}
-		break;
-	default : cout << "Closed the item bag without using items" << endl;
-	}
-}
-
 void battlemenu(){
-	if(commonenemy.saytype() == 1){
-		cout << "Grass ";
+	if(battletype == 1){
+		commonenemy.saystats();
 	}
-	if(commonenemy.saytype() == 2){
-		cout << "Normal ";
-	}
-	if(commonenemy.saytype() == 3){
-		cout << "Dark ";
-	}
-	if(commonenemy.saytype() == 4){
-		cout << "Light ";
-	}
-	if(commonenemy.saytype() == 5){
-		cout << "Fire ";
-	}
-	if(commonenemy.saytype() == 6){
-		cout << "Water ";
-	}
-	if(commonenemy.saytype() == 7){
-		cout << "Ice ";
-	}
-	cout << "Human" << endl;
-	if(piercingeyeeffect == false){
-		cout << "Life = ";
-		cout << commonenemy.saylife();
-		cout << endl;
-	}
-	else{
-		cout << "Life = " << commonenemy.saylife() << "/" << commonenemy.saymaxlife() << endl;
-		printf("AT = %d | DEF = %d\n",commonenemy.sayattack(),commonenemy.saydefense());
-	}
-	if(piercingeyeeffect == true){
-		cout << "Weak to: ";
-		if(commonenemy.saytype() == 1){
-			cout << "[Darkness (x1.5)] [Fire (x1.5)] [Ice (x1.5)] " << endl;
-		}
-		if(commonenemy.saytype() == 2){
-			cout << "[Darkness (x1.5)] [Fire (x1.5)]" << endl;
-		}
-		if(commonenemy.saytype() == 3){
-			cout << "[Light (x1.5)] [Fire (x1.5)]" << endl;
-		}
-		if(commonenemy.saytype() == 4){
-			cout << "[Darkness (x1.5)] [Water (x1.5)] [Grass (x1.5)]" << endl;
-		}
-		if(commonenemy.saytype() == 5){
-			cout << "[Darkness (x1.5)] [Water (x2)]" << endl;
-		}
-		if(commonenemy.saytype() == 6){
-			cout << "[Ice (x1.5)] [Grass (x2)]" << endl;
-		}
-		if(commonenemy.saytype() == 7){
-			cout << "[Water (x1.5)] [Fire (x1.5)]" << endl;
-		}
-	}
-	printf("Effects = ");
-	if(piercingeyeeffect == true){
-		cout << "Piercing Eye\n" << endl;
-	}
-	if(piercingeyeeffect == false){
-		cout << "None\n" << endl;
+	if(battletype == 2){
+		boss.saystats();
 	}
 	cout << playername << endl;
 	cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
@@ -558,6 +530,7 @@ EVENT:
 		randomseed();
 		commonenemy.randomizetype();
 		commonenemy.randomizeparameters();
+		battletype = 1;
 		start = false;
 	}
 	else{
@@ -570,14 +543,26 @@ EVENT:
 			traveling();
 			goto EVENT;
 		}
+		if(eventtype == 3){
+			dialogue = 2;
+			dialogues();
+		}
 		clear();
 		if(dialogue == 0){
 			randomseed();
 			commonenemy.randomizetype();
 			commonenemy.randomizeparameters();
 			commonenemy.restoreparameters();
+			battletype = 1;
+		}
+		if(dialogue == 2){
+			randomseed();
+			boss.randomizeboss();
+			battletype = 2;
 		}
 	}
+
+if(battletype == 1){
 	while(1){
 
 STARTBATTLE:
@@ -862,13 +847,298 @@ STARTBATTLE:
 		commonenemy.limitlife();
 	}
 }
+if(battletype == 2){
+	while(1){
+
+STARTBOSSBATTLE:
+
+		mainplayer.determinecriticalpower();
+		boss.determinecriticalpower();
+		weapons.determineattack();
+		weapons.determinerealattack();
+		rangedweapon.determineattack();
+		rangedweapon.determinerealattack();
+		mainplayer.determinemaxsp();
+
+		randomseed();
+
+		defeat();
+		boss.victorychecker();
+		if(boss.saylife() <= 0 || runawayfrombattle == true){
+			runawayfrombattle = false;
+			distanceenemy = 3;
+			goto EVENT;
+		}
+
+
+		battlemenu();
+
+		if(distanceenemy == 1 || distanceenemy == 2){
+			successfulhit = true;
+			successfulhit2 = true;
+		}
+		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
+			successfulhit = false;
+			successfulhit2 = false;
+		}
+
+		// El jugador ejecuta su turno
+
+		cin >> movement;
+
+		switch(movement){
+		case '5':
+		case '1':
+			break;
+		default :
+			clear();
+			break;
+		}
+
+		switch(movement){
+		case '1':
+			subcriticalcheckerone = rand() % 100;
+			cout << "Do you want to use your melee weapon [1] or your ranged weapon? [2]" << endl;
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(successfulhit == true && mainplayer.sayresistance() >= 2){
+					boss.enemyattacked();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultrar();
+				}
+				else{
+					if(mainplayer.sayresistance() < 2){
+						cout << "You are too tired to perform that move!" << endl;
+					}
+					else{
+						cout << "You are too far from the enemy to perform that move!" << endl;
+					}
+				}
+				break;
+			case '2' :
+				if(mainplayer.sayresistance() >= 1){
+					boss.rangedattacked();
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultra();
+				}
+				else{
+					cout << "You are too tired to perform that move!" << endl;
+				}
+				break;
+			default : goto STARTBOSSBATTLE;break;
+			}
+			break;
+		case '2':
+			itemmenu();break;
+		case '3':
+			printf("List of Special moves:\n\n");
+			printf("Piercing eye [2 SP]['1' to use]\n");
+			printf("-- Unveils more detailed stats of the enemy\n");
+			printf("Quick eye [4 SP]['2' to use]\n");
+			printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
+			printf("\nType any other key to go back to the main menu\n");
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					piercingeyeeffect = true;
+					cout << "Used Piercing Eye!" << endl;
+				}
+				else{
+					if(mainplayer.sayresistance() < 3){
+						cout << "You are too tired to perform that move!" << endl;
+					}
+					else{
+						cout << "You haven't enough SP left to perform this move!" << endl;
+					}
+				}
+				break;
+			case '2' :
+				if(mainplayer.saysp() >= 4 && mainplayer.sayresistance() >= 3){
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseplayersp();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					piercingeyeeffect = true;
+					cout << "Used Quick Eye!\n" << endl;
+					goto STARTBOSSBATTLE;
+					break;
+				}
+				else{
+					if(mainplayer.sayresistance() < 3){
+						cout << "You are too tired to perform that move!" << endl;
+					}
+					else{
+						cout << "You haven't enough SP left to perform this move!" << endl;
+					}
+				}
+				break;
+			default : goto STARTBOSSBATTLE;
+				}
+			break;
+		case '5' :
+			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(distanceenemy == 1){
+					cout << "You can't get closer to the enemy!" << endl;
+				}
+				else{
+					if(mainplayer.sayresistance() >= 3){
+						distanceenemy--;
+						cout << "Got closer to the enemy" << endl;
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+					}
+					else{
+						cout << "You are too tired to move!" << endl;
+					}
+				}
+				break;
+			case '2' :
+				if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
+					runawayfrombattle = true;
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					goto STARTBOSSBATTLE;
+				}
+				if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
+					cout << "You are too tired to escape!" << endl;
+				}
+				if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
+					cout << "You are too tired to move!" << endl;
+				}
+				if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
+					distanceenemy++;
+					cout << "Moved a bit away from the enemy" << endl;
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+				}
+				break;
+			default : goto STARTBOSSBATTLE;break;
+			}
+			break;
+		case '4' :
+			printf("List of Magic learned:\n\n");
+			printf("Meditate [5 MP]['1' to use]\n");
+			printf("-- Heals the player by 60 life points\n");
+			printf("Ice [3 MP]['2' to use]\n");
+			printf("-- Harms the enemy using the Ice Element\n");
+			printf("\nType any other key to go back to the main menu\n");
+			cin >> movement;
+			clear();
+			switch(movement){
+			case '1' :
+				if(mainplayer.saymp() >= 5){
+					mainplayer.meditateused();
+					mainplayer.limitplayerlife();
+				}
+				else{
+					cout << "You haven't enough MP left to perform this move!" << endl;
+				}
+				break;
+			case '2' :
+				if(mainplayer.saymp() >= 3){
+					boss.iceattacked();
+				}
+				else{
+					cout << "You haven't enough MP left to perform this move!" << endl;
+				}
+				break;
+			default :
+				goto STARTBOSSBATTLE;
+			}
+			break;
+		case '6' :
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseresistance();
+			mainplayer.increaseplayersp();
+			cout << "That was a good rest! Stats recovered a little bit" << endl;
+			break;
+		case '7' :
+			if(mainplayer.sayultra() >= 100){
+				cout << "List of Ultra Attacks:" << endl << endl;
+				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 10 Resistance]['1' to use]" << endl;
+				cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
+				cout << endl << "Type any other key to go back to the battle menu" << endl;
+				cin >> movement;
+				clear();
+				switch(movement){
+					case '1' :
+						if(mainplayer.sayresistance() >= 10){
+							boss.receivedultra();
+							mainplayer.decreasetenresistance();
+						}
+						else{
+							cout << "You are too tired to perform that ultra!" << endl;
+						}
+						break;
+					default :
+						goto STARTBOSSBATTLE;
+				}
+			}
+			else{
+				cout << "Skipped the turn" << endl;
+			}
+			break;
+		case 'p' :
+			equipment();
+			goto STARTBOSSBATTLE;
+			break;
+		default:
+			cout << "Skipped the turn" << endl;
+			break;
+		}
+
+		if(distanceenemy == 1 || distanceenemy == 2){
+			successfulhit = true;
+			successfulhit2 = true;
+		}
+		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
+			successfulhit = false;
+			successfulhit2 = false;
+		}
+
+		 // El enemigo ejecuta su turno
+		mainplayer.playerattackedboss();
+
+		mainplayer.increaseultra();
+		mainplayer.limitultra();
+		mainplayer.limitresistance();
+		mainplayer.limitplayerlife();
+		mainplayer.limitsp();
+		boss.limitlife();
+	}
+}
+}
 
 
 int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.5 PRERELEASE!" << endl;
+		cout << "Welcome to Tactical Alpha 1.5!" << endl;
 		cout << "What will be the main character's name?" << endl;
 		cin >> playername;
 		clear();

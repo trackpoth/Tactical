@@ -34,4 +34,14 @@ void dialogues(){
 		cout << "Hippie: WOOOOOOOOOO WAAAAAAAAAA WOOOOOOOOOOO" << endl;
 		_getch();
 	}
+	if(dialogue == 2){
+		cout << "(You hear someone running after you)" << endl;
+		_getch();
+		cout << "???: QUIERO MI BOCADILLO!" << endl;
+		_getch();
+		cout << "You: W-what? Sorry, I don't speak spanish" << endl;
+		_getch();
+		cout << "???: QUIERO MI BOCADILLO!!" << endl;
+		_getch();
+	}
 }

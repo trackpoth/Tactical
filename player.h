@@ -34,6 +34,8 @@ int section = 1;
 int zone = 1;
 int travel;
 
+int battletype;
+
 void clear(){
 	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -98,13 +100,19 @@ public:
 	void limitresistance();
 	void limitultra();
 	void limitsp();
+
 	void determinecriticalpower();
 	void determinemaxsp();
+
 	void defeatchecker();
+
 	void smallhealthpilltaken();
 	void damagepilltaken();
 	void meditateused();
+
 	void playerattacked();
+	void playerattackedboss();
+
 	void increasetp();
 	void decreasetp();
 	void increaseattack();
@@ -116,6 +124,8 @@ public:
 	void increasedefense();
 	void increasemaxresistance();
 	void randomtpincrease();
+	void randomtpincreaseboss();
+
 	void upgrading();
 	void shop();
 
@@ -437,6 +447,13 @@ void player::randomtpincrease(){
 	squares += squaresincrease;
 }
 
+void player::randomtpincreaseboss(){
+	tpincrease = rand() % 320 + 105;
+	playertp += tpincrease;
+	squaresincrease = rand() % 60 + 12;
+	squares += squaresincrease;
+}
+
 player mainplayer;
 
 void player::upgrading(){
@@ -620,6 +637,8 @@ public:
 	void randomizeparameters();
 	void restoreparameters();
 	void healthdrinktaken();
+	void saystats();
+	void randomizeboss();
 
 protected:
 	int enemylife;
@@ -732,7 +751,76 @@ void enemy::healthdrinktaken(){
 	}
 }
 
+void enemy::saystats(){
+	if(battletype == 2){
+		cout << "[BOSS] ";
+	}
+	if(enemytype == 1){
+		cout << "Grass ";
+	}
+	if(enemytype == 2){
+		cout << "Normal ";
+	}
+	if(enemytype == 3){
+		cout << "Dark ";
+	}
+	if(enemytype == 4){
+		cout << "Light ";
+	}
+	if(enemytype == 5){
+		cout << "Fire ";
+	}
+	if(enemytype == 6){
+		cout << "Water ";
+	}
+	if(enemytype == 7){
+		cout << "Ice ";
+	}
+	cout << "Human" << endl;
+	if(piercingeyeeffect == false){
+		cout << "Life = ";
+		cout << enemylife;
+		cout << endl;
+	}
+	else{
+		cout << "Life = " << enemylife << "/" << enemymaxlife << endl;
+		printf("AT = %d | DEF = %d\n",enemyattack,enemydefense);
+	}
+	if(piercingeyeeffect == true){
+		cout << "Weak to: ";
+		if(enemytype == 1){
+			cout << "[Darkness (x1.5)] [Fire (x1.5)] [Ice (x1.5)] " << endl;
+		}
+		if(enemytype == 2){
+			cout << "[Darkness (x1.5)] [Fire (x1.5)]" << endl;
+		}
+		if(enemytype == 3){
+			cout << "[Light (x1.5)] [Fire (x1.5)]" << endl;
+		}
+		if(enemytype == 4){
+			cout << "[Darkness (x1.5)] [Water (x1.5)] [Grass (x1.5)]" << endl;
+		}
+		if(enemytype == 5){
+			cout << "[Darkness (x1.5)] [Water (x2)]" << endl;
+		}
+		if(enemytype == 6){
+			cout << "[Ice (x1.5)] [Grass (x2)]" << endl;
+		}
+		if(enemytype == 7){
+			cout << "[Water (x1.5)] [Fire (x1.5)]" << endl;
+		}
+	}
+	printf("Effects = ");
+	if(piercingeyeeffect == true){
+		cout << "[Piercing Eye]\n" << endl;
+	}
+	if(piercingeyeeffect == false){
+		cout << "None\n" << endl;
+	}
+}
+
 enemy commonenemy;
+enemy boss;
 
 void player::playerattacked(){
 
@@ -860,4 +948,142 @@ ATTACK:
 			goto ATTACK;
 		}
 	}
+}
+
+void player::playerattackedboss(){
+
+	movementint = rand() % 101;
+
+	// 1: 50%  2: 45%  3: 5%
+	if(boss.sayint() == 1){
+		if(movementint >= 0 && movementint <= 50){
+			movementfinal = 1;
+		}
+		if(movementint >= 51 && movementint <= 95){
+			movementfinal = 2;
+		}
+		if(movementint >= 96 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 35%  2: 55%  3: 10%
+	if(boss.sayint() == 2){
+		if(movementint >= 0 && movementint <= 35){
+			movementfinal = 1;
+		}
+		if(movementint >= 36 && movementint <= 90){
+			movementfinal = 2;
+		}
+		if(movementint >= 91 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 15%  2: 65%  3: 20%
+	if(boss.sayint() == 3){
+		if(movementint >= 0 && movementint <= 15){
+			movementfinal = 1;
+		}
+		if(movementint >= 16 && movementint <= 80){
+			movementfinal = 2;
+		}
+		if(movementint >= 81 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 5%  2: 55%  3: 40%
+	if(boss.sayint() == 4){
+		if(movementint >= 0 && movementint <= 5){
+			movementfinal = 1;
+		}
+		if(movementint >= 6 && movementint <= 60){
+			movementfinal = 2;
+		}
+		if(movementint >= 61 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 2: 25%  3: 75%
+	if(boss.sayint() == 5){
+		if(movementint >= 0 && movementint <= 25){
+			movementfinal = 2;
+		}
+		if(movementint >= 26 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// movementfinal == 1: No hace nada
+	// movementfinal == 2: Ataca físicamente acercándose si está muy lejos
+	// movementfinal == 3: Mira su vida actual y si es demasiado baja usa un objeto curativo, si no es así tiene el mismo efecto que movementfinal 2.
+ATTACK:
+	if(movementfinal == 1){
+		cout << "The enemy doesn't do anything!" << endl << endl;
+	}
+
+	if(movementfinal == 2){
+		if(successfulhit2 == true){
+			subcriticalcheckertwo = rand() % 101;
+
+			// El enemigo ejecuta un ataque físico
+
+			if(subcriticalcheckertwo <= boss.saycriticalchecker()){
+
+				// Crítico defensa superior a ataque
+				if(playerdefense >= boss.saycriticalpower()){
+					playerlife -= 1;
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Crítico defensa inferior a ataque
+				else{
+					playerlife -= boss.saycriticalpower();
+					playerlife += playerdefense;
+					printf("The enemy made a critical hit, causing %d damage!\n\n",boss.saycriticalpower() - mainplayer.saydefense());
+				}
+			}
+			else{
+
+				// Normal defensa superior a ataque
+				if(playerdefense >= boss.sayattack()){
+					playerlife -= 1;
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Normal defensa inferior a ataque
+				else{
+					playerlife -= (boss.sayattack() - playerdefense);
+					printf("The enemy inflicted %d damage\n\n",boss.sayattack() - mainplayer.saydefense());
+				}
+			}
+		}
+		else{
+			cout << "The enemy got closer to " << playername << endl << endl;
+			distanceenemy--;
+		}
+	}
+
+	if(movementfinal == 3){
+		if(boss.saylife() <= boss.saymaxlife() * 0.3 && boss.sayhealthdrink() == true){
+			boss.healthdrinktaken();
+			cout << "The enemy used a Health Drink!" << endl << endl;
+		}
+		else{
+			movementfinal = 2;
+			goto ATTACK;
+		}
+	}
+}
+
+void enemy::randomizeboss(){
+	enemytype = rand() % 7 + 1;
+	enemyint = 4;
+	healthdrink = 1;
+	enemymaxlife += rand() % 200 + commonenemy.saymaxlife();
+	enemyattack += rand() % 8 + commonenemy.sayattack();
+	enemydefense += rand() % 6 + commonenemy.saydefense();
+	enemylife = enemymaxlife;
 }
