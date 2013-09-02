@@ -26,6 +26,14 @@ int shopitemd;
 
 // Funciones de alta importancia que pueden ser llamadas desde cualquier parte del programa
 
+void gotoxy( int column, int line )
+{
+  COORD coord;
+  coord.X = column;
+  coord.Y = line;
+  SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),coord);
+}
+
 void randomseed(){
 	t = clock();
 	if(t >= 10000){
@@ -82,6 +90,10 @@ void equipment(){
 	if(rangedweapon.sayattack1equipped() == 1){
 		cout << "Bullshot [2% +RAT][+1 SP]" << endl;
 	}
+	cout << "Shields: ";
+	if(playershields.sayshield1equipped() == 1){
+		cout << "Full Cracked Shield [10 SH][2 RT]" << endl;
+	}
 	cout << endl << "Sector = " << section << endl;
 	cout << "Zone = " << zone << endl;
 	cout << endl << "Squares = " << mainplayer.saysquares() << endl;
@@ -102,7 +114,7 @@ TRAVELING:
 	randomseed();
 	cout << "Where do you want to go? Northwest [1], North [2] or Northeast? [3]" << endl << endl;
 	cout << "Northwest = More shops, more bosses" << endl;
-	cout << "North = Anything can happen" << endl;
+	cout << "North     = Anything can happen" << endl;
 	cout << "Northeast = More enemies" << endl;
 	cout << endl << "[4] Equipment & stats" << endl;
 	cout << "[5] Item bag" << endl;
@@ -110,7 +122,7 @@ TRAVELING:
 	clear();
 	switch(movement){
 	case '1' :
-		cout << "Heading west..." << endl;
+		cout << "Heading northwest..." << endl;
 		Sleep(1000);
 		eventgenerator = 1;
 		break;
@@ -120,7 +132,7 @@ TRAVELING:
 		eventgenerator = 2;
 		break;
 	case '3' :
-		cout << "Heading east..." << endl;
+		cout << "Heading northeast..." << endl;
 		Sleep(1000);
 		eventgenerator = 3;
 		break;
@@ -167,14 +179,14 @@ TRAVELING:
 	}
 	if(eventgenerator == 3){
 
-		// 1: 80%  2: 5%  3: 15%
-		if(travel >= 0 && travel <= 80){
+		// 1: 75%  2: 5%  3: 20%
+		if(travel >= 0 && travel <= 75){
 			eventtype = 1;
 		}
-		if(travel >= 81 && travel <= 85){
+		if(travel >= 76 && travel <= 80){
 			eventtype = 2;
 		}
-		if(travel >= 86 && travel <= 100){
+		if(travel >= 81 && travel <= 100){
 			eventtype = 3;
 		}
 	}
@@ -186,6 +198,329 @@ TRAVELING:
 
 
 // Funciones procedentes de clases
+
+void player::determinemaxshields(){
+	if(playershields.sayshield1equipped() == true){
+		maxshields = playershields.saymaxshield1();
+		rechargerate = playershields.sayrecharge1();
+	}
+}
+
+void player::playerattacked(){
+
+	movementint = rand() % 101;
+
+	// 1: 50%  2: 45%  3: 5%
+	if(commonenemy.sayint() == 1){
+		if(movementint >= 0 && movementint <= 50){
+			movementfinal = 1;
+		}
+		if(movementint >= 51 && movementint <= 95){
+			movementfinal = 2;
+		}
+		if(movementint >= 96 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 35%  2: 55%  3: 10%
+	if(commonenemy.sayint() == 2){
+		if(movementint >= 0 && movementint <= 35){
+			movementfinal = 1;
+		}
+		if(movementint >= 36 && movementint <= 90){
+			movementfinal = 2;
+		}
+		if(movementint >= 91 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 15%  2: 65%  3: 20%
+	if(commonenemy.sayint() == 3){
+		if(movementint >= 0 && movementint <= 15){
+			movementfinal = 1;
+		}
+		if(movementint >= 16 && movementint <= 80){
+			movementfinal = 2;
+		}
+		if(movementint >= 81 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 5%  2: 55%  3: 40%
+	if(commonenemy.sayint() == 4){
+		if(movementint >= 0 && movementint <= 5){
+			movementfinal = 1;
+		}
+		if(movementint >= 6 && movementint <= 60){
+			movementfinal = 2;
+		}
+		if(movementint >= 61 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 2: 25%  3: 75%
+	if(commonenemy.sayint() == 5){
+		if(movementint >= 0 && movementint <= 25){
+			movementfinal = 2;
+		}
+		if(movementint >= 26 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// movementfinal == 1: No hace nada
+	// movementfinal == 2: Ataca físicamente acercándose si está muy lejos
+	// movementfinal == 3: Mira su vida actual y si es demasiado baja usa un objeto curativo, si no es así tiene el mismo efecto que movementfinal 2.
+ATTACK:
+	if(movementfinal == 1){
+		cout << "The enemy doesn't do anything!" << endl << endl;
+	}
+
+	if(movementfinal == 2){
+		if(successfulhit2 == true){
+			subcriticalcheckertwo = rand() % 101;
+
+			// El enemigo ejecuta un ataque físico
+
+			if(subcriticalcheckertwo <= commonenemy.saycriticalchecker()){
+
+				// Crítico defensa superior a ataque
+				if(playerdefense >= commonenemy.saycriticalpower()){
+					if(shields > 0){
+						shields -= 1;
+					}
+					else{
+						playerlife -= 1;
+					}
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Crítico defensa inferior a ataque
+				else{
+					if(shields > 0){
+						shields -= commonenemy.saycriticalpower();
+						shields += playerdefense;
+						if(shields <= 0){
+							playerlife += shields;
+							shields = 0;
+						}
+					}
+					else{
+						playerlife -= commonenemy.saycriticalpower();
+						playerlife += playerdefense;
+					}
+					printf("The enemy made a critical hit, causing %d damage!\n\n",commonenemy.saycriticalpower() - mainplayer.saydefense());
+				}
+			}
+			else{
+
+				// Normal defensa superior a ataque
+				if(playerdefense >= commonenemy.sayattack()){
+					if(shields > 0){
+						shields -= 1;
+					}
+					else{
+						playerlife -= 1;
+					}
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Normal defensa inferior a ataque
+				else{
+					if(shields > 0){
+						shields -= commonenemy.sayattack();
+						shields += playerdefense;
+						if(shields <= 0){
+							playerlife += shields;
+							shields = 0;
+						}
+					}
+					else{
+						playerlife -= (commonenemy.sayattack() - playerdefense);
+					}
+					printf("The enemy inflicted %d damage\n\n",commonenemy.sayattack() - mainplayer.saydefense());
+				}
+			}
+		}
+		else{
+			cout << "The enemy got closer to " << playername << endl << endl;
+			distanceenemy--;
+		}
+	}
+
+	if(movementfinal == 3){
+		if(commonenemy.saylife() <= commonenemy.saymaxlife() * 0.3 && commonenemy.sayhealthdrink() == true){
+			commonenemy.healthdrinktaken();
+			cout << "The enemy used a Health Drink!" << endl << endl;
+		}
+		else{
+			movementfinal = 2;
+			goto ATTACK;
+		}
+	}
+}
+
+void player::playerattackedboss(){
+
+	movementint = rand() % 101;
+
+	// 1: 50%  2: 45%  3: 5%
+	if(boss.sayint() == 1){
+		if(movementint >= 0 && movementint <= 50){
+			movementfinal = 1;
+		}
+		if(movementint >= 51 && movementint <= 95){
+			movementfinal = 2;
+		}
+		if(movementint >= 96 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 35%  2: 55%  3: 10%
+	if(boss.sayint() == 2){
+		if(movementint >= 0 && movementint <= 35){
+			movementfinal = 1;
+		}
+		if(movementint >= 36 && movementint <= 90){
+			movementfinal = 2;
+		}
+		if(movementint >= 91 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 15%  2: 65%  3: 20%
+	if(boss.sayint() == 3){
+		if(movementint >= 0 && movementint <= 15){
+			movementfinal = 1;
+		}
+		if(movementint >= 16 && movementint <= 80){
+			movementfinal = 2;
+		}
+		if(movementint >= 81 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 1: 5%  2: 55%  3: 40%
+	if(boss.sayint() == 4){
+		if(movementint >= 0 && movementint <= 5){
+			movementfinal = 1;
+		}
+		if(movementint >= 6 && movementint <= 60){
+			movementfinal = 2;
+		}
+		if(movementint >= 61 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// 2: 25%  3: 75%
+	if(boss.sayint() == 5){
+		if(movementint >= 0 && movementint <= 25){
+			movementfinal = 2;
+		}
+		if(movementint >= 26 && movementint <= 100){
+			movementfinal = 3;
+		}
+	}
+
+	// movementfinal == 1: No hace nada
+	// movementfinal == 2: Ataca físicamente acercándose si está muy lejos
+	// movementfinal == 3: Mira su vida actual y si es demasiado baja usa un objeto curativo, si no es así tiene el mismo efecto que movementfinal 2.
+ATTACK:
+	if(movementfinal == 1){
+		cout << "The enemy doesn't do anything!" << endl << endl;
+	}
+
+	if(movementfinal == 2){
+		if(successfulhit2 == true){
+			subcriticalcheckertwo = rand() % 101;
+
+			// El enemigo ejecuta un ataque físico
+
+			if(subcriticalcheckertwo <= boss.saycriticalchecker()){
+
+				// Crítico defensa superior a ataque
+				if(playerdefense >= boss.saycriticalpower()){
+					if(shields > 0){
+						shields -= 1;
+					}
+					else{
+						playerlife -= 1;
+					}
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Crítico defensa inferior a ataque
+				else{
+					if(shields > 0){
+						shields -= boss.saycriticalpower();
+						shields += playerdefense;
+						if(shields <= 0){
+							playerlife += shields;
+							shields = 0;
+						}
+					}
+					else{
+						playerlife -= boss.saycriticalpower();
+						playerlife += playerdefense;
+					}
+					printf("The enemy made a critical hit, causing %d damage!\n\n",boss.saycriticalpower() - mainplayer.saydefense());
+				}
+			}
+			else{
+
+				// Normal defensa superior a ataque
+				if(playerdefense >= boss.sayattack()){
+					if(shields > 0){
+						shields -= 1;
+					}
+					else{
+						playerlife -= 1;
+					}
+					printf("You only took 1 damage because of your high defense!\n\n");
+				}
+
+				// Normal defensa inferior a ataque
+				else{
+					if(shields > 0){
+						shields -= boss.sayattack();
+						shields += playerdefense;
+						if(shields <= 0){
+							playerlife += shields;
+							shields = 0;
+						}
+					}
+					else{
+						playerlife -= (boss.sayattack() - playerdefense);
+					}
+					printf("The enemy inflicted %d damage\n\n",boss.sayattack() - mainplayer.saydefense());
+				}
+			}
+		}
+		else{
+			cout << "The enemy got closer to " << playername << endl << endl;
+			distanceenemy--;
+		}
+	}
+
+	if(movementfinal == 3){
+		if(boss.saylife() <= boss.saymaxlife() * 0.3 && boss.sayhealthdrink() == true){
+			boss.healthdrinktaken();
+			cout << "The enemy used a Health Drink!" << endl << endl;
+		}
+		else{
+			movementfinal = 2;
+			goto ATTACK;
+		}
+	}
+}
 
 void enemy::enemyattacked(){
 	if(damagepilleffect == false){
@@ -359,6 +694,7 @@ void enemy::victorychecker(){
 	if(enemylife <= 0 || runawayfrombattle == true){
 		damagepilleffect = false;
 		piercingeyeeffect = false;
+		mainplayer.restoreshields();
 		randomseed();
 		clear();
 		if(firstbattle == false && runawayfrombattle == false){
@@ -472,6 +808,18 @@ void battlemenu(){
 	}
 	cout << playername << endl;
 	cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
+	if(mainplayer.sayshields() <= 0){
+		mainplayer.increaserecharge();
+		if(mainplayer.sayrechargemeter() >= 100){
+			mainplayer.restoreshields();
+		}
+	}
+	if(mainplayer.sayshields() <= 0){
+		cout << " | Shields = Recharge: " << mainplayer.sayrechargemeter() << "%";
+	}
+	else{
+		cout << " | Shields = " << mainplayer.sayshields() << "/" << mainplayer.saymaxshields();
+	}
 	cout << " | SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
 	cout << " | MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
 	cout << "AT = " << mainplayer.attackparameter() << " + " << weapons.sayattack() * 100 << "%";
@@ -480,15 +828,7 @@ void battlemenu(){
 	cout << " | RAT = " << mainplayer.sayrangedattack() << " + " << rangedweapon.sayattack() * 100 << "%";
 	cout << " | DEF = " << mainplayer.saydefense() << endl;
 	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << " | ";
-	cout << "Ultra meter = " << mainplayer.sayultra() << endl;
-	cout << "Effects = ";
-	if(damagepilleffect == true){
-		cout << "[Damage Pill] " << endl;
-	}
-	else{
-		cout << "None" << endl;
-	}
-	printf("Distance from the enemy: ");
+	cout << "Ultra meter = " << mainplayer.sayultra() <<  " | Distance = ";
 	if(distanceenemy == 1){
 		cout << "Very short" << endl;
 	}
@@ -504,16 +844,20 @@ void battlemenu(){
 	if(distanceenemy == 5){
 		cout << "Very far" << endl;
 	}
-	printf("\n[1] Attack\n");
-	printf("[2] Items\n");
-	printf("[3] Special\n");
-	printf("[4] Magic\n");
-	printf("[5] Move\n");
-	printf("[6] Rest\n");
-	if(mainplayer.sayultra() >= 100){
-		cout << "[7] ULTRA" << endl;
+	cout << "Effects = ";
+	if(damagepilleffect == true){
+		cout << "[Damage Pill] " << endl;
 	}
-	printf("[p] Other\n");
+	else{
+		cout << "None" << endl;
+	}
+	printf("\n[q] Meelee attack [w] Ranged attack [e] Magic attack\n");
+	printf("[2] Items         [3] Special       [4] Magic\n");
+	printf("[5] Move          [6] Rest");
+	if(mainplayer.sayultra() >= 100){
+		cout << "          [7] Ultra";
+	}
+	printf("\n[p] Other\n");
 }
 
 void battle(){
@@ -530,6 +874,8 @@ EVENT:
 		randomseed();
 		commonenemy.randomizetype();
 		commonenemy.randomizeparameters();
+		mainplayer.determinemaxshields();
+		mainplayer.restoreshields();
 		battletype = 1;
 		start = false;
 	}
@@ -573,6 +919,7 @@ STARTBATTLE:
 		weapons.determinerealattack();
 		rangedweapon.determineattack();
 		rangedweapon.determinerealattack();
+		mainplayer.determinemaxshields();
 		mainplayer.determinemaxsp();
 
 		randomseed();
@@ -603,7 +950,6 @@ STARTBATTLE:
 
 		switch(movement){
 		case '5':
-		case '1':
 			break;
 		default :
 			clear();
@@ -611,39 +957,31 @@ STARTBATTLE:
 		}
 
 		switch(movement){
-		case '1':
+		case 'q':
 			subcriticalcheckerone = rand() % 100;
-			cout << "Do you want to use your melee weapon [1] or your ranged weapon? [2]" << endl;
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(successfulhit == true && mainplayer.sayresistance() >= 2){
-					commonenemy.enemyattacked();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.increaseultrar();
-				}
-				else{
-					if(mainplayer.sayresistance() < 2){
-						cout << "You are too tired to perform that move!" << endl;
-					}
-					else{
-						cout << "You are too far from the enemy to perform that move!" << endl;
-					}
-				}
-				break;
-			case '2' :
-				if(mainplayer.sayresistance() >= 1){
-					commonenemy.rangedattacked();
-					mainplayer.decreaseresistance();
-					mainplayer.increaseultra();
-				}
-				else{
+			if(successfulhit == true && mainplayer.sayresistance() >= 2){
+				commonenemy.enemyattacked();
+				mainplayer.decreaseresistance();
+				mainplayer.decreaseresistance();
+				mainplayer.increaseultrar();
+			}
+			else{
+				if(mainplayer.sayresistance() < 2){
 					cout << "You are too tired to perform that move!" << endl;
 				}
-				break;
-			default : goto STARTBATTLE;break;
+				else{
+					cout << "You are too far from the enemy to perform that move!" << endl;
+				}
+			}
+			break;
+		case 'w' :
+			if(mainplayer.sayresistance() >= 1){
+				commonenemy.rangedattacked();
+				mainplayer.decreaseresistance();
+				mainplayer.increaseultra();
+			}
+			else{
+				cout << "You are too tired to perform that move!" << endl;
 			}
 			break;
 		case '2':
@@ -858,6 +1196,7 @@ STARTBOSSBATTLE:
 		weapons.determinerealattack();
 		rangedweapon.determineattack();
 		rangedweapon.determinerealattack();
+		mainplayer.determinemaxshields();
 		mainplayer.determinemaxsp();
 
 		randomseed();
@@ -888,7 +1227,6 @@ STARTBOSSBATTLE:
 
 		switch(movement){
 		case '5':
-		case '1':
 			break;
 		default :
 			clear();
@@ -896,39 +1234,31 @@ STARTBOSSBATTLE:
 		}
 
 		switch(movement){
-		case '1':
+		case 'q':
 			subcriticalcheckerone = rand() % 100;
-			cout << "Do you want to use your melee weapon [1] or your ranged weapon? [2]" << endl;
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(successfulhit == true && mainplayer.sayresistance() >= 2){
-					boss.enemyattacked();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.increaseultrar();
-				}
-				else{
-					if(mainplayer.sayresistance() < 2){
-						cout << "You are too tired to perform that move!" << endl;
-					}
-					else{
-						cout << "You are too far from the enemy to perform that move!" << endl;
-					}
-				}
-				break;
-			case '2' :
-				if(mainplayer.sayresistance() >= 1){
-					boss.rangedattacked();
-					mainplayer.decreaseresistance();
-					mainplayer.increaseultra();
-				}
-				else{
+			if(successfulhit == true && mainplayer.sayresistance() >= 2){
+				boss.enemyattacked();
+				mainplayer.decreaseresistance();
+				mainplayer.decreaseresistance();
+				mainplayer.increaseultrar();
+			}
+			else{
+				if(mainplayer.sayresistance() < 2){
 					cout << "You are too tired to perform that move!" << endl;
 				}
-				break;
-			default : goto STARTBOSSBATTLE;break;
+				else{
+					cout << "You are too far from the enemy to perform that move!" << endl;
+				}
+			}
+			break;
+		case 'w' :
+			if(mainplayer.sayresistance() >= 1){
+				boss.rangedattacked();
+				mainplayer.decreaseresistance();
+				mainplayer.increaseultra();
+			}
+			else{
+				cout << "You are too tired to perform that move!" << endl;
 			}
 			break;
 		case '2':
@@ -1138,25 +1468,42 @@ int main(){
 	// Inicio del programa, se le pregunta al jugador el nombre del main character
 	randomseed();
 	while(1){
-		cout << "Welcome to Tactical Alpha 1.5!" << endl;
-		cout << "What will be the main character's name?" << endl;
+		gotoxy(2,2);
+		cout << "########    ###     ######  ######## ####  ######     ###    ##       ";
+		gotoxy(2,3);
+		cout << "   ##      ## ##   ##    ##    ##     ##  ##    ##   ## ##   ##       ";
+		gotoxy(2,4);
+		cout << "   ##     ##   ##  ##          ##     ##  ##        ##   ##  ##       ";
+		gotoxy(2,5);
+		cout << "   ##    ##     ## ##          ##     ##  ##       ##     ## ##       ";
+		gotoxy(2,6);
+		cout << "   ##    ######### ##          ##     ##  ##       ######### ##       ";
+		gotoxy(2,7);
+		cout << "   ##    ##     ## ##    ##    ##     ##  ##    ## ##     ## ##       ";
+		gotoxy(2,8);
+		cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
+		gotoxy(2,9);
+		cout << "                                                           [Alpha 1.6]";
+		gotoxy(2,12);
+		cout << "What will be the main character's name?";
+		gotoxy(2,13);
 		cin >> playername;
-		clear();
 		if(playername == "Trackpoth"){
-			cout << "Will it be our god and savior's name, Trackpoth?\n\a" << endl;
+			gotoxy(2,15);
+			cout << "Will it be our god and savior's name, Trackpoth?\a";
 		}
 		if(playername == "COCOS"){
-			cout << "COCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\a\n" << endl;
+			gotoxy(2,15);
+			cout << "COCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS";
 		}
 		if(playername != "Trackpoth"){
 			if(playername != "COCOS"){
-				cout << "Will it be ";
-				cout << playername;
-				cout << "?\a\n\n";
+				gotoxy(2,15);
+				cout << "Will it be " << playername << "?\a";
 			}
 		}
-		cout << "Type '1' to say yes" << endl;
-		cout << "Type any other key to input a different name" << endl;
+		cout << " [1] Yes [Any other key] No" << endl;
+		gotoxy(2,16);
 		cin >> movement;
 		switch (movement){
 		case '1' :

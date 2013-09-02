@@ -68,6 +68,7 @@ public:
 	int sayrealattack();
 	void determineattack();
 	void determinerealattack();
+
 private:
 	float attack1;
 	int sp1;
@@ -111,3 +112,46 @@ void ranged::determineattack(){
 }
 
 ranged rangedweapon;
+
+class shield
+{
+public:
+	shield();
+
+	int sayshield1();
+	int saymaxshield1();
+	int sayrecharge1();
+	bool sayshield1equipped();
+
+private:
+	int shield1;
+	int maxshield1;
+	int recharge1;
+	bool shield1equipped;
+};
+
+shield::shield()
+{
+	shield1 = 10;
+	maxshield1 = 10;
+	recharge1 = 2;
+	shield1equipped = true;
+}
+
+int shield::sayshield1(){
+	return shield1;
+}
+
+int shield::saymaxshield1(){
+	return maxshield1;
+}
+
+int shield::sayrecharge1(){
+	return recharge1;
+}
+
+bool shield::sayshield1equipped(){
+	return shield1equipped;
+}
+
+shield playershields;
