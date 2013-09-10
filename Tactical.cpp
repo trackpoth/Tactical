@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <stdio.h>
 #include <conio.h>
 #include <iostream>
@@ -5,13 +6,18 @@
 #include <time.h>
 #include <string>
 #include <windows.h>
+#include <cstring>
+#include <sstream>
 #include "player.h"
+#include "key.h"
 #include "dialogues.h"
 #include "weapons.h"
 
 using namespace std;
 
 bool start;
+bool load;
+bool loadfailed;
 
 int eventtype;
 int eventgenerator;
@@ -24,9 +30,34 @@ int shopitemb;
 int shopitemc;
 int shopitemd;
 
+string encrypter;
+string chartostring;
+string intEncrypter(int number)
+{
+   stringstream ss;
+   ss << number;
+   return ss.str();
+}
+
 // Funciones de alta importancia que pueden ser llamadas desde cualquier parte del programa
 
-void gotoxy( int column, int line )
+void encrypt(string data,string key)
+{
+    for(unsigned i=0;i<data.size();i++){
+        data[i] += key[i%key.size()];
+	}
+	encrypter = data;
+}
+
+void decrypt(string data,string key)
+{
+    for(unsigned i=0;i<data.size();i++){
+        data[i] -= key[i%key.size()];
+	}
+	encrypter = data;
+}
+
+void gotoxy(int column, int line)
 {
   COORD coord;
   coord.X = column;
@@ -60,7 +91,7 @@ void itemmenu(){
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' :
+	case '1' : 
 		if(mainplayer.saysmallhealthpill() > 0){
 			mainplayer.smallhealthpilltaken();
 			mainplayer.limitplayerlife();
@@ -69,7 +100,7 @@ void itemmenu(){
 			printf("Closed the item bag without using items\n");
 		}
 		break;
-	case '2' :
+	case '2' : 
 		if(mainplayer.saydamagepill() > 0){
 			mainplayer.damagepilltaken();
 		}
@@ -82,17 +113,17 @@ void itemmenu(){
 }
 
 void equipment(){
-	cout << "Melee weapon: ";
-	if(weapons.sayattack1equipped() == 1){
-		cout << "Tennis Racket [2% +AT]" << endl;
+	cout << "Melee weapon : ";
+	if(weapons.sayequippedmelee() == 1){
+		cout << "[+2% AT]          Tennis Racket" << endl;
 	}
 	cout << "Ranged weapon: ";
-	if(rangedweapon.sayattack1equipped() == 1){
-		cout << "Bullshot [2% +RAT][+1 SP]" << endl;
+	if(rangedweapon.sayequippedranged() == 1){
+		cout << "[+2% RAT | +1 SP] Bullshot" << endl;
 	}
-	cout << "Shields: ";
-	if(playershields.sayshield1equipped() == 1){
-		cout << "Full Cracked Shield [10 SH][2 RT]" << endl;
+	cout << "Shields      : ";
+	if(playershields.sayequippedshield() == 1){
+		cout << "[10 SH | 2 RT]    Full Cracked Shield" << endl;
 	}
 	cout << endl << "Sector = " << section << endl;
 	cout << "Zone = " << zone << endl;
@@ -102,9 +133,407 @@ void equipment(){
 	cin >> movement;
 	clear();
 	switch(movement){
-	case 't' :
+	case 't' : 
 		mainplayer.upgrading();
 	default:;
+	}
+}
+
+int converter;
+
+void stringtoint(){
+	stringstream ss(encrypter);
+	ss >> converter;
+}
+
+void player::restoreparameters(int parameter){
+	if(parameter == 1){
+		playermaxlife = converter;
+	}
+	if(parameter == 2){
+		playermaxspbase = converter;
+	}
+	if(parameter == 3){
+		playermaxmp = converter;
+	}
+	if(parameter == 4){
+		playermaxresistance = converter;
+	}
+	if(parameter == 5){
+		playerattack = converter;
+	}
+	if(parameter == 6){
+		playermagicattack = converter;
+	}
+	if(parameter == 7){
+		playerrangedattack = converter;
+	}
+	if(parameter == 8){
+		playerdefense = converter;
+	}
+	if(parameter == 9){
+		playerlife = converter;
+	}
+	if(parameter == 10){
+		playersp = converter;
+	}
+	if(parameter == 11){
+		playermp = converter;
+	}
+	if(parameter == 12){
+		playerresistance = converter;
+	}
+	if(parameter == 13){
+		playerultra = converter;
+	}
+	if(parameter == 14){
+		playercriticalchecker = converter;
+	}
+	if(parameter == 15){
+		smallhealthpill = converter;
+	}
+	if(parameter == 16){
+		damagepill = converter;
+	}
+	if(parameter == 17){
+		squares = converter;
+	}
+	if(parameter == 18){
+		playertp = converter;
+	}
+	if(parameter == 19){
+		attacktpmeter = converter;
+	}
+	if(parameter == 20){
+		ratmeter = converter;
+	}
+	if(parameter == 21){
+		matmeter = converter;
+	}
+	if(parameter == 22){
+		defensemeter = converter;
+	}
+	if(parameter == 23){
+		lifemeter = converter;
+	}
+	if(parameter == 24){
+		spmeter = converter;
+	}
+	if(parameter == 25){
+		mpmeter = converter;
+	}
+	if(parameter == 26){
+		resmeter = converter;
+	}
+}
+
+void weapon::restoremelee(){
+	equippedmelee = converter;
+}
+
+void ranged::restoreranged(){
+	equippedranged = converter;
+}
+
+void shield::restoreshield(){
+	equippedshield = converter;
+}
+
+void enemy::restoreparameters(int parameter){
+	if(parameter == 1){
+		enemymaxlife = converter;
+	}
+	if(parameter == 2){
+		enemyattack = converter;
+	}
+	if(parameter == 3){
+		enemydefense = converter;
+	}
+}
+
+void savegame(int savetype){
+	FILE * save;
+	char retriever[10];
+	if(savetype == 2){
+		save = fopen("resources.txt","r");
+		if(save != NULL){
+				rewind(save);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+			playername = encrypter.c_str();
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			section = converter;
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			zone = converter;
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(1);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(2);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(3);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(4);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(5);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(6);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(7);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(8);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(9);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(10);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(11);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(12);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(13);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(14);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(15);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(16);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(17);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(18);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(19);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(20);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(21);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(22);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(23);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(24);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(25);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mainplayer.restoreparameters(26);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			weapons.restoremelee();
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			rangedweapon.restoreranged();
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			playershields.restoreshield();
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			commonenemy.restoreparameters(1);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			commonenemy.restoreparameters(2);
+				fscanf_s(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			commonenemy.restoreparameters(3);
+			cout << "Game loaded correctly!" << endl;
+			_getch();
+			fclose(save);
+			remove("resources.txt");
+		}
+		else{
+			cout << "There isn't any save to load";
+			loadfailed = true;
+		}
+	}
+	if(savetype == 1){
+		save = fopen("resources.txt","w");
+		if(save != NULL){
+			cout << "Saving the game... Wait a second..." << endl;
+			cout << "Saving 1/9 block of data..." << endl;
+				encrypt(playername,key);											// Playername
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(section),key);									// Section
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(zone),key);									// Zone
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 2/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.saymaxlife()),key);					// [mainplayer] Max life
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymaxspbase()),key);				// [mainplayer] Max SP base
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymaxmp()),key);					// [mainplayer] Max MP
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymaxresistance()),key);			// [mainplayer] Max resistance
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 3/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.attackparameter()),key);			// [mainplayer] Attack
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymagicattack()),key);				// [mainplayer] Magic attack
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayrangedattack()),key);			// [mainplayer] Ranged attack
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saydefense()),key);					// [mainplayer] Defense
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 4/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.saylife()),key);					// [mainplayer] Life
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saysp()),key);						// [mainplayer] SP
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymp()),key);						// [mainplayer] MP
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayresistance()),key);				// [mainplayer] Resistance
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayultra()),key);					// [mainplayer] Ultra
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 5/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.saycriticalchecker()),key);			// [mainplayer] Critical checker
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saysmallhealthpill()),key);			// [mainplayer] Small Health Pill [quantity]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saydamagepill()),key);				// [mainplayer] Damage Pill [quantity]
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 6/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.saysquares()),key);					// [mainplayer] Squares
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saytp()),key);						// [mainplayer] Train Points
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 7/9 block of data..." << endl;
+				encrypt(intEncrypter(mainplayer.sayattacktpmeter()),key);			// [mainplayer] TP meter [attack]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayratmeter()),key);				// [mainplayer] TP meter [ranged attack]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saymatmeter()),key);				// [mainplayer] TP meter [magic attack]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saydefensemeter()),key);			// [mainplayer] TP meter [defense]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saylifemeter()),key);				// [mainplayer] TP meter [life]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayspmeter()),key);					// [mainplayer] TP meter [sp]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.saympmeter()),key);					// [mainplayer] TP meter [mp]
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayresmeter()),key);				// [mainplayer] TP meter [resistance]
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 8/9 block of data..." << endl;
+				encrypt(intEncrypter(weapons.sayequippedmelee()),key);				// [weapons] Equipped melee ID
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(rangedweapon.sayequippedranged()),key);		// [rangedweapon] Equipped ranged ID
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(playershields.sayequippedshield()),key);		// [playershields] Equipped shields ID
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saving 9/9 block of data..." << endl;
+				encrypt(intEncrypter(commonenemy.saymaxlife()),key);				// [commonenemy] Max life
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(commonenemy.sayattack()),key);					// [commonenemy] Attack
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(commonenemy.saydefense()),key);				// [commonenemy] Defense
+				fprintf(save,"%s ",encrypter.c_str());
+			cout << "Saved successfully! Hope to see you again soon!" << endl;
+			_getch();
+			fclose(save);
+		}
+		else{
+			cout << "An error ocurred while saving the game" << endl;
+			_getch();
+		}
+		exit(0);
 	}
 }
 
@@ -118,10 +547,11 @@ TRAVELING:
 	cout << "Northeast = More enemies" << endl;
 	cout << endl << "[4] Equipment & stats" << endl;
 	cout << "[5] Item bag" << endl;
+	cout << "[6] Save & quit" << endl;
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' :
+	case '1' : 
 		cout << "Heading northwest..." << endl;
 		Sleep(1000);
 		eventgenerator = 1;
@@ -139,9 +569,15 @@ TRAVELING:
 	case '4' :
 		equipment();
 		goto TRAVELING;
+		break;
 	case '5' :
 		itemmenu();
 		goto TRAVELING;
+		break;
+	case '6' :
+		savegame(1);
+		goto TRAVELING;
+		break;
 	default : clear();goto TRAVELING;
 	}
 	zone++;
@@ -196,11 +632,10 @@ TRAVELING:
 }
 
 
-
 // Funciones procedentes de clases
 
 void player::determinemaxshields(){
-	if(playershields.sayshield1equipped() == true){
+	if(playershields.sayequippedshield() == 1){
 		maxshields = playershields.saymaxshield1();
 		rechargerate = playershields.sayrecharge1();
 	}
@@ -538,7 +973,7 @@ void enemy::enemyattacked(){
 			enemylife += enemydefense;
 			cout << playername;
 			cout << " inflicted ";
-			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense);
+			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense); 
 			cout << " to the enemy" << endl;
 		}
 	}
@@ -632,7 +1067,7 @@ SHOP:
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' :
+	case '1' : 
 		if(squares >= smallhealthpillworth * shopvalue){
 			squares -= smallhealthpillworth * shopvalue;
 			smallhealthpill++;
@@ -654,7 +1089,7 @@ SHOP:
 			goto SHOP;
 		}
 		break;
-	default :
+	default : 
 		cout << "Exit the shop? [1] Yes [Any other key] No" << endl;
 		cin >> movement;
 		clear();
@@ -822,11 +1257,6 @@ void battlemenu(){
 	}
 	cout << " | SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
 	cout << " | MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
-	cout << "AT = " << mainplayer.attackparameter() << " + " << weapons.sayattack() * 100 << "%";
-	cout << " | ";
-	cout << "MAT = " << mainplayer.saymagicattack();
-	cout << " | RAT = " << mainplayer.sayrangedattack() << " + " << rangedweapon.sayattack() * 100 << "%";
-	cout << " | DEF = " << mainplayer.saydefense() << endl;
 	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << " | ";
 	cout << "Ultra meter = " << mainplayer.sayultra() <<  " | Distance = ";
 	if(distanceenemy == 1){
@@ -844,6 +1274,11 @@ void battlemenu(){
 	if(distanceenemy == 5){
 		cout << "Very far" << endl;
 	}
+	cout << "AT = " << mainplayer.attackparameter() << " + " << weapons.sayattack() * 100 << "%";
+	cout << " | ";
+	cout << "MAT = " << mainplayer.saymagicattack();
+	cout << " | RAT = " << mainplayer.sayrangedattack() << " + " << rangedweapon.sayattack() * 100 << "%";
+	cout << " | DEF = " << mainplayer.saydefense() << endl;
 	cout << "Effects = ";
 	if(damagepilleffect == true){
 		cout << "[Damage Pill] " << endl;
@@ -862,6 +1297,10 @@ void battlemenu(){
 
 void battle(){
 EVENT:
+	if(load == true){
+		load = false;
+		traveling();
+	}
 	clear();
 	if(start == true){
 		cout << "Name applied correctly" << endl;
@@ -986,7 +1425,7 @@ STARTBATTLE:
 			break;
 		case '2':
 			itemmenu();break;
-		case '3':
+		case '3': 	
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
@@ -996,7 +1435,7 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' :
+			case '1' : 
 				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
@@ -1025,7 +1464,7 @@ STARTBATTLE:
 					mainplayer.decreaseresistance();
 					mainplayer.decreaseresistance();
 					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl;
+					cout << "Used Quick Eye!\n" << endl; 
 					goto STARTBATTLE;
 					break;
 				}
@@ -1041,7 +1480,7 @@ STARTBATTLE:
 			default : goto STARTBATTLE;
 				}
 			break;
-		case '5' :
+		case '5' : 
 			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
 			cin >> movement;
 			clear();
@@ -1098,7 +1537,7 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' :
+			case '1' : 
 				if(mainplayer.saymp() >= 5){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
@@ -1107,7 +1546,7 @@ STARTBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case '2' :
+			case '2' : 
 				if(mainplayer.saymp() >= 3){
 					commonenemy.iceattacked();
 				}
@@ -1115,11 +1554,11 @@ STARTBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			default :
+			default : 
 				goto STARTBATTLE;
 			}
 			break;
-		case '6' :
+		case '6' : 
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
@@ -1138,7 +1577,7 @@ STARTBATTLE:
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' :
+					case '1' : 
 						if(mainplayer.sayresistance() >= 10){
 							commonenemy.receivedultra();
 							mainplayer.decreasetenresistance();
@@ -1155,11 +1594,11 @@ STARTBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
-		case 'p' :
+		case 'p' : 
 			equipment();
 			goto STARTBATTLE;
 			break;
-		default:
+		default: 
 			cout << "Skipped the turn" << endl;
 			break;
 		}
@@ -1263,7 +1702,7 @@ STARTBOSSBATTLE:
 			break;
 		case '2':
 			itemmenu();break;
-		case '3':
+		case '3': 	
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
@@ -1273,7 +1712,7 @@ STARTBOSSBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' :
+			case '1' : 
 				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
@@ -1302,7 +1741,7 @@ STARTBOSSBATTLE:
 					mainplayer.decreaseresistance();
 					mainplayer.decreaseresistance();
 					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl;
+					cout << "Used Quick Eye!\n" << endl; 
 					goto STARTBOSSBATTLE;
 					break;
 				}
@@ -1318,7 +1757,7 @@ STARTBOSSBATTLE:
 			default : goto STARTBOSSBATTLE;
 				}
 			break;
-		case '5' :
+		case '5' : 
 			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
 			cin >> movement;
 			clear();
@@ -1375,7 +1814,7 @@ STARTBOSSBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' :
+			case '1' : 
 				if(mainplayer.saymp() >= 5){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
@@ -1384,7 +1823,7 @@ STARTBOSSBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case '2' :
+			case '2' : 
 				if(mainplayer.saymp() >= 3){
 					boss.iceattacked();
 				}
@@ -1392,11 +1831,11 @@ STARTBOSSBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			default :
+			default : 
 				goto STARTBOSSBATTLE;
 			}
 			break;
-		case '6' :
+		case '6' : 
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
@@ -1415,7 +1854,7 @@ STARTBOSSBATTLE:
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' :
+					case '1' : 
 						if(mainplayer.sayresistance() >= 10){
 							boss.receivedultra();
 							mainplayer.decreasetenresistance();
@@ -1432,11 +1871,11 @@ STARTBOSSBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
-		case 'p' :
+		case 'p' : 
 			equipment();
 			goto STARTBOSSBATTLE;
 			break;
-		default:
+		default: 
 			cout << "Skipped the turn" << endl;
 			break;
 		}
@@ -1463,55 +1902,77 @@ STARTBOSSBATTLE:
 }
 }
 
+void maintitle(){
+	gotoxy(2,2);
+	cout << "########    ###     ######  ######## ####  ######     ###    ##       ";
+	gotoxy(2,3);
+	cout << "   ##      ## ##   ##    ##    ##     ##  ##    ##   ## ##   ##       ";
+	gotoxy(2,4);
+	cout << "   ##     ##   ##  ##          ##     ##  ##        ##   ##  ##       ";
+	gotoxy(2,5);
+	cout << "   ##    ##     ## ##          ##     ##  ##       ##     ## ##       ";
+	gotoxy(2,6);
+	cout << "   ##    ######### ##          ##     ##  ##       ######### ##       ";
+	gotoxy(2,7);
+	cout << "   ##    ##     ## ##    ##    ##     ##  ##    ## ##     ## ##       ";
+	gotoxy(2,8);
+	cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
+	gotoxy(2,9);
+	cout << "                                                           [Alpha 1.6]";
+}
 
 int main(){
-	// Inicio del programa, se le pregunta al jugador el nombre del main character
+	// Inicio
 	randomseed();
 	while(1){
-		gotoxy(2,2);
-		cout << "########    ###     ######  ######## ####  ######     ###    ##       ";
-		gotoxy(2,3);
-		cout << "   ##      ## ##   ##    ##    ##     ##  ##    ##   ## ##   ##       ";
-		gotoxy(2,4);
-		cout << "   ##     ##   ##  ##          ##     ##  ##        ##   ##  ##       ";
-		gotoxy(2,5);
-		cout << "   ##    ##     ## ##          ##     ##  ##       ##     ## ##       ";
-		gotoxy(2,6);
-		cout << "   ##    ######### ##          ##     ##  ##       ######### ##       ";
-		gotoxy(2,7);
-		cout << "   ##    ##     ## ##    ##    ##     ##  ##    ## ##     ## ##       ";
-		gotoxy(2,8);
-		cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
-		gotoxy(2,9);
-		cout << "                                                           [Alpha 1.6]";
+		maintitle();
 		gotoxy(2,12);
-		cout << "What will be the main character's name?";
-		gotoxy(2,13);
-		cin >> playername;
-		if(playername == "Trackpoth"){
-			gotoxy(2,15);
-			cout << "Will it be our god and savior's name, Trackpoth?\a";
-		}
-		if(playername == "COCOS"){
-			gotoxy(2,15);
-			cout << "COCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS";
-		}
-		if(playername != "Trackpoth"){
-			if(playername != "COCOS"){
+		cout << "[1] New Game" << endl;
+		gotoxy(2,14);
+		cout << "[2] Continue" << endl;
+		gotoxy(2,16);
+		movement = _getch();
+		switch(movement){
+		case '1':
+			gotoxy(20,75);
+			clear();
+			maintitle();
+			gotoxy(2,12);
+			cout << "What will be the main character's name?";
+			gotoxy(2,13);
+			cin >> playername;
+			if(playername == "Trackpoth"){
+				gotoxy(2,15);
+				cout << "Will it be our god and savior's name, Trackpoth?\a";
+			}
+			if(playername == "COCOS"){
+				gotoxy(2,15);
+				cout << "COCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS\aCOCOS";
+			}
+			if(playername != "Trackpoth" && playername != "COCOS"){
 				gotoxy(2,15);
 				cout << "Will it be " << playername << "?\a";
 			}
-		}
-		cout << " [1] Yes [Any other key] No" << endl;
-		gotoxy(2,16);
-		cin >> movement;
-		switch (movement){
-		case '1' :
-			start = true;
-			battle();
+			cout << " [1] Yes [Any other key] No" << endl;
+			gotoxy(2,16);
+			movement = _getch();
+			switch (movement){
+			case '1' : 
+				start = true;
+				battle();
+				break;
+			}
+			clear();
+			break;
+		case '2':
+			savegame(2);
+			if(loadfailed == false){
+				load = true;
+				firstbattle = false;
+				battle();
+			}
 			break;
 		}
-		clear();
 	}
 	return 0;
 }

@@ -11,33 +11,35 @@ class weapon
 public:
 	weapon();
 	float sayattack1();
-	int sayattack1equipped();
 
+	int sayequippedmelee();
 	float sayattack();
 	int sayrealattack();
+
 	void determineattack();
 	void determinerealattack();
+	void restoremelee();
 
 private:
 	float attack1;
-	int attack1equipped;
 	
 	float attack;
 	int realattack;
+	int equippedmelee;
 };
 
 weapon::weapon()
 {
 	attack1 = 0.02;
-	attack1equipped = true;
+	equippedmelee = 1;
 }
 
 float weapon::sayattack1(){
 	return attack1;
 }
 
-int weapon::sayattack1equipped(){
-	return attack1equipped;
+int weapon::sayequippedmelee(){
+	return equippedmelee;
 }
 
 float weapon::sayattack(){
@@ -49,7 +51,7 @@ int weapon::sayrealattack(){
 }
 
 void weapon::determineattack(){
-	if(attack1equipped == 1){
+	if(equippedmelee == 1){
 		attack = attack1;
 	}
 }
@@ -62,27 +64,29 @@ public:
 	ranged();
 	float sayattack1();
 	int saysp1();
-	int sayattack1equipped();
 
+	int sayequippedranged();
 	float sayattack();
 	int sayrealattack();
+
 	void determineattack();
 	void determinerealattack();
+	void restoreranged();
 
 private:
 	float attack1;
 	int sp1;
-	int attack1equipped;
 	
 	float attack;
 	int realattack;
+	int equippedranged;
 };
 
 ranged::ranged()
 {
 	attack1 = 0.02;
 	sp1 = 1;
-	attack1equipped = true;
+	equippedranged = 1;
 }
 
 float ranged::sayattack1(){
@@ -93,8 +97,8 @@ int ranged::saysp1(){
 	return sp1;
 }
 
-int ranged::sayattack1equipped(){
-	return attack1equipped;
+int ranged::sayequippedranged(){
+	return equippedranged;
 }
 
 float ranged::sayattack(){
@@ -106,7 +110,7 @@ int ranged::sayrealattack(){
 }
 
 void ranged::determineattack(){
-	if(attack1equipped == 1){
+	if(equippedranged == 1){
 		attack = attack1;
 	}
 }
@@ -121,13 +125,15 @@ public:
 	int sayshield1();
 	int saymaxshield1();
 	int sayrecharge1();
-	bool sayshield1equipped();
+
+	int sayequippedshield();
+	void restoreshield();
 
 private:
 	int shield1;
 	int maxshield1;
 	int recharge1;
-	bool shield1equipped;
+	int equippedshield;
 };
 
 shield::shield()
@@ -135,7 +141,7 @@ shield::shield()
 	shield1 = 10;
 	maxshield1 = 10;
 	recharge1 = 2;
-	shield1equipped = true;
+	equippedshield = 1;
 }
 
 int shield::sayshield1(){
@@ -150,8 +156,8 @@ int shield::sayrecharge1(){
 	return recharge1;
 }
 
-bool shield::sayshield1equipped(){
-	return shield1equipped;
+int shield::sayequippedshield(){
+	return equippedshield;
 }
 
 shield playershields;

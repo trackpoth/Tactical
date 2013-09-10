@@ -66,6 +66,7 @@ public:
 	int attackparameter();
 	int saymaxlife();
 	int saylife();
+	int saymaxspbase();
 	int saymaxsp();
 	int saysp();
 	int saymaxmp();
@@ -74,9 +75,12 @@ public:
 	int sayrangedattack();
 	int saycriticalchecker();
 	int saycriticalpower();
+	float saycriticalmultiplier();
 	int saysmallhealthpill();
 	int saysmallhealthpillvalue();
+	int saysmallhealthpillworth();
 	int saydamagepill();
+	int saydamagepillworth();
 	int sayresistance();
 	int saymaxresistance();
 	int sayultra();
@@ -132,10 +136,22 @@ public:
 	void determinemaxshields();
 	void restoreshields();
 	void increaserecharge();
+
+	void restoreparameters(int parameter);
+
 	int sayshields();
 	int saymaxshields();
 	int sayrechargerate();
 	int sayrechargemeter();
+
+	int sayattacktpmeter();
+	int sayratmeter();
+	int saymatmeter();
+	int saylifemeter();
+	int saydefensemeter();
+	int sayspmeter();
+	int saympmeter();
+	int sayresmeter();
 
 protected:
 	// Player's parameters
@@ -143,20 +159,23 @@ protected:
 	int playermaxsp;
 	int playermaxmp;
 	int playermaxspbase;
+	int playermaxresistance;
+	int playermaxultra;
+
 	int playerattack;
 	int playermagicattack;
 	int playerrangedattack;
+	int playerdefense;
+
 	int playerlife;
 	int playersp;
 	int playermp;
-	int playercriticalchecker;
-	float playercriticalmultiplier;
-	int playercriticalpower;
 	int playerresistance;
-	int playermaxresistance;
 	int playerultra;
-	int playermaxultra;
-	int playerdefense;
+
+	int playercriticalchecker;
+	int playercriticalpower;
+	float playercriticalmultiplier;
 
 	// Player's items
 	int smallhealthpill;
@@ -233,6 +252,10 @@ int player::saylife(){
 	return playerlife;
 }
 
+int player::saymaxspbase(){
+	return playermaxspbase;
+}
+
 int player::saymaxsp(){
 	return playermaxsp;
 }
@@ -265,6 +288,10 @@ int player::saycriticalpower(){
 	return playercriticalpower;
 }
 
+float player::saycriticalmultiplier(){
+	return playercriticalmultiplier;
+}
+
 int player::saysmallhealthpill(){
 	return smallhealthpill;
 }
@@ -273,8 +300,16 @@ int player::saysmallhealthpillvalue(){
 	return smallhealthpillvalue;
 }
 
+int player::saysmallhealthpillworth(){
+	return smallhealthpillworth;
+}
+
 int player::saydamagepill(){
 	return damagepill;
+}
+
+int player::saydamagepillworth(){
+	return damagepillworth;
 }
 
 int player::sayresistance(){
@@ -493,6 +528,37 @@ int player::sayrechargemeter(){
 	return rechargemeter;
 }
 
+int player::sayattacktpmeter(){
+	return attacktpmeter;
+}
+
+int player::sayratmeter(){
+	return ratmeter;
+}
+
+int player::saymatmeter(){
+	return matmeter;
+}
+
+int player::saydefensemeter(){
+	return defensemeter;
+}
+
+int player::saylifemeter(){
+	return lifemeter;
+}
+
+int player::sayspmeter(){
+	return spmeter;
+}
+
+int player::saympmeter(){
+	return mpmeter;
+}
+
+int player::sayresmeter(){
+	return resmeter;
+}
 
 player mainplayer;
 
@@ -500,21 +566,21 @@ void player::upgrading(){
 UPGRADING:
 	cout << "Parameter upgrading center" << endl;
 	cout << "Current TP: " << playertp << endl << endl;
-	cout << "Attack (AT): " << playerattack << " -> " << playerattack + 1 << endl;
+	cout << "Attack (AT)        : " << playerattack << " -> " << playerattack + 1 << endl;
 	cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
-	cout << "Magic attack (MAT): " << playermagicattack << " -> " << playermagicattack + 1 << endl;
-	cout << "Defense (DEF): " << playerdefense << " -> " << playerdefense + 1 << endl;
-	cout << "Max Life: " << playermaxlife << " -> " << playermaxlife + 10 << endl;
-	cout << "Max SP: " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
-	cout << "Max MP: " << playermaxmp << " -> " << playermaxmp + 1 << endl;
-	cout << "Resistance: " << playermaxresistance << " -> " << playermaxresistance + 2 << endl;
-	cout << endl << "[1] Upgrade AT (-" << attacktpmeter << " TP)" << endl;
-	cout << "[2] Upgrade RAT (-" << ratmeter << " TP)" << endl;
-	cout << "[3] Upgrade MAT (-" << matmeter << " TP)" << endl;
-	cout << "[4] Upgrade DEF (-" << defensemeter << " TP)" << endl;
-	cout << "[5] Upgrade Max Life (-" << lifemeter << " TP)" << endl;
-	cout << "[6] Upgrade Max SP (-" << spmeter << " TP)" << endl;
-	cout << "[7] Upgrade Max MP (-" << mpmeter << " TP)" << endl;
+	cout << "Magic attack (MAT) : " << playermagicattack << " -> " << playermagicattack + 1 << endl;
+	cout << "Defense (DEF)      : " << playerdefense << " -> " << playerdefense + 1 << endl;
+	cout << "Max Life           : " << playermaxlife << " -> " << playermaxlife + 10 << endl;
+	cout << "Max SP             : " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
+	cout << "Max MP             : " << playermaxmp << " -> " << playermaxmp + 1 << endl;
+	cout << "Resistance         : " << playermaxresistance << " -> " << playermaxresistance + 2 << endl << endl;
+	cout << "[1] Upgrade AT         (-" << attacktpmeter << " TP)" << endl;
+	cout << "[2] Upgrade RAT        (-" << ratmeter << " TP)" << endl;
+	cout << "[3] Upgrade MAT        (-" << matmeter << " TP)" << endl;
+	cout << "[4] Upgrade DEF        (-" << defensemeter << " TP)" << endl;
+	cout << "[5] Upgrade Max Life   (-" << lifemeter << " TP)" << endl;
+	cout << "[6] Upgrade Max SP     (-" << spmeter << " TP)" << endl;
+	cout << "[7] Upgrade Max MP     (-" << mpmeter << " TP)" << endl;
 	cout << "[8] Upgrade Resistance (-" << resmeter << " TP)" << endl;
 	cout << "Type any other key to go back to the menu" << endl;
 	cin >> movement;
@@ -679,6 +745,8 @@ public:
 	void healthdrinktaken();
 	void saystats();
 	void randomizeboss();
+
+	void restoreparameters(int parameter);
 
 protected:
 	int enemylife;

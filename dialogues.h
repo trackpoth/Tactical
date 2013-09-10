@@ -18,18 +18,18 @@ void dialogues(){
 	}
 	if(dialogue == 1){
 		cout << "(You hear very loud noises at the top of the hill)" << endl;
-		cout << "Type '1' to investigate" << endl;
-		cout << "Type any other key to ignore it and keep playing Teetrix in a stolen Game Box" << endl;
+		cout << "[1] Investigate" << endl;
+		cout << "[Any other key] Ignore it and keep playing Teetrix in a stolen Game Box" << endl;
 		cin >> decision;
 		switch(decision){
 		default :
-			cout << "You ignore it completely. THE END." << endl;
+			cout << endl << "You ignore it completely. THE END." << endl;
 			_getch();
 			exit(0);
 			break;
 		case '1' : ;
 		}
-		cout << "You: WHAT THE HECK IS HAPPENING HERE?" << endl;
+		cout << endl << "You: WHAT THE HECK IS HAPPENING HERE?" << endl;
 		_getch();
 		cout << "Hippie: WOOOOOOOOOO WAAAAAAAAAA WOOOOOOOOOOO" << endl;
 		_getch();
