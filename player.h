@@ -36,6 +36,14 @@ int travel;
 
 int battletype;
 
+void gotoxy(int column, int line)
+{
+  COORD coord;
+  coord.X = column;
+  coord.Y = line;
+  SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),coord);
+}
+
 void clear(){
 	HANDLE hndl = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -139,6 +147,8 @@ public:
 
 	void restoreparameters(int parameter);
 
+	void customizecharacter(int type);
+
 	int sayshields();
 	int saymaxshields();
 	int sayrechargerate();
@@ -199,6 +209,11 @@ protected:
 	int spmeter;
 	int mpmeter;
 	int resmeter;
+
+	int masterstealth;
+	int masterstrength;
+	int mastermagic;
+	int masterhealth;
 
 	// Player's shields
 	int shields;
@@ -563,156 +578,178 @@ int player::sayresmeter(){
 player mainplayer;
 
 void player::upgrading(){
-UPGRADING:
 	cout << "Parameter upgrading center" << endl;
 	cout << "Current TP: " << playertp << endl << endl;
-	cout << "Attack (AT)        : " << playerattack << " -> " << playerattack + 1 << endl;
-	cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
-	cout << "Magic attack (MAT) : " << playermagicattack << " -> " << playermagicattack + 1 << endl;
-	cout << "Defense (DEF)      : " << playerdefense << " -> " << playerdefense + 1 << endl;
-	cout << "Max Life           : " << playermaxlife << " -> " << playermaxlife + 10 << endl;
-	cout << "Max SP             : " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
-	cout << "Max MP             : " << playermaxmp << " -> " << playermaxmp + 1 << endl;
-	cout << "Resistance         : " << playermaxresistance << " -> " << playermaxresistance + 2 << endl << endl;
-	cout << "[1] Upgrade AT         (-" << attacktpmeter << " TP)" << endl;
-	cout << "[2] Upgrade RAT        (-" << ratmeter << " TP)" << endl;
-	cout << "[3] Upgrade MAT        (-" << matmeter << " TP)" << endl;
-	cout << "[4] Upgrade DEF        (-" << defensemeter << " TP)" << endl;
-	cout << "[5] Upgrade Max Life   (-" << lifemeter << " TP)" << endl;
-	cout << "[6] Upgrade Max SP     (-" << spmeter << " TP)" << endl;
-	cout << "[7] Upgrade Max MP     (-" << mpmeter << " TP)" << endl;
-	cout << "[8] Upgrade Resistance (-" << resmeter << " TP)" << endl;
+	cout << "[1] Stealth tier  [" << masterstealth << " skill points]" << endl;
+	cout << "[2] Strength tier [" << masterstrength << " skill points]" << endl;
+	cout << "[3] Magic tier    [" << mastermagic << " skill points]" << endl;
+	cout << "[4] Health tier   [" << masterhealth << " skill points]" << endl;
 	cout << "Type any other key to go back to the menu" << endl;
 	cin >> movement;
 	clear();
 	switch(movement){
 	case '1' :
-		if(playertp >= attacktpmeter){
-			playertp -= attacktpmeter;
-			playerattack++;
-			if(attacktpmeter >= 60){
+STEALTH:
+		cout << "Parameter upgrading center | Stealth tier" << endl;
+		cout << "Current TP: " << playertp << endl << endl;
+		cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
+		if(masterstealth >= 1){
+			cout << "Max SP             : " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
+		}
+		if(masterstealth >= 2){
+			cout << "Resistance         : " << playermaxresistance << " -> " << playermaxresistance + 2 << endl;
+		}
+		cout << endl << "[1] Upgrade RAT        (-" << 90 - (12 * masterstealth) << " TP)" << endl;
+		if(masterstealth >= 1){
+			cout << "[2] Upgrade Max SP     (-" << 240 - (30 * masterstealth) << " TP)" << endl;
+		}
+		if(masterstealth >= 2){
+			cout << "[3] Upgrade Resistance (-" << 120 - (12 * masterstealth) << " TP)" << endl;
+		}
+		cout << "Type any other key to go back to the menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (12 * masterstealth)){
+				playertp -= 90 - (12 * masterstealth);
+				playerrangedattack++;
+				goto STEALTH;
 			}
 			else{
-				attacktpmeter += 2;
+				cout << "You do not have enough Train Points for that!" << endl << endl;
 			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
+			break;
+		case '2' :
+			if(masterstealth >= 1){
+				if(playertp >= 240 - (30 * masterstealth)){
+					playertp -= 240 - (30 * masterstealth);
+					playermaxspbase++;
+					playersp++;
+					goto STEALTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
+		case '3' :
+			if(masterstealth >= 2){
+				if(playertp >= 120 - (12 * masterstealth)){
+					playertp -= 120 - (12 * masterstealth);
+					playermaxresistance += 2;
+					playerresistance += 2;
+					goto STEALTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
 		}
 		break;
 	case '2' :
-		if(playertp >= ratmeter){
-			playertp -= ratmeter;
-			playerrangedattack++;
-			if(ratmeter >= 70){
+STRENGTH:
+		cout << "Parameter upgrading center | Strength tier" << endl;
+		cout << "Current TP: " << playertp << endl << endl;
+		cout << "Attack (AT)        : " << playerattack << " -> " << playerattack + 1 << endl;
+		if(masterstrength >= 1){
+			cout << "Defense (DEF)      : " << playerdefense << " -> " << playerdefense + 1 << endl;
+		}
+		cout << endl << "[1] Upgrade AT         (-" << 80 - (12 * masterstrength) << " TP)" << endl;
+		if(masterstrength >= 1){
+			cout << "[2] Upgrade DEF        (-" << 80 - (9 * masterstrength) << " TP)" << endl;
+		}
+		cout << "Type any other key to go back to the menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 80 - (12 * masterstrength)){
+				playertp -= 80 - (12 * masterstrength);
+				playerattack++;
+				goto STRENGTH;
 			}
 			else{
-				ratmeter += 3;
+				cout << "You do not have enough Train Points for that!" << endl << endl;
 			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
+			break;
+		case '2' :
+			if(masterstrength >= 1){
+				if(playertp >= 80 - (9 * masterstrength)){
+					playertp -= 80 - (9 * masterstrength);
+					playerdefense++;
+					goto STRENGTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+				break;
+			}
 		}
 		break;
 	case '3' :
-		if(playertp >= matmeter){
-			playertp -= matmeter;
-			playermagicattack++;
-			if(matmeter >= 70){
+MAGIC:
+		cout << "Parameter upgrading center | Magic tier" << endl;
+		cout << "Current TP: " << playertp << endl << endl;
+		cout << "Magic attack (MAT) : " << playermagicattack << " -> " << playermagicattack + 1 << endl;
+		if(mastermagic >= 2){
+			cout << "Max MP             : " << playermaxmp << " -> " << playermaxmp + 1 << endl;
+		}
+		cout << endl << "[1] Upgrade MAT        (-" << 90 - (12 * mastermagic) << " TP)" << endl;
+		if(mastermagic >= 2){
+			cout << "[2] Upgrade Max MP     (-" << 240 - (30 * mastermagic) << " TP)" << endl;
+		}
+		cout << "Type any other key to go back to the menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (12 * mastermagic)){
+				playertp -= 90 - (12 * mastermagic);
+				playermagicattack++;
+				goto MAGIC;
 			}
 			else{
-				matmeter += 3;
+				cout << "You do not have enough Train Points for that!" << endl << endl;
 			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
+			break;
+		case '2' :
+			if(mastermagic >= 2){
+				if(playertp >= 240 - (30 * mastermagic)){
+					playertp -= 240 - (30 * mastermagic);
+					playermaxmp++;
+					playermp++;
+					goto MAGIC;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
 		}
 		break;
 	case '4' :
-		if(playertp >= defensemeter){
-			playertp -= defensemeter;
-			playerdefense++;
-			if(defensemeter >= 60){
-				if(defensemeter >= 80){
-				}
-				else{
-					defensemeter += 2;
-				}
+HEALTH:
+		cout << "Parameter upgrading center | Health tier" << endl;
+		cout << "Current TP: " << playertp << endl << endl;
+		cout << "Max Life           : " << playermaxlife << " -> " << playermaxlife + 10 << endl << endl;
+		cout << "[1] Upgrade Max Life   (-" << 90 - (9 * masterhealth) << " TP)" << endl;
+		cout << "Type any other key to go back to the menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (9 * masterhealth)){
+				playertp -= 90 - (9 * masterhealth);
+				playermaxlife += 10;
+				playerlife += 10;
+				goto HEALTH;
 			}
 			else{
-				defensemeter += 3;
+				cout << "You do not have enough Train Points for that!" << endl << endl;
 			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
-		}
-		break;
-	case '5' :
-		if(playertp >= lifemeter){
-			playertp -= lifemeter;
-			playermaxlife += 10;
-			playerlife += 10;
-			if(lifemeter >= 85){
-			}
-			else{
-				lifemeter += 5;
-			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
-		}
-		break;
-	case '6' :
-		if(playertp >= spmeter){
-			playertp -= spmeter;
-			playermaxspbase++;
-			playersp++;
-			if(spmeter >= 210){
-			}
-			else{
-				spmeter += 15;
-			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
-		}
-		break;
-	case '7' :
-		if(playertp >= mpmeter){
-			playertp -= mpmeter;
-			playermaxmp++;
-			playermp++;
-			if(mpmeter >= 240){
-			}
-			else{
-				mpmeter += 15;
-			}
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
-		}
-		break;
-	case '8' :
-		if(playertp >= resmeter){
-			playertp -= resmeter;
-			if(resmeter >= 90){
-			}
-			else{
-				resmeter += 4;
-			}
-			playermaxresistance += 2;
-			playerresistance += 2;
-			goto UPGRADING;
-		}
-		else{
-			cout << "You do not have enough Train Points for that!" << endl << endl;
+			break;
 		}
 		break;
 	}

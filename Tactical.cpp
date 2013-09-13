@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <stdio.h>
 #include <conio.h>
 #include <iostream>
@@ -18,6 +17,7 @@ using namespace std;
 bool start;
 bool load;
 bool loadfailed;
+bool savefileexists;
 
 int eventtype;
 int eventgenerator;
@@ -30,6 +30,7 @@ int shopitemb;
 int shopitemc;
 int shopitemd;
 
+char retriever[10];
 string encrypter;
 string chartostring;
 string intEncrypter(int number)
@@ -55,14 +56,6 @@ void decrypt(string data,string key)
         data[i] -= key[i%key.size()];
 	}
 	encrypter = data;
-}
-
-void gotoxy(int column, int line)
-{
-  COORD coord;
-  coord.X = column;
-  coord.Y = line;
-  SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),coord);
 }
 
 void randomseed(){
@@ -91,7 +84,7 @@ void itemmenu(){
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' : 
+	case '1' :
 		if(mainplayer.saysmallhealthpill() > 0){
 			mainplayer.smallhealthpilltaken();
 			mainplayer.limitplayerlife();
@@ -100,7 +93,7 @@ void itemmenu(){
 			printf("Closed the item bag without using items\n");
 		}
 		break;
-	case '2' : 
+	case '2' :
 		if(mainplayer.saydamagepill() > 0){
 			mainplayer.damagepilltaken();
 		}
@@ -133,7 +126,7 @@ void equipment(){
 	cin >> movement;
 	clear();
 	switch(movement){
-	case 't' : 
+	case 't' :
 		mainplayer.upgrading();
 	default:;
 	}
@@ -253,181 +246,180 @@ void enemy::restoreparameters(int parameter){
 
 void savegame(int savetype){
 	FILE * save;
-	char retriever[10];
 	if(savetype == 2){
 		save = fopen("resources.txt","r");
 		if(save != NULL){
 				rewind(save);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 			playername = encrypter.c_str();
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			section = converter;
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			zone = converter;
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(1);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(2);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(3);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(4);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(5);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(6);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(7);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(8);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(9);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(10);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(11);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(12);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(13);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(14);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(15);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(16);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(17);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(18);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(19);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(20);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(21);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(22);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(23);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(24);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(25);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			mainplayer.restoreparameters(26);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			weapons.restoremelee();
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			rangedweapon.restoreranged();
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			playershields.restoreshield();
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			commonenemy.restoreparameters(1);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
 			commonenemy.restoreparameters(2);
-				fscanf_s(save,"%s",retriever);
+				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
@@ -535,6 +527,16 @@ void savegame(int savetype){
 		}
 		exit(0);
 	}
+	if(savetype == 3){
+		save = fopen("resources.txt","r");
+		if(save != NULL){
+			cout << "There is a save file! Come back later when you finish the current game" << endl;
+			savefileexists = true;
+		}
+		else{
+			savefileexists = false;
+		}
+	}
 }
 
 void traveling(){
@@ -551,7 +553,7 @@ TRAVELING:
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' : 
+	case '1' :
 		cout << "Heading northwest..." << endl;
 		Sleep(1000);
 		eventgenerator = 1;
@@ -633,6 +635,242 @@ TRAVELING:
 
 
 // Funciones procedentes de clases
+
+void player::customizecharacter(int type){
+	FILE * character;
+	char answer;
+	if(type == 1){
+		character = fopen("character.txt","w+");
+		cout << "                                ";
+		clear();
+		masterstealth = 0;
+		masterstrength = 0;
+		mastermagic = 0;
+		masterhealth = 0;
+		cout << "Welcome to the character customization!" << endl;
+		cout << "Just answer some questions and your character will have its own personality!" << endl;
+		getch();
+CUSTOMIZATION:
+		clear();
+		cout << "1º Do you want to be feared, or to be admired?" << endl;
+		cout << endl << "1: Feared" << endl;
+		cout << "2: Admired" << endl;
+		movement = _getch();
+		clear();
+		switch(movement){
+			case '1' :
+				cout << "2º Do you like to act slow and steady, or quickly?" << endl;
+				cout << endl << "1: Slow and steady" << endl;
+				cout << "2: Quickly" << endl;
+				answer = _getch();
+				switch(answer){
+				case '1' :
+					masterstealth++;
+					break;
+				case '2' :
+					masterstrength++;
+					break;
+				default :
+					masterstealth = 0;
+					masterstrength = 0;
+					mastermagic = 0;
+					masterhealth = 0;
+					goto CUSTOMIZATION;
+					break;
+				}
+				break;
+			case '2' :
+				cout << "2º Do you want to use magic to punish the evil, or to help the poor?" << endl;
+				cout << endl << "1: Punish the evil" << endl;
+				cout << "2: Help the poor" << endl;
+				answer = _getch();
+				switch(answer){
+				case '1' :
+					mastermagic++;
+					break;
+				case '2' :
+					masterhealth++;
+					break;
+				default :
+					masterstealth = 0;
+					masterstrength = 0;
+					mastermagic = 0;
+					masterhealth = 0;
+					goto CUSTOMIZATION;
+					break;
+				}
+				break;
+			default :
+				masterstealth = 0;
+				masterstrength = 0;
+				mastermagic = 0;
+				masterhealth = 0;
+				goto CUSTOMIZATION;
+				break;
+		}
+		clear();
+		cout << "3º You find an old man with a knife stabbed in his chest.\nSeems like the bandit who caused it is running away" << endl;
+		cout << endl << "1: Kill the bandit with your ranged weapon" << endl;
+		cout << "2: Finish the old man and loot him" << endl;
+		cout << "3: Heal the old man with magic" << endl;
+		cout << "4: Stop the bandit with magic and take him to prison" << endl;
+		movement = _getch();
+		switch(movement){
+			case '1' :
+				masterstealth++;
+				break;
+			case '2' :
+				masterstrength++;
+				break;
+			case '3' :
+				masterhealth++;
+				break;
+			case '4' :
+				mastermagic++;
+				break;
+			default :
+				masterstealth = 0;
+				masterstrength = 0;
+				mastermagic = 0;
+				masterhealth = 0;
+				goto CUSTOMIZATION;
+				break;
+		}
+		clear();
+		cout << "4º You find a group of bandits.\nThey are well equipped, and they seem to be looking for you" << endl;
+		cout << endl << "1: Kill them one by one using magic" << endl;
+		cout << "2: Deploy shields on the ground to run away safely" << endl;
+		cout << "3: Run away using stealth" << endl;
+		cout << "4: Quickly murder them before they know what's happening" << endl;
+		movement = _getch();
+		switch(movement){
+			case '1' :
+				mastermagic++;
+				break;
+			case '2' :
+				masterhealth++;
+				break;
+			case '3' :
+				masterstealth++;
+				break;
+			case '4' :
+				masterstrength++;
+				break;
+			default :
+				masterstealth = 0;
+				masterstrength = 0;
+				mastermagic = 0;
+				masterhealth = 0;
+				goto CUSTOMIZATION;
+				break;
+		}
+		clear();
+		cout << "5º You hear a voice. 'What are your dreams, young adventurer?'" << endl;
+		cout << endl << "1: To find the secrets" << endl;
+		cout << "2: To reach world peace" << endl;
+		cout << "3: To destroy the evil without mercy" << endl;
+		movement = _getch();
+		switch(movement){
+			case '1' :
+				clear();
+				cout << "5.2º What secrets?" << endl;
+				cout << endl << "1: The secrets of stealth" << endl;
+				cout << "2: The secrets of magic" << endl;
+				answer = _getch();
+				switch(answer){
+				case '1' :
+					masterstealth++;
+					break;
+				case '2' :
+					mastermagic++;
+					break;
+				default :
+					masterstealth = 0;
+					masterstrength = 0;
+					mastermagic = 0;
+					masterhealth = 0;
+					goto CUSTOMIZATION;
+					break;
+				}
+				break;
+			case '2' :
+				masterhealth++;
+				break;
+			case '3' :
+				masterstrength++;
+				break;
+			default :
+				masterstealth = 0;
+				masterstrength = 0;
+				mastermagic = 0;
+				masterhealth = 0;
+				goto CUSTOMIZATION;
+				break;
+		}
+		clear();
+		cout << "Okay! The stats of your character will be:" << endl;
+		cout << endl << "Stealth skill : " << masterstealth << endl;
+		cout << "Strength skill: " << masterstrength << endl;
+		cout << "Magic skill   : " << mastermagic << endl;
+		cout << "Health skill  : " << masterhealth << endl;
+		getch();
+		encrypt(intEncrypter(masterstealth),key);					// Stealth skill
+		fprintf(character,"%s ",encrypter.c_str());
+		encrypt(intEncrypter(masterstrength),key);					// Strength skill
+		fprintf(character,"%s ",encrypter.c_str());
+		encrypt(intEncrypter(mastermagic),key);						// Magic skill
+		fprintf(character,"%s ",encrypter.c_str());
+		encrypt(intEncrypter(masterhealth),key);					// Health skill
+		fprintf(character,"%s ",encrypter.c_str());
+		fclose(character);
+		clear();
+	}
+	if(type == 2){
+		character = fopen("character.txt","r");
+		if(character != NULL){
+			rewind(character);
+			cout << "Loading character file..." << endl;
+				fscanf(character,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			masterstealth = converter;
+				fscanf(character,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			masterstrength = converter;
+				fscanf(character,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			mastermagic = converter;
+				fscanf(character,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			masterhealth = converter;
+			fclose(character);
+			if((masterstealth + masterstrength + mastermagic + masterhealth) != 4){
+				cout << "character.txt is corrupted.\nPlease create another character at 'Customize character'" << endl;
+			}
+			else{
+				cout << "Loaded succesfully!" << endl;
+				cout << endl << "Stealth skill : " << masterstealth << endl;
+				cout << "Strength skill: " << masterstrength << endl;
+				cout << "Magic skill   : " << mastermagic << endl;
+				cout << "Health skill  : " << masterhealth << endl;
+			}
+			_getch();
+			clear();
+		}
+		else{
+			cout << "Warning! character.txt not found!" << endl << "Please create a character at 'Customize character' before playing" << endl;
+			_getch();
+			clear();
+		}
+	}
+}
 
 void player::determinemaxshields(){
 	if(playershields.sayequippedshield() == 1){
@@ -973,7 +1211,7 @@ void enemy::enemyattacked(){
 			enemylife += enemydefense;
 			cout << playername;
 			cout << " inflicted ";
-			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense); 
+			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense);
 			cout << " to the enemy" << endl;
 		}
 	}
@@ -1067,7 +1305,7 @@ SHOP:
 	cin >> movement;
 	clear();
 	switch(movement){
-	case '1' : 
+	case '1' :
 		if(squares >= smallhealthpillworth * shopvalue){
 			squares -= smallhealthpillworth * shopvalue;
 			smallhealthpill++;
@@ -1089,7 +1327,7 @@ SHOP:
 			goto SHOP;
 		}
 		break;
-	default : 
+	default :
 		cout << "Exit the shop? [1] Yes [Any other key] No" << endl;
 		cin >> movement;
 		clear();
@@ -1286,7 +1524,7 @@ void battlemenu(){
 	else{
 		cout << "None" << endl;
 	}
-	printf("\n[q] Meelee attack [w] Ranged attack [e] Magic attack\n");
+	printf("\n[q] Meelee attack [w] Ranged attack\n");
 	printf("[2] Items         [3] Special       [4] Magic\n");
 	printf("[5] Move          [6] Rest");
 	if(mainplayer.sayultra() >= 100){
@@ -1425,7 +1663,7 @@ STARTBATTLE:
 			break;
 		case '2':
 			itemmenu();break;
-		case '3': 	
+		case '3':
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
@@ -1435,7 +1673,7 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
+			case '1' :
 				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
@@ -1464,7 +1702,7 @@ STARTBATTLE:
 					mainplayer.decreaseresistance();
 					mainplayer.decreaseresistance();
 					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl; 
+					cout << "Used Quick Eye!\n" << endl;
 					goto STARTBATTLE;
 					break;
 				}
@@ -1480,7 +1718,7 @@ STARTBATTLE:
 			default : goto STARTBATTLE;
 				}
 			break;
-		case '5' : 
+		case '5' :
 			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
 			cin >> movement;
 			clear();
@@ -1537,7 +1775,7 @@ STARTBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
+			case '1' :
 				if(mainplayer.saymp() >= 5){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
@@ -1546,7 +1784,7 @@ STARTBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case '2' : 
+			case '2' :
 				if(mainplayer.saymp() >= 3){
 					commonenemy.iceattacked();
 				}
@@ -1554,11 +1792,11 @@ STARTBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			default : 
+			default :
 				goto STARTBATTLE;
 			}
 			break;
-		case '6' : 
+		case '6' :
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
@@ -1577,7 +1815,7 @@ STARTBATTLE:
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' : 
+					case '1' :
 						if(mainplayer.sayresistance() >= 10){
 							commonenemy.receivedultra();
 							mainplayer.decreasetenresistance();
@@ -1594,11 +1832,11 @@ STARTBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
-		case 'p' : 
+		case 'p' :
 			equipment();
 			goto STARTBATTLE;
 			break;
-		default: 
+		default:
 			cout << "Skipped the turn" << endl;
 			break;
 		}
@@ -1702,7 +1940,7 @@ STARTBOSSBATTLE:
 			break;
 		case '2':
 			itemmenu();break;
-		case '3': 	
+		case '3':
 			printf("List of Special moves:\n\n");
 			printf("Piercing eye [2 SP]['1' to use]\n");
 			printf("-- Unveils more detailed stats of the enemy\n");
@@ -1712,7 +1950,7 @@ STARTBOSSBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
+			case '1' :
 				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
 					mainplayer.decreaseplayersp();
 					mainplayer.decreaseplayersp();
@@ -1741,7 +1979,7 @@ STARTBOSSBATTLE:
 					mainplayer.decreaseresistance();
 					mainplayer.decreaseresistance();
 					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl; 
+					cout << "Used Quick Eye!\n" << endl;
 					goto STARTBOSSBATTLE;
 					break;
 				}
@@ -1757,7 +1995,7 @@ STARTBOSSBATTLE:
 			default : goto STARTBOSSBATTLE;
 				}
 			break;
-		case '5' : 
+		case '5' :
 			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
 			cin >> movement;
 			clear();
@@ -1814,7 +2052,7 @@ STARTBOSSBATTLE:
 			cin >> movement;
 			clear();
 			switch(movement){
-			case '1' : 
+			case '1' :
 				if(mainplayer.saymp() >= 5){
 					mainplayer.meditateused();
 					mainplayer.limitplayerlife();
@@ -1823,7 +2061,7 @@ STARTBOSSBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			case '2' : 
+			case '2' :
 				if(mainplayer.saymp() >= 3){
 					boss.iceattacked();
 				}
@@ -1831,11 +2069,11 @@ STARTBOSSBATTLE:
 					cout << "You haven't enough MP left to perform this move!" << endl;
 				}
 				break;
-			default : 
+			default :
 				goto STARTBOSSBATTLE;
 			}
 			break;
-		case '6' : 
+		case '6' :
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
 			mainplayer.increaseresistance();
@@ -1854,7 +2092,7 @@ STARTBOSSBATTLE:
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' : 
+					case '1' :
 						if(mainplayer.sayresistance() >= 10){
 							boss.receivedultra();
 							mainplayer.decreasetenresistance();
@@ -1871,11 +2109,11 @@ STARTBOSSBATTLE:
 				cout << "Skipped the turn" << endl;
 			}
 			break;
-		case 'p' : 
+		case 'p' :
 			equipment();
 			goto STARTBOSSBATTLE;
 			break;
-		default: 
+		default:
 			cout << "Skipped the turn" << endl;
 			break;
 		}
@@ -1924,6 +2162,7 @@ void maintitle(){
 int main(){
 	// Inicio
 	randomseed();
+	mainplayer.customizecharacter(2);
 	while(1){
 		maintitle();
 		gotoxy(2,12);
@@ -1931,9 +2170,12 @@ int main(){
 		gotoxy(2,14);
 		cout << "[2] Continue" << endl;
 		gotoxy(2,16);
+		cout << "[3] Customize Character" << endl;
+		gotoxy(2,18);
 		movement = _getch();
 		switch(movement){
 		case '1':
+			cout << "                             ";
 			gotoxy(20,75);
 			clear();
 			maintitle();
@@ -1957,11 +2199,12 @@ int main(){
 			gotoxy(2,16);
 			movement = _getch();
 			switch (movement){
-			case '1' : 
+			case '1' :
 				start = true;
 				battle();
 				break;
 			}
+			gotoxy(20,75);
 			clear();
 			break;
 		case '2':
@@ -1971,6 +2214,15 @@ int main(){
 				firstbattle = false;
 				battle();
 			}
+			break;
+		case '3':
+			savegame(3);
+			if(savefileexists == false){
+				mainplayer.customizecharacter(1);
+			}
+			break;
+		default :
+			cout << "                             ";
 			break;
 		}
 	}
