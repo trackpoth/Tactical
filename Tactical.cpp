@@ -246,6 +246,7 @@ void enemy::restoreparameters(int parameter){
 
 void savegame(int savetype){
 	FILE * save;
+	int integritychecker;
 	if(savetype == 2){
 		save = fopen("resources.txt","r");
 		if(save != NULL){
@@ -424,10 +425,31 @@ void savegame(int savetype){
 				decrypt(chartostring,key);
 				stringtoint();
 			commonenemy.restoreparameters(3);
-			cout << "Game loaded correctly!" << endl;
-			_getch();
-			fclose(save);
-			remove("resources.txt");
+				fscanf(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
+			integritychecker = converter;
+			if(integritychecker == (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmp() + mainplayer.saymaxresistance() +
+				mainplayer.attackparameter() + mainplayer.saymagicattack() + mainplayer.sayrangedattack() + mainplayer.saydefense() + mainplayer.saylife() +
+				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
+				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
+				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + playershields.sayequippedshield() +
+				commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense())){
+					cout << "Game loaded correctly!" << endl;
+					_getch();
+					fclose(save);
+					remove("resources.txt");
+			}
+			else{
+				clear();
+				cout << "Save game corrupted." << endl;
+				fclose(save);
+				remove("resources.txt");
+				_getch();
+				exit(1);
+			}
 		}
 		else{
 			cout << "There isn't any save to load";
@@ -517,6 +539,20 @@ void savegame(int savetype){
 				fprintf(save,"%s ",encrypter.c_str());
 				encrypt(intEncrypter(commonenemy.saydefense()),key);				// [commonenemy] Defense
 				fprintf(save,"%s ",encrypter.c_str());
+
+			integritychecker = (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmp() + mainplayer.saymaxresistance() +
+				mainplayer.attackparameter() + mainplayer.saymagicattack() + mainplayer.sayrangedattack() + mainplayer.saydefense() + mainplayer.saylife() +
+				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
+				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
+				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + playershields.sayequippedshield() +
+				commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense());
+
+				encrypt(intEncrypter(integritychecker),key);
+				fprintf(save,"%s ",encrypter.c_str());
+
+			cout << integritychecker << endl;
+
 			cout << "Saved successfully! Hope to see you again soon!" << endl;
 			_getch();
 			fclose(save);
@@ -640,6 +676,7 @@ void player::customizecharacter(int type){
 	FILE * character;
 	char answer;
 	if(type == 1){
+CUSTOMIZATIONSTART:
 		character = fopen("character.txt","w+");
 		cout << "                                ";
 		clear();
@@ -852,7 +889,9 @@ CUSTOMIZATION:
 			masterhealth = converter;
 			fclose(character);
 			if((masterstealth + masterstrength + mastermagic + masterhealth) != 4){
-				cout << "character.txt is corrupted.\nPlease create another character at 'Customize character'" << endl;
+				cout << "character.txt is corrupted and it will be deleted.\nPlease create another character at 'Customize character'" << endl;
+				fclose(character);
+				remove("character.txt");
 			}
 			else{
 				cout << "Loaded succesfully!" << endl;
@@ -863,10 +902,13 @@ CUSTOMIZATION:
 			}
 			_getch();
 			clear();
+			fclose(character);
 		}
 		else{
-			cout << "Warning! character.txt not found!" << endl << "Please create a character at 'Customize character' before playing" << endl;
+			cout << "Warning! character.txt not found!" << endl << "You will be now redirected to the 'Character customization'" << endl;
 			_getch();
+			clear();
+			goto CUSTOMIZATIONSTART;
 			clear();
 		}
 	}
