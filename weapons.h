@@ -86,6 +86,7 @@ ranged::ranged()
 {
 	attack1 = 0.02;
 	sp1 = 1;
+
 	equippedranged = 1;
 }
 
@@ -116,6 +117,66 @@ void ranged::determineattack(){
 }
 
 ranged rangedweapon;
+
+class magic
+{
+public:
+	magic();
+	float saymagicattack1();
+	int saymp1();
+
+	int sayequippedmagic();
+	float saymagicattack();
+	int sayrealmagicattack();
+
+	void determinemagicattack();
+	void determinerealmagicattack();
+	void restoremagic();
+
+private:
+	float magicattack1;
+	int mp1;
+	
+	float magicattack;
+	int realmagicattack;
+	int equippedmagic;
+};
+
+magic::magic()
+{
+	magicattack1 = 0.02;
+	mp1 = 1;
+
+	equippedmagic = 1;
+}
+
+float magic::saymagicattack1(){
+	return magicattack1;
+}
+
+int magic::saymp1(){
+	return mp1;
+}
+
+int magic::sayequippedmagic(){
+	return equippedmagic;
+}
+
+float magic::saymagicattack(){
+	return magicattack;
+}
+
+int magic::sayrealmagicattack(){
+	return realmagicattack;
+}
+
+void magic::determinemagicattack(){
+	if(equippedmagic == 1){
+		magicattack = magicattack1;
+	}
+}
+
+magic magicweapon;
 
 class shield
 {

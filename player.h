@@ -8,15 +8,14 @@
 
 using namespace std;
 
-// Defininición de los valores que determinan la frecuencia y el poder de los ataques críticos
+// DefiniciÃ³n de variables locales
+
 int subcriticalcheckerone;
 int subcriticalcheckertwo;
 
-// Efectos varios provocados por determinadas causas
 bool piercingeyeeffect;
 bool damagepilleffect;
 
-// Otros argumentos con funciones secundarias
 char movement;
 int seed;
 int distanceenemy = 3;
@@ -77,6 +76,7 @@ public:
 	int saymaxspbase();
 	int saymaxsp();
 	int saysp();
+	int saymaxmpbase();
 	int saymaxmp();
 	int saymp();
 	int saymagicattack();
@@ -115,6 +115,7 @@ public:
 
 	void determinecriticalpower();
 	void determinemaxsp();
+	void determinemaxmp();
 
 	void defeatchecker();
 
@@ -169,6 +170,7 @@ protected:
 	int playermaxsp;
 	int playermaxmp;
 	int playermaxspbase;
+	int playermaxmpbase;
 	int playermaxresistance;
 	int playermaxultra;
 
@@ -226,13 +228,13 @@ player::player()
 {
 	playermaxlife = 460;
 	playermaxspbase = 13;
-	playermaxmp = 11;
+	playermaxmpbase = 11;
 	playerattack = 18;
 	playermagicattack = 16;
 	playerrangedattack = 14;
 	playerlife = 460;
 	playersp = 14;
-	playermp = 11;
+	playermp = 12;
 	playercriticalchecker = 20;
 	playercriticalmultiplier = 1.5;
 	smallhealthpill = 2;
@@ -277,6 +279,10 @@ int player::saymaxsp(){
 
 int player::saysp(){
 	return playersp;
+}
+
+int player::saymaxmpbase(){
+	return playermaxmpbase;
 }
 
 int player::saymaxmp(){
@@ -718,7 +724,7 @@ MAGIC:
 			if(mastermagic >= 2){
 				if(playertp >= 240 - (30 * mastermagic)){
 					playertp -= 240 - (30 * mastermagic);
-					playermaxmp++;
+					playermaxmpbase++;
 					playermp++;
 					goto MAGIC;
 				}
@@ -773,7 +779,9 @@ public:
 	void enemyattacked();
 	void rangedattacked();
 	void receivedultra();
-	void iceattacked();
+
+	void magicattacked(int type, float strength, int mpdecrease);
+
 	void determinecriticalpower();
 	void limitlife();
 	void randomizetype();
@@ -852,28 +860,6 @@ void enemy::receivedultra(){
 	cout << playername << " USED ULTRA KICK IN THE NUTS! " << mainplayer.attackparameter() * 3 << " DAMAGE WAS DEALT!" << endl;
 }
 
-void enemy::iceattacked(){
-	mainplayer.decreaseplayermp();
-	mainplayer.decreaseplayermp();
-	mainplayer.decreaseplayermp();
-	if(enemytype == 1 || enemytype == 6){
-		enemylife = (enemylife - mainplayer.saymagicattack() * 1.5);
-		cout << "You dealt " << mainplayer.saymagicattack() * 1.5 << " damage to the enemy by using Ice! It was very effective!" << endl;
-	}
-	if(enemytype == 5){
-		enemylife = (enemylife - mainplayer.saymagicattack() * 0.5);
-		cout << "You dealt " << mainplayer.saymagicattack() * 0.5 << " damage to the enemy by using Ice. It wasn't very effective..." << endl;
-	}
-	if(enemytype == 7){
-		enemylife = (enemylife + mainplayer.saymagicattack());
-		cout << "You healed the enemy " << mainplayer.saymagicattack() << " life points by using Ice!" << endl;
-	}
-	if(enemytype == 2 || enemytype == 3 || enemytype == 4){
-		enemylife = (enemylife - mainplayer.saymagicattack());
-		cout << "You dealt " << mainplayer.saymagicattack() << " damage to the enemy by using Ice!" << endl;
-	}
-}
-
 void enemy::determinecriticalpower(){
 	enemycriticalpower = enemyattack * 1.5;
 }
@@ -921,6 +907,9 @@ void enemy::saystats(){
 	if(enemytype == 7){
 		cout << "Ice ";
 	}
+	if(enemytype == 8){
+		cout << "Ground ";
+	}
 	cout << "Human" << endl;
 	if(piercingeyeeffect == false){
 		cout << "Life = ";
@@ -940,19 +929,22 @@ void enemy::saystats(){
 			cout << "[Darkness (x1.5)] [Fire (x1.5)]" << endl;
 		}
 		if(enemytype == 3){
-			cout << "[Light (x1.5)] [Fire (x1.5)]" << endl;
+			cout << "[Light (x2)] [Fire (x1.5)]" << endl;
 		}
 		if(enemytype == 4){
-			cout << "[Darkness (x1.5)] [Water (x1.5)] [Grass (x1.5)]" << endl;
+			cout << "[Darkness (x1.5)] [Ground (x1.5)] [Grass (x1.5)]" << endl;
 		}
 		if(enemytype == 5){
-			cout << "[Darkness (x1.5)] [Water (x2)]" << endl;
+			cout << "[Darkness (x1.5)] [Water (x2)] [Ground (x2)]" << endl;
 		}
 		if(enemytype == 6){
-			cout << "[Ice (x1.5)] [Grass (x2)]" << endl;
+			cout << "[Ice (x2)] [Grass (x2)]" << endl;
 		}
 		if(enemytype == 7){
 			cout << "[Water (x1.5)] [Fire (x1.5)]" << endl;
+		}
+		if(enemytype == 8){
+			cout << "[Water (x1.5)] [Grass (x1.5)]" << endl;
 		}
 	}
 	printf("Effects = ");
@@ -968,7 +960,7 @@ enemy commonenemy;
 enemy boss;
 
 void enemy::randomizeboss(){
-	enemytype = rand() % 7 + 1;
+	enemytype = rand() % 8 + 1;
 	enemyint = 4;
 	healthdrink = 1;
 	enemymaxlife += rand() % 200 + commonenemy.saymaxlife();

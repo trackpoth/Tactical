@@ -114,6 +114,10 @@ void equipment(){
 	if(rangedweapon.sayequippedranged() == 1){
 		cout << "[+2% RAT | +1 SP] Bullshot" << endl;
 	}
+	cout << "Magic weapon : ";
+	if(magicweapon.sayequippedmagic() == 1){
+		cout << "[+2% MAT | +1 MP] DLL injector" << endl;
+	}
 	cout << "Shields      : ";
 	if(playershields.sayequippedshield() == 1){
 		cout << "[10 SH | 2 RT]    Full Cracked Shield" << endl;
@@ -147,7 +151,7 @@ void player::restoreparameters(int parameter){
 		playermaxspbase = converter;
 	}
 	if(parameter == 3){
-		playermaxmp = converter;
+		playermaxmpbase = converter;
 	}
 	if(parameter == 4){
 		playermaxresistance = converter;
@@ -226,6 +230,10 @@ void weapon::restoremelee(){
 
 void ranged::restoreranged(){
 	equippedranged = converter;
+}
+
+void magic::restoremagic(){
+	equippedmagic = converter;
 }
 
 void shield::restoreshield(){
@@ -409,6 +417,11 @@ void savegame(int savetype){
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint();
+			magicweapon.restoremagic();
+				fscanf(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint();
 			playershields.restoreshield();
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
@@ -430,13 +443,13 @@ void savegame(int savetype){
 				decrypt(chartostring,key);
 				stringtoint();
 			integritychecker = converter;
-			if(integritychecker == (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmp() + mainplayer.saymaxresistance() +
+			if(integritychecker == (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmpbase() + mainplayer.saymaxresistance() +
 				mainplayer.attackparameter() + mainplayer.saymagicattack() + mainplayer.sayrangedattack() + mainplayer.saydefense() + mainplayer.saylife() +
 				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
 				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
 				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
-				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + playershields.sayequippedshield() +
-				commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense())){
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
+				playershields.sayequippedshield() + commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense())){
 					cout << "Game loaded correctly!" << endl;
 					_getch();
 					fclose(save);
@@ -472,7 +485,7 @@ void savegame(int savetype){
 				fprintf(save,"%s ",encrypter.c_str());
 				encrypt(intEncrypter(mainplayer.saymaxspbase()),key);				// [mainplayer] Max SP base
 				fprintf(save,"%s ",encrypter.c_str());
-				encrypt(intEncrypter(mainplayer.saymaxmp()),key);					// [mainplayer] Max MP
+				encrypt(intEncrypter(mainplayer.saymaxmpbase()),key);				// [mainplayer] Max MP base
 				fprintf(save,"%s ",encrypter.c_str());
 				encrypt(intEncrypter(mainplayer.saymaxresistance()),key);			// [mainplayer] Max resistance
 				fprintf(save,"%s ",encrypter.c_str());
@@ -526,9 +539,11 @@ void savegame(int savetype){
 				encrypt(intEncrypter(mainplayer.sayresmeter()),key);				// [mainplayer] TP meter [resistance]
 				fprintf(save,"%s ",encrypter.c_str());
 			cout << "Saving 8/9 block of data..." << endl;
-				encrypt(intEncrypter(weapons.sayequippedmelee()),key);				// [weapons] Equipped melee ID
+				encrypt(intEncrypter(weapons.sayequippedmelee()),key);				// [weapons]       Equipped melee ID
 				fprintf(save,"%s ",encrypter.c_str());
-				encrypt(intEncrypter(rangedweapon.sayequippedranged()),key);		// [rangedweapon] Equipped ranged ID
+				encrypt(intEncrypter(rangedweapon.sayequippedranged()),key);		// [rangedweapon]  Equipped ranged ID
+				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(magicweapon.sayequippedmagic()),key);			// [magicweapon]   Equipped magic ID
 				fprintf(save,"%s ",encrypter.c_str());
 				encrypt(intEncrypter(playershields.sayequippedshield()),key);		// [playershields] Equipped shields ID
 				fprintf(save,"%s ",encrypter.c_str());
@@ -540,18 +555,16 @@ void savegame(int savetype){
 				encrypt(intEncrypter(commonenemy.saydefense()),key);				// [commonenemy] Defense
 				fprintf(save,"%s ",encrypter.c_str());
 
-			integritychecker = (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmp() + mainplayer.saymaxresistance() +
+			integritychecker = (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmpbase() + mainplayer.saymaxresistance() +
 				mainplayer.attackparameter() + mainplayer.saymagicattack() + mainplayer.sayrangedattack() + mainplayer.saydefense() + mainplayer.saylife() +
 				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
 				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
 				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
-				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + playershields.sayequippedshield() +
-				commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense());
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
+				playershields.sayequippedshield() + commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense());
 
 				encrypt(intEncrypter(integritychecker),key);
 				fprintf(save,"%s ",encrypter.c_str());
-
-			cout << integritychecker << endl;
 
 			cout << "Saved successfully! Hope to see you again soon!" << endl;
 			_getch();
@@ -686,7 +699,7 @@ CUSTOMIZATIONSTART:
 		masterhealth = 0;
 		cout << "Welcome to the character customization!" << endl;
 		cout << "Just answer some questions and your character will have its own personality!" << endl;
-		getch();
+		_getch();
 CUSTOMIZATION:
 		clear();
 		cout << "1º Do you want to be feared, or to be admired?" << endl;
@@ -850,7 +863,7 @@ CUSTOMIZATION:
 		cout << "Strength skill: " << masterstrength << endl;
 		cout << "Magic skill   : " << mastermagic << endl;
 		cout << "Health skill  : " << masterhealth << endl;
-		getch();
+		_getch();
 		encrypt(intEncrypter(masterstealth),key);					// Stealth skill
 		fprintf(character,"%s ",encrypter.c_str());
 		encrypt(intEncrypter(masterstrength),key);					// Strength skill
@@ -1320,6 +1333,152 @@ void enemy::rangedattacked(){
 	}
 }
 
+void enemy::magicattacked(int type, float strength, int mpdecrease){
+
+	for(int n = 1; n <= mpdecrease; n++){
+		mainplayer.decreaseplayermp();
+	}
+
+	if(type == 1){
+		if(enemytype == 6){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Grass! It was extremely effective!" << endl;
+		}
+		if(enemytype == 4 || enemytype == 8){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Grass! It was very effective!" << endl;
+		}
+		if(enemytype == 3 || enemytype == 5 || enemytype == 7){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Grass. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 1){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Grass!" << endl;
+		}
+		if(enemytype == 2){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Grass!" << endl;
+		}
+	}
+	if(type == 3){
+		if(enemytype == 1 || enemytype == 2 || enemytype == 4 || enemytype == 5){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Dark! It was very effective!" << endl;
+		}
+		if(enemytype == 8){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Dark. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 3 || enemytype == 6){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Dark!" << endl;
+		}
+		if(enemytype == 7){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Dark!" << endl;
+		}
+	}
+	if(type == 4){
+		if(enemytype == 3){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Light! It was extremely effective!" << endl;
+		}
+		if(enemytype == 5){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Light. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 4 || enemytype == 1){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Light!" << endl;
+		}
+		if(enemytype == 7 || enemytype == 2 || enemytype == 8  || enemytype == 6){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Light!" << endl;
+		}
+	}
+	if(type == 5){
+		if(enemytype == 3 || enemytype == 7 || enemytype == 1 || enemytype == 2){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Fire! It was very effective!" << endl;
+		}
+		if(enemytype == 6 || enemytype == 8){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Fire. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 4 || enemytype == 5){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Fire!" << endl;
+		}
+	}
+	if(type == 6){
+		if(enemytype == 5){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Water! It was extremely effective!" << endl;
+		}
+		if(enemytype == 7 || enemytype == 8){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Water! It was very effective!" << endl;
+		}
+		if(enemytype == 3){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Water. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 6 || enemytype == 1){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Water!" << endl;
+		}
+		if(enemytype == 2 || enemytype == 4){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Water!" << endl;
+		}
+	}
+	if(type == 7){
+		if(enemytype == 6){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Ice! It was extremely effective!" << endl;
+		}
+		if(enemytype == 1){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Ice! It was very effective!" << endl;
+		}
+		if(enemytype == 5){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Ice. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 7){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Ice!" << endl;
+		}
+		if(enemytype == 2 || enemytype == 3 || enemytype == 4 || enemytype == 8){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Ice!" << endl;
+		}
+	}
+	if(type == 8){
+		if(enemytype == 5){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Ground! It was extremely effective!" << endl;
+		}
+		if(enemytype == 4){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Ground! It was very effective!" << endl;
+		}
+		if(enemytype == 1){
+			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Ground. It wasn't very effective..." << endl;
+		}
+		if(enemytype == 8){
+			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Ground!" << endl;
+		}
+		if(enemytype == 6 || enemytype == 3 || enemytype == 7 || enemytype == 2){
+			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Ground!" << endl;
+		}
+	}
+}
+
 void player::shop(){
 	cout << "You see a shop near you" << endl;
 	_getch();
@@ -1381,7 +1540,7 @@ SHOP:
 }
 
 void enemy::randomizetype(){
-	enemytype = rand() % 7 + 1;
+	enemytype = rand() % 8 + 1;
 	enemyint = rand() % 3 + 1;
 	healthdrink = rand() % 1;
 }
@@ -1401,8 +1560,16 @@ void ranged::determinerealattack(){
 	realattack = (attack * mainplayer.sayrangedattack());
 }
 
+void magic::determinerealmagicattack(){
+	realmagicattack = (magicattack * mainplayer.saymagicattack());
+}
+
 void player::determinemaxsp(){
 	playermaxsp = (playermaxspbase + rangedweapon.saysp1());
+}
+
+void player::determinemaxmp(){
+	playermaxmp = (playermaxmpbase + magicweapon.saymp1());
 }
 
 void enemy::victorychecker(){
@@ -1556,7 +1723,7 @@ void battlemenu(){
 	}
 	cout << "AT = " << mainplayer.attackparameter() << " + " << weapons.sayattack() * 100 << "%";
 	cout << " | ";
-	cout << "MAT = " << mainplayer.saymagicattack();
+	cout << "MAT = " << mainplayer.saymagicattack() << " + " << magicweapon.saymagicattack() * 100 << "%";
 	cout << " | RAT = " << mainplayer.sayrangedattack() << " + " << rangedweapon.sayattack() * 100 << "%";
 	cout << " | DEF = " << mainplayer.saydefense() << endl;
 	cout << "Effects = ";
@@ -1627,559 +1794,329 @@ EVENT:
 		}
 	}
 
-if(battletype == 1){
-	while(1){
+	if(battletype == 1 || battletype == 2){
+		while(1){
 
 STARTBATTLE:
 
-		mainplayer.determinecriticalpower();
-		commonenemy.determinecriticalpower();
-		weapons.determineattack();
-		weapons.determinerealattack();
-		rangedweapon.determineattack();
-		rangedweapon.determinerealattack();
-		mainplayer.determinemaxshields();
-		mainplayer.determinemaxsp();
-
-		randomseed();
-
-		defeat();
-		commonenemy.victorychecker();
-		if(commonenemy.saylife() <= 0 || runawayfrombattle == true){
-			runawayfrombattle = false;
-			distanceenemy = 3;
-			goto EVENT;
-		}
-
-
-		battlemenu();
-
-		if(distanceenemy == 1 || distanceenemy == 2){
-			successfulhit = true;
-			successfulhit2 = true;
-		}
-		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
-			successfulhit = false;
-			successfulhit2 = false;
-		}
-
-		// El jugador ejecuta su turno
-
-		cin >> movement;
-
-		switch(movement){
-		case '5':
-			break;
-		default :
-			clear();
-			break;
-		}
-
-		switch(movement){
-		case 'q':
-			subcriticalcheckerone = rand() % 100;
-			if(successfulhit == true && mainplayer.sayresistance() >= 2){
-				commonenemy.enemyattacked();
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				mainplayer.increaseultrar();
+			mainplayer.determinecriticalpower();
+			if(battletype == 1){
+				commonenemy.determinecriticalpower();
 			}
-			else{
-				if(mainplayer.sayresistance() < 2){
-					cout << "You are too tired to perform that move!" << endl;
-				}
-				else{
-					cout << "You are too far from the enemy to perform that move!" << endl;
+			if(battletype == 2){
+				boss.determinecriticalpower();
+			}
+			weapons.determineattack();
+			weapons.determinerealattack();
+			rangedweapon.determineattack();
+			rangedweapon.determinerealattack();
+			magicweapon.determinemagicattack();
+			magicweapon.determinerealmagicattack();
+			mainplayer.determinemaxshields();
+			mainplayer.determinemaxsp();
+			mainplayer.determinemaxmp();
+
+			randomseed();
+
+			defeat();
+			if(battletype == 1){
+				commonenemy.victorychecker();
+				if(commonenemy.saylife() <= 0 || runawayfrombattle == true){
+					runawayfrombattle = false;
+					distanceenemy = 3;
+					goto EVENT;
 				}
 			}
-			break;
-		case 'w' :
-			if(mainplayer.sayresistance() >= 1){
-				commonenemy.rangedattacked();
-				mainplayer.decreaseresistance();
-				mainplayer.increaseultra();
+			if(battletype == 2){
+				boss.victorychecker();
+				if(boss.saylife() <= 0 || runawayfrombattle == true){
+					runawayfrombattle = false;
+					distanceenemy = 3;
+					goto EVENT;
+				}
 			}
-			else{
-				cout << "You are too tired to perform that move!" << endl;
+
+			battlemenu();
+
+			if(distanceenemy == 1 || distanceenemy == 2){
+				successfulhit = true;
+				successfulhit2 = true;
 			}
-			break;
-		case '2':
-			itemmenu();break;
-		case '3':
-			printf("List of Special moves:\n\n");
-			printf("Piercing eye [2 SP]['1' to use]\n");
-			printf("-- Unveils more detailed stats of the enemy\n");
-			printf("Quick eye [4 SP]['2' to use]\n");
-			printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
-			printf("\nType any other key to go back to the main menu\n");
+			if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
+				successfulhit = false;
+				successfulhit2 = false;
+			}
+
+			// El jugador ejecuta su turno
+
 			cin >> movement;
-			clear();
+
 			switch(movement){
-			case '1' :
-				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					piercingeyeeffect = true;
-					cout << "Used Piercing Eye!" << endl;
-				}
-				else{
-					if(mainplayer.sayresistance() < 3){
-						cout << "You are too tired to perform that move!" << endl;
-					}
-					else{
-						cout << "You haven't enough SP left to perform this move!" << endl;
-					}
-				}
-				break;
-			case '2' :
-				if(mainplayer.saysp() >= 4 && mainplayer.sayresistance() >= 3){
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl;
-					goto STARTBATTLE;
-					break;
-				}
-				else{
-					if(mainplayer.sayresistance() < 3){
-						cout << "You are too tired to perform that move!" << endl;
-					}
-					else{
-						cout << "You haven't enough SP left to perform this move!" << endl;
-					}
-				}
-				break;
-			default : goto STARTBATTLE;
-				}
-			break;
-		case '5' :
-			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(distanceenemy == 1){
-					cout << "You can't get closer to the enemy!" << endl;
-				}
-				else{
-					if(mainplayer.sayresistance() >= 3){
-						distanceenemy--;
-						cout << "Got closer to the enemy" << endl;
-						mainplayer.decreaseresistance();
-						mainplayer.decreaseresistance();
-						mainplayer.decreaseresistance();
-					}
-					else{
-						cout << "You are too tired to move!" << endl;
-					}
-				}
-				break;
-			case '2' :
-				if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
-					runawayfrombattle = true;
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					goto STARTBATTLE;
-				}
-				if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
-					cout << "You are too tired to escape!" << endl;
-				}
-				if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
-					cout << "You are too tired to move!" << endl;
-				}
-				if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
-					distanceenemy++;
-					cout << "Moved a bit away from the enemy" << endl;
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-				}
-				break;
-			default : goto STARTBATTLE;break;
-			}
-			break;
-		case '4' :
-			printf("List of Magic learned:\n\n");
-			printf("Meditate [5 MP]['1' to use]\n");
-			printf("-- Heals the player by 60 life points\n");
-			printf("Ice [3 MP]['2' to use]\n");
-			printf("-- Harms the enemy using the Ice Element\n");
-			printf("\nType any other key to go back to the main menu\n");
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(mainplayer.saymp() >= 5){
-					mainplayer.meditateused();
-					mainplayer.limitplayerlife();
-				}
-				else{
-					cout << "You haven't enough MP left to perform this move!" << endl;
-				}
-				break;
-			case '2' :
-				if(mainplayer.saymp() >= 3){
-					commonenemy.iceattacked();
-				}
-				else{
-					cout << "You haven't enough MP left to perform this move!" << endl;
-				}
+			case '5':
 				break;
 			default :
-				goto STARTBATTLE;
+				clear();
+				break;
 			}
-			break;
-		case '6' :
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseplayersp();
-			cout << "That was a good rest! Stats recovered a little bit" << endl;
-			break;
-		case '7' :
-			if(mainplayer.sayultra() >= 100){
-				cout << "List of Ultra Attacks:" << endl << endl;
-				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 10 Resistance]['1' to use]" << endl;
-				cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
-				cout << endl << "Type any other key to go back to the battle menu" << endl;
+
+			switch(movement){
+			case 'q':
+				subcriticalcheckerone = rand() % 100;
+				if(successfulhit == true && mainplayer.sayresistance() >= 2){
+					if(battletype == 1){
+						commonenemy.enemyattacked();
+					}
+					if(battletype == 2){
+						boss.enemyattacked();
+					}
+					mainplayer.decreaseresistance();
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultrar();
+				}
+				else{
+					if(mainplayer.sayresistance() < 2){
+						cout << "You are too tired to perform that move!" << endl;
+					}
+					else{
+						cout << "You are too far from the enemy to perform that move!" << endl;
+					}
+				}
+				break;
+			case 'w' :
+				if(mainplayer.sayresistance() >= 1){
+					if(battletype == 1){
+						commonenemy.rangedattacked();
+					}
+					if(battletype == 2){
+						boss.rangedattacked();
+					}
+					mainplayer.decreaseresistance();
+					mainplayer.increaseultra();
+				}
+				else{
+					cout << "You are too tired to perform that move!" << endl;
+				}
+				break;
+			case '2':
+				itemmenu();break;
+			case '3':
+				printf("List of Special moves:\n\n");
+				printf("Piercing eye [2 SP]['1' to use]\n");
+				printf("-- Unveils more detailed stats of the enemy\n");
+				printf("Quick eye [4 SP]['2' to use]\n");
+				printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
+				printf("\nType any other key to go back to the main menu\n");
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' :
-						if(mainplayer.sayresistance() >= 10){
-							commonenemy.receivedultra();
-							mainplayer.decreasetenresistance();
+				case '1' :
+					if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						piercingeyeeffect = true;
+						cout << "Used Piercing Eye!" << endl;
+					}
+					else{
+						if(mainplayer.sayresistance() < 3){
+							cout << "You are too tired to perform that move!" << endl;
 						}
 						else{
-							cout << "You are too tired to perform that ultra!" << endl;
+							cout << "You haven't enough SP left to perform this move!" << endl;
 						}
-						break;
-					default :
+					}
+					break;
+				case '2' :
+					if(mainplayer.saysp() >= 4 && mainplayer.sayresistance() >= 3){
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseplayersp();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						piercingeyeeffect = true;
+						cout << "Used Quick Eye!\n" << endl;
 						goto STARTBATTLE;
-				}
-			}
-			else{
-				cout << "Skipped the turn" << endl;
-			}
-			break;
-		case 'p' :
-			equipment();
-			goto STARTBATTLE;
-			break;
-		default:
-			cout << "Skipped the turn" << endl;
-			break;
-		}
-
-		if(distanceenemy == 1 || distanceenemy == 2){
-			successfulhit = true;
-			successfulhit2 = true;
-		}
-		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
-			successfulhit = false;
-			successfulhit2 = false;
-		}
-
-		 // El enemigo ejecuta su turno
-		mainplayer.playerattacked();
-
-
-		mainplayer.increaseultra();
-		mainplayer.limitultra();
-		mainplayer.limitresistance();
-		mainplayer.limitplayerlife();
-		mainplayer.limitsp();
-		commonenemy.limitlife();
-	}
-}
-if(battletype == 2){
-	while(1){
-
-STARTBOSSBATTLE:
-
-		mainplayer.determinecriticalpower();
-		boss.determinecriticalpower();
-		weapons.determineattack();
-		weapons.determinerealattack();
-		rangedweapon.determineattack();
-		rangedweapon.determinerealattack();
-		mainplayer.determinemaxshields();
-		mainplayer.determinemaxsp();
-
-		randomseed();
-
-		defeat();
-		boss.victorychecker();
-		if(boss.saylife() <= 0 || runawayfrombattle == true){
-			runawayfrombattle = false;
-			distanceenemy = 3;
-			goto EVENT;
-		}
-
-
-		battlemenu();
-
-		if(distanceenemy == 1 || distanceenemy == 2){
-			successfulhit = true;
-			successfulhit2 = true;
-		}
-		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
-			successfulhit = false;
-			successfulhit2 = false;
-		}
-
-		// El jugador ejecuta su turno
-
-		cin >> movement;
-
-		switch(movement){
-		case '5':
-			break;
-		default :
-			clear();
-			break;
-		}
-
-		switch(movement){
-		case 'q':
-			subcriticalcheckerone = rand() % 100;
-			if(successfulhit == true && mainplayer.sayresistance() >= 2){
-				boss.enemyattacked();
-				mainplayer.decreaseresistance();
-				mainplayer.decreaseresistance();
-				mainplayer.increaseultrar();
-			}
-			else{
-				if(mainplayer.sayresistance() < 2){
-					cout << "You are too tired to perform that move!" << endl;
-				}
-				else{
-					cout << "You are too far from the enemy to perform that move!" << endl;
-				}
-			}
-			break;
-		case 'w' :
-			if(mainplayer.sayresistance() >= 1){
-				boss.rangedattacked();
-				mainplayer.decreaseresistance();
-				mainplayer.increaseultra();
-			}
-			else{
-				cout << "You are too tired to perform that move!" << endl;
-			}
-			break;
-		case '2':
-			itemmenu();break;
-		case '3':
-			printf("List of Special moves:\n\n");
-			printf("Piercing eye [2 SP]['1' to use]\n");
-			printf("-- Unveils more detailed stats of the enemy\n");
-			printf("Quick eye [4 SP]['2' to use]\n");
-			printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
-			printf("\nType any other key to go back to the main menu\n");
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					piercingeyeeffect = true;
-					cout << "Used Piercing Eye!" << endl;
-				}
-				else{
-					if(mainplayer.sayresistance() < 3){
-						cout << "You are too tired to perform that move!" << endl;
+						break;
 					}
 					else{
-						cout << "You haven't enough SP left to perform this move!" << endl;
+						if(mainplayer.sayresistance() < 3){
+							cout << "You are too tired to perform that move!" << endl;
+						}
+						else{
+							cout << "You haven't enough SP left to perform this move!" << endl;
+						}
 					}
-				}
-				break;
-			case '2' :
-				if(mainplayer.saysp() >= 4 && mainplayer.sayresistance() >= 3){
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseplayersp();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					piercingeyeeffect = true;
-					cout << "Used Quick Eye!\n" << endl;
-					goto STARTBOSSBATTLE;
 					break;
-				}
-				else{
-					if(mainplayer.sayresistance() < 3){
-						cout << "You are too tired to perform that move!" << endl;
+				default : goto STARTBATTLE;
 					}
-					else{
-						cout << "You haven't enough SP left to perform this move!" << endl;
-					}
-				}
 				break;
-			default : goto STARTBOSSBATTLE;
-				}
-			break;
-		case '5' :
-			cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(distanceenemy == 1){
-					cout << "You can't get closer to the enemy!" << endl;
-				}
-				else{
-					if(mainplayer.sayresistance() >= 3){
-						distanceenemy--;
-						cout << "Got closer to the enemy" << endl;
-						mainplayer.decreaseresistance();
-						mainplayer.decreaseresistance();
-						mainplayer.decreaseresistance();
-					}
-					else{
-						cout << "You are too tired to move!" << endl;
-					}
-				}
-				break;
-			case '2' :
-				if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
-					runawayfrombattle = true;
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					goto STARTBOSSBATTLE;
-				}
-				if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
-					cout << "You are too tired to escape!" << endl;
-				}
-				if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
-					cout << "You are too tired to move!" << endl;
-				}
-				if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
-					distanceenemy++;
-					cout << "Moved a bit away from the enemy" << endl;
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-					mainplayer.decreaseresistance();
-				}
-				break;
-			default : goto STARTBOSSBATTLE;break;
-			}
-			break;
-		case '4' :
-			printf("List of Magic learned:\n\n");
-			printf("Meditate [5 MP]['1' to use]\n");
-			printf("-- Heals the player by 60 life points\n");
-			printf("Ice [3 MP]['2' to use]\n");
-			printf("-- Harms the enemy using the Ice Element\n");
-			printf("\nType any other key to go back to the main menu\n");
-			cin >> movement;
-			clear();
-			switch(movement){
-			case '1' :
-				if(mainplayer.saymp() >= 5){
-					mainplayer.meditateused();
-					mainplayer.limitplayerlife();
-				}
-				else{
-					cout << "You haven't enough MP left to perform this move!" << endl;
-				}
-				break;
-			case '2' :
-				if(mainplayer.saymp() >= 3){
-					boss.iceattacked();
-				}
-				else{
-					cout << "You haven't enough MP left to perform this move!" << endl;
-				}
-				break;
-			default :
-				goto STARTBOSSBATTLE;
-			}
-			break;
-		case '6' :
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseresistance();
-			mainplayer.increaseplayersp();
-			cout << "That was a good rest! Stats recovered a little bit" << endl;
-			break;
-		case '7' :
-			if(mainplayer.sayultra() >= 100){
-				cout << "List of Ultra Attacks:" << endl << endl;
-				cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 10 Resistance]['1' to use]" << endl;
-				cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
-				cout << endl << "Type any other key to go back to the battle menu" << endl;
+			case '5' :
+				cout << "Do you want to move towards the enemy [1] or away from the enemy? [2]" << endl;
 				cin >> movement;
 				clear();
 				switch(movement){
-					case '1' :
-						if(mainplayer.sayresistance() >= 10){
-							boss.receivedultra();
-							mainplayer.decreasetenresistance();
+				case '1' :
+					if(distanceenemy == 1){
+						cout << "You can't get closer to the enemy!" << endl;
+					}
+					else{
+						if(mainplayer.sayresistance() >= 3){
+							distanceenemy--;
+							cout << "Got closer to the enemy" << endl;
+							mainplayer.decreaseresistance();
+							mainplayer.decreaseresistance();
+							mainplayer.decreaseresistance();
 						}
 						else{
-							cout << "You are too tired to perform that ultra!" << endl;
+							cout << "You are too tired to move!" << endl;
 						}
-						break;
-					default :
-						goto STARTBOSSBATTLE;
+					}
+					break;
+				case '2' :
+					if(distanceenemy == 5 && mainplayer.sayresistance() >= 3){
+						runawayfrombattle = true;
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						goto STARTBATTLE;
+					}
+					if(distanceenemy == 5 && mainplayer.sayresistance() < 3){
+						cout << "You are too tired to escape!" << endl;
+					}
+					if(distanceenemy < 5 && mainplayer.sayresistance() < 3){
+						cout << "You are too tired to move!" << endl;
+					}
+					if(distanceenemy < 5 && mainplayer.sayresistance() >= 3){
+						distanceenemy++;
+						cout << "Moved a bit away from the enemy" << endl;
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+						mainplayer.decreaseresistance();
+					}
+					break;
+				default : goto STARTBATTLE;break;
 				}
-			}
-			else{
+				break;
+			case '4' :
+				printf("List of Magic learned:\n\n");
+				printf("Meditate [5 MP]['1' to use]\n");
+				printf("-- Heals the player by 60 life points\n");
+				printf("Ice [3 MP]['2' to use]\n");
+				printf("-- Harms the enemy using the Ice Element\n");
+				printf("\nType any other key to go back to the main menu\n");
+				cin >> movement;
+				clear();
+				switch(movement){
+				case '1' :
+					if(mainplayer.saymp() >= 5){
+						mainplayer.meditateused();
+						mainplayer.limitplayerlife();
+					}
+					else{
+						cout << "You haven't enough MP left to perform this move!" << endl;
+					}
+					break;
+				case '2' :
+					if(mainplayer.saymp() >= 3){
+						if(battletype == 1){
+							commonenemy.magicattacked(7,1,3);
+						}
+						if(battletype == 2){
+							boss.magicattacked(7,1,3);
+						}
+					}
+					else{
+						cout << "You haven't enough MP left to perform this move!" << endl;
+					}
+					break;
+				default :
+					goto STARTBATTLE;
+				}
+				break;
+			case '6' :
+				mainplayer.increaseresistance();
+				mainplayer.increaseresistance();
+				mainplayer.increaseresistance();
+				mainplayer.increaseresistance();
+				mainplayer.increaseresistance();
+				mainplayer.increaseresistance();
+				mainplayer.increaseplayersp();
+				cout << "That was a good rest! Stats recovered a little bit" << endl;
+				break;
+			case '7' :
+				if(mainplayer.sayultra() >= 100){
+					cout << "List of Ultra Attacks:" << endl << endl;
+					cout << "-Ultra kick in the nuts [WEAK][100 Ultra | 10 Resistance]['1' to use]" << endl;
+					cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
+					cout << endl << "Type any other key to go back to the battle menu" << endl;
+					cin >> movement;
+					clear();
+					switch(movement){
+						case '1' :
+							if(mainplayer.sayresistance() >= 10){
+								if(battletype == 1){
+									commonenemy.receivedultra();
+								}
+								if(battletype == 2){
+									boss.receivedultra();
+								}
+								mainplayer.decreasetenresistance();
+							}
+							else{
+								cout << "You are too tired to perform that ultra!" << endl;
+							}
+							break;
+						default :
+							goto STARTBATTLE;
+					}
+				}
+				else{
+					cout << "Skipped the turn" << endl;
+				}
+				break;
+			case 'p' :
+				equipment();
+				goto STARTBATTLE;
+				break;
+			default:
 				cout << "Skipped the turn" << endl;
+				break;
 			}
-			break;
-		case 'p' :
-			equipment();
-			goto STARTBOSSBATTLE;
-			break;
-		default:
-			cout << "Skipped the turn" << endl;
-			break;
-		}
 
-		if(distanceenemy == 1 || distanceenemy == 2){
-			successfulhit = true;
-			successfulhit2 = true;
-		}
-		if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
-			successfulhit = false;
-			successfulhit2 = false;
-		}
+			if(distanceenemy == 1 || distanceenemy == 2){
+				successfulhit = true;
+				successfulhit2 = true;
+			}
+			if(distanceenemy == 3 || distanceenemy == 4 || distanceenemy == 5){
+				successfulhit = false;
+				successfulhit2 = false;
+			}
 
-		 // El enemigo ejecuta su turno
-		mainplayer.playerattackedboss();
+			 // El enemigo ejecuta su turno
+			if(battletype == 1){
+				mainplayer.playerattacked();
+			}
+			if(battletype == 2){
+				mainplayer.playerattackedboss();
+			}
 
-		mainplayer.increaseultra();
-		mainplayer.limitultra();
-		mainplayer.limitresistance();
-		mainplayer.limitplayerlife();
-		mainplayer.limitsp();
-		boss.limitlife();
+			mainplayer.increaseultra();
+			mainplayer.limitultra();
+			mainplayer.limitresistance();
+			mainplayer.limitplayerlife();
+			mainplayer.limitsp();
+			if(battletype == 1){
+				commonenemy.limitlife();
+			}
+			if(battletype == 2){
+				boss.limitlife();
+			}
+		}
 	}
-}
 }
 
 void maintitle(){
@@ -2198,7 +2135,7 @@ void maintitle(){
 	gotoxy(2,8);
 	cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
 	gotoxy(2,9);
-	cout << "                                                           [Alpha 1.6]";
+	cout << "				                            [Alpha 2.1] ";
 }
 
 int main(){
