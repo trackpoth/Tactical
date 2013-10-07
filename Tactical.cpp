@@ -7,10 +7,30 @@
 #include <windows.h>
 #include <cstring>
 #include <sstream>
+#include <winuser.h>
+#include <pthread.h>
 #include "player.h"
 #include "key.h"
 #include "dialogues.h"
 #include "weapons.h"
+
+#define BLACK 0
+#define BLUE 1
+#define GREEN 2
+#define CYAN 3
+#define RED 4
+#define MAGENTA 5
+#define BROWN 6
+#define LIGHTGREY 7
+#define DARKGREY 8
+#define LIGHTBLUE 9
+#define LIGHTGREEN 10
+#define LIGHTCYAN 11
+#define LIGHTRED 12
+#define LIGHTMAGENTA 13
+#define YELLOW 14
+#define WHITE 15
+#define BLINK 128
 
 using namespace std;
 
@@ -18,6 +38,8 @@ bool start;
 bool load;
 bool loadfailed;
 bool savefileexists;
+bool succesfulbuy;
+int skilllearnt;
 
 int eventtype;
 int eventgenerator;
@@ -40,8 +62,6 @@ string intEncrypter(int number)
    return ss.str();
 }
 
-// Funciones de alta importancia que pueden ser llamadas desde cualquier parte del programa
-
 void encrypt(string data,string key)
 {
     for(unsigned i=0;i<data.size();i++){
@@ -58,6 +78,17 @@ void decrypt(string data,string key)
 	encrypter = data;
 }
 
+void clearcolors(int text, int background){
+	int n;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (text + (background * 16)) );
+	for(; n < 25; n++){
+	gotoxy(0,n);
+	cout << "                                                                                ";
+	}
+	n = 0;
+	gotoxy(0,0);
+}
+
 void randomseed(){
 	t = clock();
 	if(t >= 10000){
@@ -68,6 +99,7 @@ void randomseed(){
 }
 
 void itemmenu(){
+	clear();
 	cout << playername << "'s life: " << mainplayer.saylife() << "/" << mainplayer.saymaxlife() << endl << endl;
 	if(mainplayer.saysmallhealthpill() > 0){
 		printf("Small Health Pill x%d [1 to use]\n",mainplayer.saysmallhealthpill());
@@ -105,6 +137,18 @@ void itemmenu(){
 	}
 }
 
+void options(){
+OPTIONS:
+	cout << "Options" << endl << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (backgroundcolor * 16)) );
+	cout << "There are no options at the moment" << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+	cin >> movement;
+	clear();
+	switch(movement){
+	}
+}
+
 void equipment(){
 	cout << "Melee weapon : ";
 	if(weapons.sayequippedmelee() == 1){
@@ -122,24 +166,28 @@ void equipment(){
 	if(playershields.sayequippedshield() == 1){
 		cout << "[10 SH | 2 RT]    Full Cracked Shield" << endl;
 	}
-	cout << endl << "Sector = " << section << endl;
-	cout << "Zone = " << zone << endl;
+	cout << endl << "Sector = " << section << " | Zone = " << zone << endl;
 	cout << endl << "Squares = " << mainplayer.saysquares() << endl;
-	cout << endl << "Type 't' to enter the parameter upgrading center" << endl;
-	cout << "Type any key to go back to the menu" << endl;
+	cout << endl << "[t] Enter the parameter upgrading center" << endl;
+	cout << "[o] Options" << endl;
+	cout << "[Any other key] Go back to the menu" << endl;
 	cin >> movement;
 	clear();
 	switch(movement){
 	case 't' :
 		mainplayer.upgrading();
+		break;
+	case 'o' :
+		options();
+		break;
 	default:;
 	}
 }
 
 int converter;
 
-void stringtoint(){
-	stringstream ss(encrypter);
+void stringtoint(string value){
+	stringstream ss(value);
 	ss >> converter;
 }
 
@@ -222,6 +270,9 @@ void player::restoreparameters(int parameter){
 	if(parameter == 26){
 		resmeter = converter;
 	}
+	if(parameter == 27){
+		experience = converter;
+	}
 }
 
 void weapon::restoremelee(){
@@ -266,189 +317,194 @@ void savegame(int savetype){
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			section = converter;
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			zone = converter;
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(1);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(2);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(3);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(4);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(5);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(6);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(7);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(8);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(9);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(10);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(11);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(12);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(13);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(14);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(15);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(16);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(17);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(18);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(19);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(20);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(21);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(22);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(23);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(24);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(25);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mainplayer.restoreparameters(26);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
+			mainplayer.restoreparameters(27);
+				fscanf(save,"%s",retriever);
+				chartostring = retriever;
+				decrypt(chartostring,key);
+				stringtoint(encrypter);
 			weapons.restoremelee();
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			rangedweapon.restoreranged();
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			magicweapon.restoremagic();
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			playershields.restoreshield();
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			commonenemy.restoreparameters(1);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			commonenemy.restoreparameters(2);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			commonenemy.restoreparameters(3);
 				fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			integritychecker = converter;
 			if(integritychecker == (section + zone + mainplayer.saymaxlife() + mainplayer.saymaxspbase() + mainplayer.saymaxmpbase() + mainplayer.saymaxresistance() +
 				mainplayer.attackparameter() + mainplayer.saymagicattack() + mainplayer.sayrangedattack() + mainplayer.saydefense() + mainplayer.saylife() +
 				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
 				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
 				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
-				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + mainplayer.sayexperience() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
 				playershields.sayequippedshield() + commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense())){
 					cout << "Game loaded correctly!" << endl;
 					_getch();
@@ -538,6 +594,8 @@ void savegame(int savetype){
 				fprintf(save,"%s ",encrypter.c_str());
 				encrypt(intEncrypter(mainplayer.sayresmeter()),key);				// [mainplayer] TP meter [resistance]
 				fprintf(save,"%s ",encrypter.c_str());
+				encrypt(intEncrypter(mainplayer.sayexperience()),key);				// [mainplayer] Experience
+				fprintf(save,"%s ",encrypter.c_str());
 			cout << "Saving 8/9 block of data..." << endl;
 				encrypt(intEncrypter(weapons.sayequippedmelee()),key);				// [weapons]       Equipped melee ID
 				fprintf(save,"%s ",encrypter.c_str());
@@ -560,7 +618,7 @@ void savegame(int savetype){
 				mainplayer.saysp() + mainplayer.saymp() + mainplayer.sayresistance() + mainplayer.sayultra() + mainplayer.saycriticalchecker() +
 				mainplayer.saysmallhealthpill() + mainplayer.saydamagepill() + mainplayer.saysquares() + mainplayer.saytp() + mainplayer.sayattacktpmeter() +
 				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
-				mainplayer.saympmeter() + mainplayer.sayresmeter() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
+				mainplayer.saympmeter() + mainplayer.sayresmeter() + mainplayer.sayexperience() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
 				playershields.sayequippedshield() + commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense());
 
 				encrypt(intEncrypter(integritychecker),key);
@@ -684,6 +742,499 @@ TRAVELING:
 
 
 // Funciones procedentes de clases
+
+void player::upgrading(){
+UPGRADING:
+	cout << "Parameter upgrading center" << endl;
+	cout << "Current TP: " << playertp << endl;
+	cout << "Current experience: " << experience << endl << endl;
+	cout << "[1] Stealth tier  [" << masterstealth << " skill points]" << endl;
+	cout << "[2] Strength tier [" << masterstrength << " skill points]" << endl;
+	cout << "[3] Magic tier    [" << mastermagic << " skill points]" << endl;
+	cout << "[4] Health tier   [" << masterhealth << " skill points]" << endl;
+	cout << endl << "[w] Experience center" << endl;
+	cout << "[Any other key] Go back to the main menu" << endl;
+	cin >> movement;
+	clear();
+	switch(movement){
+	case '1' :
+STEALTH:
+		cout << "Parameter upgrading center | Stealth tier" << endl;
+		cout << "Current TP: " << playertp << endl;
+		cout << "Current experience: " << experience << endl << endl;
+		cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
+		if(masterstealth >= 1){
+			cout << "Max SP             : " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
+		}
+		if(masterstealth >= 2){
+			cout << "Resistance         : " << playermaxresistance << " -> " << playermaxresistance + 2 << endl;
+		}
+		cout << endl << "[1] Upgrade RAT        (-" << 90 - (12 * masterstealth) << " TP)" << endl;
+		if(masterstealth >= 1){
+			cout << "[2] Upgrade Max SP     (-" << 240 - (30 * masterstealth) << " TP)" << endl;
+		}
+		if(masterstealth >= 2){
+			cout << "[3] Upgrade Resistance (-" << 120 - (12 * masterstealth) << " TP)" << endl;
+		}
+		cout << endl << "[q] Go back to the upgrading menu" << endl;
+		cout << "[Any other key] Go back to the main menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (12 * masterstealth)){
+				playertp -= 90 - (12 * masterstealth);
+				experience += 9 - (1.2 * masterstealth);
+				playerrangedattack++;
+				goto STEALTH;
+			}
+			else{
+				cout << "You do not have enough Train Points for that!" << endl << endl;
+			}
+			break;
+		case '2' :
+			if(masterstealth >= 1){
+				if(playertp >= 240 - (30 * masterstealth)){
+					playertp -= 240 - (30 * masterstealth);
+					experience += 24 - (3 * masterstealth);
+					playermaxspbase++;
+					playersp++;
+					goto STEALTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
+		case '3' :
+			if(masterstealth >= 2){
+				if(playertp >= 120 - (12 * masterstealth)){
+					playertp -= 120 - (12 * masterstealth);
+					experience += 12 - (1.2 * masterstealth);
+					playermaxresistance += 2;
+					playerresistance += 2;
+					goto STEALTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
+		case 'q' :
+			goto UPGRADING;
+			break;
+		}
+		break;
+	case '2' :
+STRENGTH:
+		cout << "Parameter upgrading center | Strength tier" << endl;
+		cout << "Current TP: " << playertp << endl;
+		cout << "Current experience: " << experience << endl << endl;
+		cout << "Attack (AT)        : " << playerattack << " -> " << playerattack + 1 << endl;
+		if(masterstrength >= 1){
+			cout << "Defense (DEF)      : " << playerdefense << " -> " << playerdefense + 1 << endl;
+		}
+		cout << endl << "[1] Upgrade AT         (-" << 80 - (12 * masterstrength) << " TP)" << endl;
+		if(masterstrength >= 1){
+			cout << "[2] Upgrade DEF        (-" << 80 - (9 * masterstrength) << " TP)" << endl;
+		}
+		cout << endl << "[q] Go back to the upgrading menu" << endl;
+		cout << "[Any other key] Go back to the main menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 80 - (12 * masterstrength)){
+				playertp -= 80 - (12 * masterstrength);
+				experience += 8 - (1.2 * masterstrength);
+				playerattack++;
+				goto STRENGTH;
+			}
+			else{
+				cout << "You do not have enough Train Points for that!" << endl << endl;
+			}
+			break;
+		case '2' :
+			if(masterstrength >= 1){
+				if(playertp >= 80 - (9 * masterstrength)){
+					playertp -= 80 - (9 * masterstrength);
+					experience += 8 - (0.9 * masterstrength);
+					playerdefense++;
+					goto STRENGTH;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
+		case 'q' :
+			goto UPGRADING;
+			break;
+		}
+		break;
+	case '3' :
+MAGIC:
+		cout << "Parameter upgrading center | Magic tier" << endl;
+		cout << "Current TP: " << playertp << endl;
+		cout << "Current experience: " << experience << endl << endl;
+		cout << "Magic attack (MAT) : " << playermagicattack << " -> " << playermagicattack + 1 << endl;
+		if(mastermagic >= 2){
+			cout << "Max MP             : " << playermaxmp << " -> " << playermaxmp + 1 << endl;
+		}
+		cout << endl << "[1] Upgrade MAT        (-" << 90 - (12 * mastermagic) << " TP)" << endl;
+		if(mastermagic >= 2){
+			cout << "[2] Upgrade Max MP     (-" << 240 - (30 * mastermagic) << " TP)" << endl;
+		}
+		cout << endl << "[q] Go back to the upgrading menu" << endl;
+		cout << "[Any other key] Go back to the main menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (12 * mastermagic)){
+				playertp -= 90 - (12 * mastermagic);
+				experience += 9 - (1.2 * mastermagic);
+				playermagicattack++;
+				goto MAGIC;
+			}
+			else{
+				cout << "You do not have enough Train Points for that!" << endl << endl;
+			}
+			break;
+		case '2' :
+			if(mastermagic >= 2){
+				if(playertp >= 240 - (30 * mastermagic)){
+					playertp -= 240 - (30 * mastermagic);
+					experience += 24 - (3 * mastermagic);
+					playermaxmpbase++;
+					playermp++;
+					goto MAGIC;
+				}
+				else{
+					cout << "You do not have enough Train Points for that!" << endl << endl;
+				}
+			}
+			break;
+		case 'q' :
+			goto UPGRADING;
+			break;
+		}
+		break;
+	case '4' :
+HEALTH:
+		cout << "Parameter upgrading center | Health tier" << endl;
+		cout << "Current TP: " << playertp << endl;
+		cout << "Current experience: " << experience << endl << endl;
+		cout << "Max Life           : " << playermaxlife << " -> " << playermaxlife + 10 << endl << endl;
+		cout << "[1] Upgrade Max Life   (-" << 90 - (9 * masterhealth) << " TP)" << endl;
+		cout << endl << "[q] Go back to the upgrading menu" << endl;
+		cout << "[Any other key] Go back to the main menu" << endl;
+		cin >> movement;
+		clear();
+		switch(movement){
+		case '1' :
+			if(playertp >= 90 - (9 * masterhealth)){
+				playertp -= 90 - (9 * masterhealth);
+				experience += 9 - (0.9 * masterhealth);
+				playermaxlife += 10;
+				playerlife += 10;
+				goto HEALTH;
+			}
+			else{
+				cout << "You do not have enough Train Points for that!" << endl << endl;
+			}
+			break;
+		case 'q' :
+			goto UPGRADING;
+			break;
+		}
+		break;
+	case 'w' :
+XPCENTER:
+		string xpinvest;
+
+		cout << "Experience center" << endl;
+		cout << "Current TP: " << playertp << endl;
+		cout << "Current experience: " << experience << endl << endl;
+		cout << "[1] Train" << endl;
+		if(masterhealth + mastermagic + masterstealth + masterstrength >= 7){
+			cout << "[2] Meditate {+1 skill point} (-200 XP)" << endl;
+		}
+		if(masterhealth + mastermagic + masterstealth + masterstrength <= 7){
+			cout << "[2] Meditate {+1 skill point} (-140 XP)" << endl;
+		}
+		cout << endl << "[q] Go back to the upgrading menu" << endl;
+		cout << "[Any other key] Go back to the main menu" << endl;
+		cin >> movement;
+		randomseed();
+		clear();
+		switch(movement){
+		case '1' :
+			cout << "Experience center | Train" << endl;
+			cout << "Current TP: " << playertp << endl;
+			cout << "Current experience: " << experience << endl << endl;
+			cout << "[1] Train magic" << endl;
+			cout << endl << "[q] Go back to the upgrading menu" << endl;
+			cout << "[Any other key] Go back to the main menu" << endl;
+			cin >> movement;
+			randomseed();
+			clear();
+			switch(movement){
+			case '1' :
+				cout << "Current experience: " << experience << endl << endl;
+				cout << "How much XP you want to invest in training? Min 10 XP" << endl;
+				cout << endl << "{Each XP adds up 4% of learning a skill}" << endl;
+				cout << "(25 XP invested = 100% of learning a tier 1 skill)" << endl;
+				cout << "(50 XP invested = 100% of learning a tier 2 skill)" << endl;
+				cout << "(75 XP invested = 100% of learning a tier 3 skill)" << endl;
+				cout << "[Note: If a tier 1 skill has a tier 2/3 version, you wont be able" << endl << "to unlock the tier 2/3 version until you unlock the tier 1 one]" << endl << endl;
+				cin >> xpinvest;
+				randomseed();
+				stringtoint(xpinvest);
+				clear();
+				if(converter < 10){
+					converter = 0;
+					cout << "The minimum is 10 XP" << endl << endl;
+					goto XPCENTER;
+				}
+				if(converter > experience){
+					converter = 0;
+					cout << "You haven't enough experience" << endl << endl;
+					goto XPCENTER;
+				}
+				else{
+					experience -= converter;
+					subcriticalcheckerone = rand() % 101;
+					if(converter <= 25){
+						if(subcriticalcheckerone > converter * 4){
+TIER1FAILED:
+							cout << "Bad luck! Training turned up with nothing new" << endl << endl;
+						}
+						else{
+STARTTIER1:
+							subcriticalcheckertwo = rand() % 7;
+TIER1:
+							if(grasslearnt == false && subcriticalcheckertwo == 1){
+								grasslearnt = true;
+								skilllearnt = 1;
+								cout << "'Grass' was learnt!" << endl << endl;
+							}
+							if(darklearnt == false && subcriticalcheckertwo == 2){
+								darklearnt = true;
+								skilllearnt = 1;
+								cout << "'Dark' was learnt!" << endl << endl;
+							}
+							if(lightlearnt == false && subcriticalcheckertwo == 3){
+								lightlearnt = true;
+								skilllearnt = 1;
+								cout << "'Light' was learnt!" << endl << endl;
+							}
+							if(firelearnt == false && subcriticalcheckertwo == 4){
+								firelearnt = true;
+								skilllearnt = 1;
+								cout << "'Fire' was learnt!" << endl << endl;
+							}
+							if(waterlearnt == false && subcriticalcheckertwo == 5){
+								waterlearnt = true;
+								skilllearnt = 1;
+								cout << "'Water' was learnt!" << endl << endl;
+							}
+							if(groundlearnt == false && subcriticalcheckertwo == 6){
+								groundlearnt = true;
+								skilllearnt = 1;
+								cout << "'Ground' was learnt!" << endl << endl;
+							}
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while((subcriticalcheckertwo == 1 && grasslearnt == true) || (subcriticalcheckertwo == 2 && darklearnt == true) || (subcriticalcheckertwo == 3 && lightlearnt == true)
+								|| (subcriticalcheckertwo == 4 && firelearnt == true) || (subcriticalcheckertwo == 5 && waterlearnt == true) || (subcriticalcheckertwo == 6 && groundlearnt == true)){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 6){
+										goto TIER1FAILED;
+									}
+								}
+								goto TIER1;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+					if(converter <= 50 && converter > 25){
+						if(subcriticalcheckerone > (converter - 25) * 4){
+							goto STARTTIER1;
+						}
+						else{
+STARTTIER2:
+							subcriticalcheckertwo = rand() % 8;
+TIER2:
+							if(frostbitelearnt == false && subcriticalcheckertwo == 1){
+								frostbitelearnt = true;
+								skilllearnt = 1;
+								cout << "'Frostbite' was learnt!" << endl << endl;
+							}
+							if(ustilagolearnt == false && subcriticalcheckertwo == 2){
+								ustilagolearnt = true;
+								skilllearnt = 1;
+								cout << "'Ustilago' was learnt!" << endl << endl;
+							}
+							if(isolationlearnt == false && subcriticalcheckertwo == 3){
+								isolationlearnt = true;
+								skilllearnt = 1;
+								cout << "'Perversion' was learnt!" << endl << endl;
+							}
+							if(illuminationlearnt == false && subcriticalcheckertwo == 4){
+								illuminationlearnt = true;
+								skilllearnt = 1;
+								cout << "'Illumination' was learnt!" << endl << endl;
+							}
+							if(flarelearnt == false && subcriticalcheckertwo == 5){
+								flarelearnt = true;
+								skilllearnt = 1;
+								cout << "'Flare' was learnt!" << endl << endl;
+							}
+							if(hydrolearnt == false && subcriticalcheckertwo == 6){
+								hydrolearnt = true;
+								skilllearnt = 1;
+								cout << "'Hydro' was learnt!" << endl << endl;
+							}
+							if(shakelearnt == false && subcriticalcheckertwo == 7){
+								shakelearnt = true;
+								skilllearnt = 1;
+								cout << "'Shake' was learnt!" << endl << endl;
+							}
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while((subcriticalcheckertwo == 1 && frostbitelearnt == true) || (subcriticalcheckertwo == 2 && ustilagolearnt == true) || (subcriticalcheckertwo == 3 && isolationlearnt == true)
+								|| (subcriticalcheckertwo == 4 && illuminationlearnt == true) || (subcriticalcheckertwo == 5 && flarelearnt == true) || (subcriticalcheckertwo == 6 && hydrolearnt == true)
+								|| (subcriticalcheckertwo == 7 && shakelearnt == true)){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 7){
+										goto STARTTIER1;
+									}
+								}
+								goto TIER2;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+					if(converter > 50){
+						if(subcriticalcheckerone > (converter - 50) * 4){
+							goto STARTTIER2;
+						}
+						else{
+STARTTIER3:
+							subcriticalcheckertwo = rand() % 8;
+TIER3:
+							if(hypothermialearnt == false && subcriticalcheckertwo == 1){
+								hypothermialearnt = true;
+								skilllearnt = 1;
+								cout << "'Hypothermia' was learnt!" << endl << endl;
+							}
+							if(phytoplasmalearnt == false && subcriticalcheckertwo == 2){
+								phytoplasmalearnt = true;
+								skilllearnt = 2;
+								cout << "'Phythoplasma' was learnt!" << endl << endl;
+							}
+							if(corruptionlearnt == false && subcriticalcheckertwo == 3){
+								corruptionlearnt = true;
+								skilllearnt = 3;
+								cout << "'Corruption' was learnt!" << endl << endl;
+							}
+							if(lethalblindnesslearnt == false && subcriticalcheckertwo == 4){
+								lethalblindnesslearnt = true;
+								skilllearnt = 4;
+								cout << "'Lethal Blindness' was learnt!" << endl << endl;
+							}
+							if(hyperthermialearnt == false && subcriticalcheckertwo == 5){
+								hyperthermialearnt = true;
+								skilllearnt = 5;
+								cout << "'Hyperthermia' was learnt!" << endl << endl;
+							}
+							if(drownlearnt == false && subcriticalcheckertwo == 6){
+								drownlearnt = true;
+								skilllearnt = 6;
+								cout << "'Drown' was learnt!" << endl << endl;
+							}
+							if(earthquakelearnt == false && subcriticalcheckertwo == 7){
+								earthquakelearnt = true;
+								skilllearnt = 7;
+								cout << "'Earthquake' was learnt!" << endl << endl;
+							}
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while((subcriticalcheckertwo == 1 && hypothermialearnt == true) || (subcriticalcheckertwo == 2 && phytoplasmalearnt == true) || (subcriticalcheckertwo == 3 && corruptionlearnt == true)
+								|| (subcriticalcheckertwo == 4 && lethalblindnesslearnt == true) || (subcriticalcheckertwo == 5 && hyperthermialearnt == true) || (subcriticalcheckertwo == 6 && drownlearnt == true)
+								|| (subcriticalcheckertwo == 7 && earthquakelearnt == true)){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 7){
+										goto STARTTIER2;
+									}
+								}
+								goto TIER3;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+				}
+				break;
+			case 'q' :
+				goto UPGRADING;
+				break;
+			}
+		case '2' :
+			if(masterhealth + mastermagic + masterstealth + masterstrength >= 7){
+				if(experience >= 200){
+					experience -= 200;
+					succesfulbuy = true;
+				}
+			}
+			if(masterhealth + mastermagic + masterstealth + masterstrength <= 7){
+				if(experience >= 140){
+					experience -= 140;
+					succesfulbuy = true;
+				}
+			}
+			if(succesfulbuy == true){
+APPLYSKILL:
+				cout << "Apply skill point to: " << endl << endl;
+				cout << "[1] Stealth" << endl;
+				cout << "[2] Strength" << endl;
+				cout << "[3] Magic" << endl;
+				cout << "[4] Health" << endl;
+				cout << "[Any other key] Go back to the main menu" << endl;
+				cin >> movement;
+				clear();
+				switch(movement){
+				case '1' :
+					masterstealth++;
+					break;
+				case '2' :
+					masterstrength++;
+					break;
+				case '3' :
+					mastermagic++;
+					break;
+				case '4' :
+					masterhealth++;
+					break;
+				default : goto APPLYSKILL;
+				}
+				succesfulbuy = false;
+			}
+			goto XPCENTER;
+			break;
+		case 'q' :
+			goto UPGRADING;
+			break;
+		}
+		break;
+	}
+}
 
 void player::customizecharacter(int type){
 	FILE * character;
@@ -873,7 +1424,7 @@ CUSTOMIZATION:
 		encrypt(intEncrypter(masterhealth),key);					// Health skill
 		fprintf(character,"%s ",encrypter.c_str());
 		fclose(character);
-		clear();
+		clearcolors(15,8);
 	}
 	if(type == 2){
 		character = fopen("character.txt","r");
@@ -883,22 +1434,22 @@ CUSTOMIZATION:
 				fscanf(character,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			masterstealth = converter;
 				fscanf(character,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			masterstrength = converter;
 				fscanf(character,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			mastermagic = converter;
 				fscanf(character,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
-				stringtoint();
+				stringtoint(encrypter);
 			masterhealth = converter;
 			fclose(character);
 			if((masterstealth + masterstrength + mastermagic + masterhealth) != 4){
@@ -920,7 +1471,7 @@ CUSTOMIZATION:
 		else{
 			cout << "Warning! character.txt not found!" << endl << "You will be now redirected to the 'Character customization'" << endl;
 			_getch();
-			clear();
+			clearcolors(7,0);
 			goto CUSTOMIZATIONSTART;
 			clear();
 		}
@@ -1333,7 +1884,7 @@ void enemy::rangedattacked(){
 	}
 }
 
-void enemy::magicattacked(int type, float strength, int mpdecrease){
+void enemy::magicattacked(int type, float strength, int mpdecrease, string skillname){
 
 	for(int n = 1; n <= mpdecrease; n++){
 		mainplayer.decreaseplayermp();
@@ -1342,139 +1893,139 @@ void enemy::magicattacked(int type, float strength, int mpdecrease){
 	if(type == 1){
 		if(enemytype == 6){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Grass! It was extremely effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using " << skillname << "! It was extremely effective!" << endl;
 		}
 		if(enemytype == 4 || enemytype == 8){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Grass! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 3 || enemytype == 5 || enemytype == 7){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Grass. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 1){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Grass!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 2){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Grass!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 3){
 		if(enemytype == 1 || enemytype == 2 || enemytype == 4 || enemytype == 5){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Dark! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 8){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Dark. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 3 || enemytype == 6){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Dark!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 7){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Dark!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 4){
 		if(enemytype == 3){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Light! It was extremely effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using " << skillname << "! It was extremely effective!" << endl;
 		}
 		if(enemytype == 5){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Light. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 4 || enemytype == 1){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Light!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 7 || enemytype == 2 || enemytype == 8  || enemytype == 6){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Light!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 5){
 		if(enemytype == 3 || enemytype == 7 || enemytype == 1 || enemytype == 2){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Fire! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 6 || enemytype == 8){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Fire. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 4 || enemytype == 5){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Fire!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 6){
 		if(enemytype == 5){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Water! It was extremely effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using " << skillname << "! It was extremely effective!" << endl;
 		}
 		if(enemytype == 7 || enemytype == 8){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Water! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 3){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Water. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 6 || enemytype == 1){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Water!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 2 || enemytype == 4){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Water!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 7){
 		if(enemytype == 6){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Ice! It was extremely effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using " << skillname << "! It was extremely effective!" << endl;
 		}
 		if(enemytype == 1){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Ice! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 5){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Ice. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 7){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Ice!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 2 || enemytype == 3 || enemytype == 4 || enemytype == 8){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Ice!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 	if(type == 8){
 		if(enemytype == 5){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using Ground! It was extremely effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 2 * strength << " damage to the enemy by using " << skillname << "! It was extremely effective!" << endl;
 		}
 		if(enemytype == 4){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using Ground! It was very effective!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 1.5 * strength << " damage to the enemy by using " << skillname << "! It was very effective!" << endl;
 		}
 		if(enemytype == 1){
 			enemylife -= ((mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength);
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using Ground. It wasn't very effective..." << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * 0.5 * strength << " damage to the enemy by using " << skillname << ". It wasn't very effective..." << endl;
 		}
 		if(enemytype == 8){
 			enemylife += (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using Ground!" << endl;
+			cout << "You healed the enemy " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " life points by using " << skillname << "!" << endl;
 		}
 		if(enemytype == 6 || enemytype == 3 || enemytype == 7 || enemytype == 2){
 			enemylife -= (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength;
-			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using Ground!" << endl;
+			cout << "You dealt " << (mainplayer.saymagicattack() + magicweapon.sayrealmagicattack()) * strength << " damage to the enemy by using " << skillname << "!" << endl;
 		}
 	}
 }
@@ -1546,9 +2097,9 @@ void enemy::randomizetype(){
 }
 
 void enemy::randomizeparameters(){
-	enemymaxlife += rand() % 35 + 2;
+	enemymaxlife += rand() % 25 + 2;
 	enemyattack += rand() % 3 + 1;
-	enemydefense += rand() % 3;
+	enemydefense += rand() % 2;
 	enemylife = enemymaxlife;
 }
 
@@ -1574,6 +2125,7 @@ void player::determinemaxmp(){
 
 void enemy::victorychecker(){
 	if(enemylife <= 0 || runawayfrombattle == true){
+		clearcolors(7,0);
 		damagepilleffect = false;
 		piercingeyeeffect = false;
 		mainplayer.restoreshields();
@@ -1688,24 +2240,67 @@ void battlemenu(){
 	if(battletype == 2){
 		boss.saystats();
 	}
-	cout << playername << endl;
-	cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
-	if(mainplayer.sayshields() <= 0){
-		mainplayer.increaserecharge();
-		if(mainplayer.sayrechargemeter() >= 100){
-			mainplayer.restoreshields();
-		}
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (15 + (backgroundcolor * 16)) );
+		cout << playername << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	if(mainplayer.saylife() <= mainplayer.saymaxlife() * 0.25){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (12 + (backgroundcolor * 16)) );
 	}
+		cout << "Life = " << mainplayer.saylife() << "/" << mainplayer.saymaxlife();
+
+		if(mainplayer.sayshields() <= 0){
+			mainplayer.increaserecharge();
+			if(mainplayer.sayrechargemeter() >= 100){
+				mainplayer.restoreshields();
+			}
+		}
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	cout << " | ";
+
 	if(mainplayer.sayshields() <= 0){
-		cout << " | Shields = Recharge: " << mainplayer.sayrechargemeter() << "%";
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (3 + (backgroundcolor * 16)) );
+		cout << "Shields = Recharge: " << mainplayer.sayrechargemeter() << "%";
 	}
 	else{
-		cout << " | Shields = " << mainplayer.sayshields() << "/" << mainplayer.saymaxshields();
+		cout << "Shields = " << mainplayer.sayshields() << "/" << mainplayer.saymaxshields();
 	}
-	cout << " | SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
-	cout << " | MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
-	cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance() << " | ";
-	cout << "Ultra meter = " << mainplayer.sayultra() <<  " | Distance = ";
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	cout << " | ";
+
+	if(mainplayer.saysp() <= mainplayer.saymaxsp() * 0.1){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (backgroundcolor * 16)) );
+	}
+		cout << "SP = " << mainplayer.saysp() << "/" << mainplayer.saymaxsp();
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	cout << " | ";
+
+	if(mainplayer.saymp() <= mainplayer.saymaxmp() * 0.1){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (backgroundcolor * 16)) );
+	}
+		cout << "MP = " << mainplayer.saymp() << "/" << mainplayer.saymaxmp() << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	if(mainplayer.sayresistance() <= 10){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (12 + (backgroundcolor * 16)) );
+	}
+		cout << "Resistance = " << mainplayer.sayresistance() << "/" << mainplayer.saymaxresistance();
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	cout << " | ";
+
+	if(mainplayer.sayultra() >= 100){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (13 + (backgroundcolor * 16)) );
+	}
+		cout << "Ultra meter = " << mainplayer.sayultra();
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
+	cout << " | Distance = ";
 	if(distanceenemy == 1){
 		cout << "Very short" << endl;
 	}
@@ -1733,13 +2328,15 @@ void battlemenu(){
 	else{
 		cout << "None" << endl;
 	}
-	printf("\n[q] Meelee attack [w] Ranged attack\n");
-	printf("[2] Items         [3] Special       [4] Magic\n");
-	printf("[5] Move          [6] Rest");
-	if(mainplayer.sayultra() >= 100){
-		cout << "          [7] Ultra";
-	}
-	printf("\n[p] Other\n");
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (backgroundcolor * 16)) );
+		printf("\n[q] Meelee attack [w] Ranged attack\n");
+		printf("[2] Items         [3] Special       [4] Magic\n");
+		printf("[5] Move          [6] Rest");
+		if(mainplayer.sayultra() >= 100){
+			cout << "          [7] Ultra";
+		}
+		printf("\n[p] Other\n");
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
 }
 
 void battle(){
@@ -1749,10 +2346,14 @@ EVENT:
 		traveling();
 	}
 	clear();
-	if(start == true){
-		cout << "Name applied correctly" << endl;
-	}
-	cout << "Press always any key to show the next lines of text" << endl << endl;
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (0 * 16)) );
+		if(start == true){
+			cout << "Name applied correctly" << endl;
+		}
+		cout << "Press always any key to show the next lines of text" << endl << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (0 * 16)) );
+
 	if(start == true){
 		dialogue = 1;
 		dialogues();
@@ -1795,10 +2396,16 @@ EVENT:
 	}
 
 	if(battletype == 1 || battletype == 2){
+		if(battletype == 1){
+			clearcolors(7,0);
+			backgroundcolor = 0;
+		}
+		if(battletype == 2){
+			clearcolors(7,4);
+			backgroundcolor = 4;
+		}
 		while(1){
-
 STARTBATTLE:
-
 			mainplayer.determinecriticalpower();
 			if(battletype == 1){
 				commonenemy.determinecriticalpower();
@@ -1907,7 +2514,7 @@ STARTBATTLE:
 				printf("-- Unveils more detailed stats of the enemy without finishing the current turn\n");
 				printf("\nType any other key to go back to the main menu\n");
 				cin >> movement;
-				clear();
+				clearcolors(7,backgroundcolor);
 				switch(movement){
 				case '1' :
 					if(mainplayer.saysp() >= 2 && mainplayer.sayresistance() >= 3){
@@ -1938,7 +2545,8 @@ STARTBATTLE:
 						mainplayer.decreaseresistance();
 						mainplayer.decreaseresistance();
 						piercingeyeeffect = true;
-						cout << "Used Quick Eye!\n" << endl;
+						cout << "Used Quick Eye!" << endl;
+						cout << "The enemy couldn't react!" << endl << endl;
 						goto STARTBATTLE;
 						break;
 					}
@@ -2002,14 +2610,138 @@ STARTBATTLE:
 				}
 				break;
 			case '4' :
-				printf("List of Magic learned:\n\n");
-				printf("Meditate [5 MP]['1' to use]\n");
-				printf("-- Heals the player by 60 life points\n");
-				printf("Ice [3 MP]['2' to use]\n");
-				printf("-- Harms the enemy using the Ice Element\n");
-				printf("\nType any other key to go back to the main menu\n");
+				cout << "List of Magic learned:" << endl << endl;
+				cout << "[1] Meditate			[5 MP]" << endl;
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+				cout << "{Tier 1} Heals the player by 60 life points" << endl;
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				cout << "[2] Ice				[2 MP]" << endl;
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+				cout << "{Tier 1} [Ice] Harms the enemy using the Ice element" << endl;
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				if(mainplayer.saygrasslearnt() == true){
+					cout << "[3] Grass			[2 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Grass] Harms the enemy using the Grass element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saydarklearnt() == true){
+					cout << "[4] Darkness			[3 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Darkness] Harms the enemy using the Darkness element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saylightlearnt() == true){
+					cout << "[5] Light			[1 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Light] Harms the enemy using the Light element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayfirelearnt() == true){
+					cout << "[6] Fire			[3 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Fire] Harms the enemy using the Fire element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saywaterlearnt() == true){
+					cout << "[7] Water			[2 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Water] Harms the enemy using the Water element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saygroundlearnt() == true){
+					cout << "[8] Ground			[2 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 1} [Ground] Harms the enemy using the Ground element" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayfrostbitelearnt() == true){
+					cout << "[9] Frostbite			[5 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Ice] Puts the enemy through an extremely low temperature" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayustilagolearnt() == true){
+					cout << "[0] Ustilago			[5 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Grass] Makes parasites grow on the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayisolationlearnt() == true){
+					cout << "[q] Isolation			[7 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Darkness] Puts the enemy through the most absolute darkness" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayilluminationlearnt() == true){
+					cout << "[w] Illumination		[4 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Light] Causes the enemy a short state of severe amnesia" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayflarelearnt() == true){
+					cout << "[e] Flare			[7 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Fire] Puts the enemy on fire, causing severe damage" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayhydrolearnt() == true){
+					cout << "[r] Hydro			[6 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Water] Puts the enemy in a strong water vortex" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayshakelearnt() == true){
+					cout << "[t] Shake			[5 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 2} [Ground] Causes a small earthquake that stuns the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayhypothermialearnt() == true){
+					cout << "[y] Hypothermia			[10 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Ice] Severely freezes the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayphytoplasmalearnt() == true){
+					cout << "[u] Phytoplasma			[10 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Grass] Makes thousands of deadly parasites grow on the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saycorruptionlearnt() == true){
+					cout << "[i] Corruption			[14 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Darkness] Corrupts the inner thoughts of the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saylethalblindnesslearnt() == true){
+					cout << "[o] Lethal Blindness		[7 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Light] Brutally stuns the enemy's brain" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayhyperthermialearnt() == true){
+					cout << "[p] Hyperthermia		[14 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Fire] Burns all the body parts of the enemy with the deadliest fire" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.saydrownlearnt() == true){
+					cout << "[a] Drown			[12 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Water] Suffocates the enemy causing extreme damage" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				if(mainplayer.sayearthquakelearnt() == true){
+					cout << "[s] Earthquake			[10 MP]" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (DARKGREY + (BLACK * 16)) );
+					cout << "{Tier 3} [Ground] Creates a deadly earthquake below the enemy" << endl;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (LIGHTGREY + (BLACK * 16)) );
+				}
+				cout << endl << "Type any other key to go back to the main menu" << endl;
 				cin >> movement;
-				clear();
+				clearcolors(7,backgroundcolor);
 				switch(movement){
 				case '1' :
 					if(mainplayer.saymp() >= 5){
@@ -2021,16 +2753,376 @@ STARTBATTLE:
 					}
 					break;
 				case '2' :
-					if(mainplayer.saymp() >= 3){
+					if(mainplayer.saymp() >= 2){
 						if(battletype == 1){
-							commonenemy.magicattacked(7,1,3);
+							commonenemy.magicattacked(7,1,2,"Ice");
 						}
 						if(battletype == 2){
-							boss.magicattacked(7,1,3);
+							boss.magicattacked(7,1,2,"Ice");
 						}
 					}
 					else{
 						cout << "You haven't enough MP left to perform this move!" << endl;
+					}
+					break;
+				case '3' :
+					if(mainplayer.saygrasslearnt() == true){
+						if(mainplayer.saymp() >= 2){
+							if(battletype == 1){
+								commonenemy.magicattacked(1,1,2,"Grass");
+							}
+							if(battletype == 2){
+								boss.magicattacked(1,1,2,"Grass");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '4' :
+					if(mainplayer.saydarklearnt() == true){
+						if(mainplayer.saymp() >= 3){
+							if(battletype == 1){
+								commonenemy.magicattacked(3,1,3,"Darkness");
+							}
+							if(battletype == 2){
+								boss.magicattacked(3,1,3,"Darkness");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '5' :
+					if(mainplayer.saylightlearnt() == true){
+						if(mainplayer.saymp() >= 1){
+							if(battletype == 1){
+								commonenemy.magicattacked(4,1,1,"Light");
+							}
+							if(battletype == 2){
+								boss.magicattacked(4,1,1,"Light");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '6' :
+					if(mainplayer.sayfirelearnt() == true){
+						if(mainplayer.saymp() >= 3){
+							if(battletype == 1){
+								commonenemy.magicattacked(5,1,3,"Fire");
+							}
+							if(battletype == 2){
+								boss.magicattacked(5,1,3,"Fire");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '7' :
+					if(mainplayer.saywaterlearnt() == true){
+						if(mainplayer.saymp() >= 2){
+							if(battletype == 1){
+								commonenemy.magicattacked(6,1,2,"Water");
+							}
+							if(battletype == 2){
+								boss.magicattacked(6,1,2,"Water");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '8' :
+					if(mainplayer.saygroundlearnt() == true){
+						if(mainplayer.saymp() >= 2){
+							if(battletype == 1){
+								commonenemy.magicattacked(8,1,2,"Ground");
+							}
+							if(battletype == 2){
+								boss.magicattacked(8,1,2,"Ground");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '9' :
+					if(mainplayer.sayfrostbitelearnt() == true){
+						if(mainplayer.saymp() >= 5){
+							if(battletype == 1){
+								commonenemy.magicattacked(7,1.7,5,"Frostbite");
+							}
+							if(battletype == 2){
+								boss.magicattacked(7,1.7,5,"Frostbite");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case '0' :
+					if(mainplayer.sayustilagolearnt() == true){
+						if(mainplayer.saymp() >= 5){
+							if(battletype == 1){
+								commonenemy.magicattacked(1,1.7,5,"Ustilago");
+							}
+							if(battletype == 2){
+								boss.magicattacked(1,1.7,5,"Ustilago");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'q' :
+					if(mainplayer.sayisolationlearnt() == true){
+						if(mainplayer.saymp() >= 7){
+							if(battletype == 1){
+								commonenemy.magicattacked(3,1.7,7,"Isolation");
+							}
+							if(battletype == 2){
+								boss.magicattacked(3,1.7,7,"Isolation");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'w' :
+					if(mainplayer.sayilluminationlearnt() == true){
+						if(mainplayer.saymp() >= 4){
+							if(battletype == 1){
+								commonenemy.magicattacked(4,1.7,4,"Illumination");
+							}
+							if(battletype == 2){
+								boss.magicattacked(4,1.7,4,"Illumination");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'e' :
+					if(mainplayer.sayflarelearnt() == true){
+						if(mainplayer.saymp() >= 7){
+							if(battletype == 1){
+								commonenemy.magicattacked(5,1.7,7,"Flare");
+							}
+							if(battletype == 2){
+								boss.magicattacked(5,1.7,7,"Flare");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'r' :
+					if(mainplayer.sayhydrolearnt() == true){
+						if(mainplayer.saymp() >= 6){
+							if(battletype == 1){
+								commonenemy.magicattacked(6,1.7,6,"Hydro");
+							}
+							if(battletype == 2){
+								boss.magicattacked(6,1.7,6,"Hydro");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 't' :
+					if(mainplayer.sayshakelearnt() == true){
+						if(mainplayer.saymp() >= 5){
+							if(battletype == 1){
+								commonenemy.magicattacked(8,1.7,5,"Shake");
+							}
+							if(battletype == 2){
+								boss.magicattacked(8,1.7,5,"Shake");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'y' :
+					if(mainplayer.sayhypothermialearnt() == true){
+						if(mainplayer.saymp() >= 10){
+							if(battletype == 1){
+								commonenemy.magicattacked(7,2.4,10,"Hypothermia");
+							}
+							if(battletype == 2){
+								boss.magicattacked(7,2.4,10,"Hypothermia");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'u' :
+					if(mainplayer.sayphytoplasmalearnt() == true){
+						if(mainplayer.saymp() >= 10){
+							if(battletype == 1){
+								commonenemy.magicattacked(1,2.4,10,"Phytoplasma");
+							}
+							if(battletype == 2){
+								boss.magicattacked(1,2.4,10,"Phytoplasma");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'i' :
+					if(mainplayer.saycorruptionlearnt() == true){
+						if(mainplayer.saymp() >= 14){
+							if(battletype == 1){
+								commonenemy.magicattacked(3,2.4,14,"Corruption");
+							}
+							if(battletype == 2){
+								boss.magicattacked(3,2.4,14,"Corruption");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'o' :
+					if(mainplayer.saylethalblindnesslearnt() == true){
+						if(mainplayer.saymp() >= 7){
+							if(battletype == 1){
+								commonenemy.magicattacked(4,2.4,7,"Lethal Blindness");
+							}
+							if(battletype == 2){
+								boss.magicattacked(4,2.4,7,"Lethal Blindness");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'p' :
+					if(mainplayer.sayhyperthermialearnt() == true){
+						if(mainplayer.saymp() >= 14){
+							if(battletype == 1){
+								commonenemy.magicattacked(5,2.4,14,"Hyperthermia");
+							}
+							if(battletype == 2){
+								boss.magicattacked(5,2.4,14,"Hyperthermia");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 'a' :
+					if(mainplayer.saydrownlearnt() == true){
+						if(mainplayer.saymp() >= 12){
+							if(battletype == 1){
+								commonenemy.magicattacked(6,2.4,12,"Drown");
+							}
+							if(battletype == 2){
+								boss.magicattacked(6,2.4,12,"Drown");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
+					}
+					break;
+				case 's' :
+					if(mainplayer.sayearthquakelearnt() == true){
+						if(mainplayer.saymp() >= 10){
+							if(battletype == 1){
+								commonenemy.magicattacked(8,2.4,10,"Earthquake");
+							}
+							if(battletype == 2){
+								boss.magicattacked(8,2.4,10,"Earthquake");
+							}
+						}
+						else{
+							cout << "You haven't enough MP left to perform this move!" << endl;
+						}
+					}
+					else{
+						goto STARTBATTLE;
 					}
 					break;
 				default :
@@ -2054,7 +3146,7 @@ STARTBATTLE:
 					cout << "--Causes relatively high damage with low ultra and resistance requirements" << endl;
 					cout << endl << "Type any other key to go back to the battle menu" << endl;
 					cin >> movement;
-					clear();
+					clearcolors(7,backgroundcolor);
 					switch(movement){
 						case '1' :
 							if(mainplayer.sayresistance() >= 10){
@@ -2079,6 +3171,7 @@ STARTBATTLE:
 				}
 				break;
 			case 'p' :
+				clearcolors(7,backgroundcolor);
 				equipment();
 				goto STARTBATTLE;
 				break;
@@ -2135,11 +3228,13 @@ void maintitle(){
 	gotoxy(2,8);
 	cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
 	gotoxy(2,9);
-	cout << "				                            [Alpha 2.1] ";
+	cout << "				                            [Alpha 2.2] ";
 }
 
 int main(){
 	// Inicio
+	SetConsoleTitle(L"Tactical");
+	clearcolors(15,8);
 	randomseed();
 	mainplayer.customizecharacter(2);
 	while(1){
@@ -2154,7 +3249,6 @@ int main(){
 		movement = _getch();
 		switch(movement){
 		case '1':
-			cout << "                             ";
 			gotoxy(20,75);
 			clear();
 			maintitle();
@@ -2180,6 +3274,7 @@ int main(){
 			switch (movement){
 			case '1' :
 				start = true;
+				clearcolors(7,0);
 				battle();
 				break;
 			}
@@ -2191,12 +3286,14 @@ int main(){
 			if(loadfailed == false){
 				load = true;
 				firstbattle = false;
+				clearcolors(7,0);
 				battle();
 			}
 			break;
 		case '3':
 			savegame(3);
 			if(savefileexists == false){
+				clearcolors(7,0);
 				mainplayer.customizecharacter(1);
 			}
 			break;

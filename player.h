@@ -34,13 +34,14 @@ int zone = 1;
 int travel;
 
 int battletype;
+int backgroundcolor;
 
 void gotoxy(int column, int line)
 {
-  COORD coord;
-  coord.X = column;
-  coord.Y = line;
-  SetConsoleCursorPosition(GetStdHandle( STD_OUTPUT_HANDLE ),coord);
+	COORD coord;
+	coord.X = column;
+	coord.Y = line;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord);
 }
 
 void clear(){
@@ -98,6 +99,28 @@ public:
 	int saytpincrease();
 	int saysquares();
 	int saysquaresincrease();
+	int sayexperience();
+
+	bool saygrasslearnt();
+	bool saydarklearnt();
+	bool saylightlearnt();
+	bool sayfirelearnt();
+	bool saywaterlearnt();
+	bool saygroundlearnt();
+	bool sayfrostbitelearnt();
+	bool sayustilagolearnt();
+	bool sayisolationlearnt();
+	bool sayilluminationlearnt();
+	bool sayflarelearnt();
+	bool sayhydrolearnt();
+	bool sayshakelearnt();
+	bool sayhypothermialearnt();
+	bool sayphytoplasmalearnt();
+	bool saycorruptionlearnt();
+	bool saylethalblindnesslearnt();
+	bool sayhyperthermialearnt();
+	bool saydrownlearnt();
+	bool sayearthquakelearnt();
 
 	void decreaseplayersp();
 	void increaseplayersp();
@@ -200,6 +223,33 @@ protected:
 	int squares;
 	int squaresincrease;
 
+	// Player's skills
+		// TIER 1 MAGIC
+	bool grasslearnt;
+	bool darklearnt;
+	bool lightlearnt;
+	bool firelearnt;
+	bool waterlearnt;
+	bool groundlearnt;
+
+		// TIER 2 MAGIC
+	bool frostbitelearnt;
+	bool ustilagolearnt;
+	bool isolationlearnt;
+	bool illuminationlearnt;
+	bool flarelearnt;
+	bool hydrolearnt;
+	bool shakelearnt;
+
+		// TIER 3 MAGIC
+	bool hypothermialearnt;
+	bool phytoplasmalearnt;
+	bool corruptionlearnt;
+	bool lethalblindnesslearnt;
+	bool hyperthermialearnt;
+	bool drownlearnt;
+	bool earthquakelearnt;
+
 	// Player's train points related parameters
 	int playertp;
 	int tpincrease;
@@ -211,6 +261,8 @@ protected:
 	int spmeter;
 	int mpmeter;
 	int resmeter;
+
+	int experience;
 
 	int masterstealth;
 	int masterstrength;
@@ -226,35 +278,35 @@ protected:
 
 player::player()
 {
-	playermaxlife = 460;
-	playermaxspbase = 13;
-	playermaxmpbase = 11;
-	playerattack = 18;
-	playermagicattack = 16;
-	playerrangedattack = 14;
-	playerlife = 460;
-	playersp = 14;
-	playermp = 12;
-	playercriticalchecker = 20;
-	playercriticalmultiplier = 1.5;
-	smallhealthpill = 2;
-	smallhealthpillvalue = 100;
-	smallhealthpillworth = 8;
-	damagepill = 1;
-	damagepillworth = 24;
-	playerresistance = 90;
-	playermaxresistance = 90;
-	playerultra = 100;
-	playermaxultra = 200;
-	playerdefense = 2;
-	attacktpmeter = 10;
-	ratmeter = 10;
-	matmeter = 10;
-	lifemeter = 15;
-	defensemeter = 12;
-	spmeter = 90;
-	mpmeter = 120;
-	resmeter = 50;
+	playermaxlife				= 460;
+	playermaxspbase				= 13;
+	playermaxmpbase				= 11;
+	playerattack				= 18;
+	playermagicattack			= 16;
+	playerrangedattack			= 14;
+	playerlife					= 460;
+	playersp					= 14;
+	playermp					= 12;
+	playercriticalchecker		= 20;
+	playercriticalmultiplier	= 1.5;
+	smallhealthpill				= 2;
+	smallhealthpillvalue		= 100;
+	smallhealthpillworth		= 8;
+	damagepill					= 1;
+	damagepillworth				= 24;
+	playerresistance			= 90;
+	playermaxresistance			= 90;
+	playerultra					= 100;
+	playermaxultra				= 200;
+	playerdefense				= 2;
+	attacktpmeter				= 10;
+	ratmeter					= 10;
+	matmeter					= 10;
+	lifemeter					= 15;
+	defensemeter				= 12;
+	spmeter						= 90;
+	mpmeter						= 120;
+	resmeter					= 50;
 }
 
 int player::attackparameter(){
@@ -367,6 +419,90 @@ int player::saysquares(){
 
 int player::saysquaresincrease(){
 	return squaresincrease;
+}
+
+int player::sayexperience(){
+	return experience;
+}
+
+bool player::saygrasslearnt(){
+	return grasslearnt;
+}
+
+bool player::saydarklearnt(){
+	return darklearnt;
+}
+
+bool player::saylightlearnt(){
+	return lightlearnt;
+}
+
+bool player::sayfirelearnt(){
+	return firelearnt;
+}
+
+bool player::saywaterlearnt(){
+	return waterlearnt;
+}
+
+bool player::saygroundlearnt(){
+	return groundlearnt;
+}
+
+bool player::sayfrostbitelearnt(){
+	return frostbitelearnt;
+}
+
+bool player::sayustilagolearnt(){
+	return ustilagolearnt;
+}
+
+bool player::sayisolationlearnt(){
+	return isolationlearnt;
+}
+
+bool player::sayilluminationlearnt(){
+	return illuminationlearnt;
+}
+
+bool player::sayflarelearnt(){
+	return flarelearnt;
+}
+
+bool player::sayhydrolearnt(){
+	return hydrolearnt;
+}
+
+bool player::sayshakelearnt(){
+	return shakelearnt;
+}
+
+bool player::sayhypothermialearnt(){
+	return hypothermialearnt;
+}
+
+bool player::sayphytoplasmalearnt(){
+	return phytoplasmalearnt;
+}
+
+bool player::saycorruptionlearnt(){
+	return corruptionlearnt;
+}
+
+bool player::saylethalblindnesslearnt(){
+	return lethalblindnesslearnt;
+}
+
+bool player::sayhyperthermialearnt(){
+	return hyperthermialearnt;
+}
+
+bool player::saydrownlearnt(){
+	return drownlearnt;
+}
+
+bool player::sayearthquakelearnt(){
+	return earthquakelearnt;
 }
 
 void player::decreaseplayersp(){
@@ -583,184 +719,6 @@ int player::sayresmeter(){
 
 player mainplayer;
 
-void player::upgrading(){
-	cout << "Parameter upgrading center" << endl;
-	cout << "Current TP: " << playertp << endl << endl;
-	cout << "[1] Stealth tier  [" << masterstealth << " skill points]" << endl;
-	cout << "[2] Strength tier [" << masterstrength << " skill points]" << endl;
-	cout << "[3] Magic tier    [" << mastermagic << " skill points]" << endl;
-	cout << "[4] Health tier   [" << masterhealth << " skill points]" << endl;
-	cout << "Type any other key to go back to the menu" << endl;
-	cin >> movement;
-	clear();
-	switch(movement){
-	case '1' :
-STEALTH:
-		cout << "Parameter upgrading center | Stealth tier" << endl;
-		cout << "Current TP: " << playertp << endl << endl;
-		cout << "Ranged attack (RAT): " << playerrangedattack << " -> " << playerrangedattack + 1 << endl;
-		if(masterstealth >= 1){
-			cout << "Max SP             : " << playermaxspbase << " -> " << playermaxspbase + 1 << endl;
-		}
-		if(masterstealth >= 2){
-			cout << "Resistance         : " << playermaxresistance << " -> " << playermaxresistance + 2 << endl;
-		}
-		cout << endl << "[1] Upgrade RAT        (-" << 90 - (12 * masterstealth) << " TP)" << endl;
-		if(masterstealth >= 1){
-			cout << "[2] Upgrade Max SP     (-" << 240 - (30 * masterstealth) << " TP)" << endl;
-		}
-		if(masterstealth >= 2){
-			cout << "[3] Upgrade Resistance (-" << 120 - (12 * masterstealth) << " TP)" << endl;
-		}
-		cout << "Type any other key to go back to the menu" << endl;
-		cin >> movement;
-		clear();
-		switch(movement){
-		case '1' :
-			if(playertp >= 90 - (12 * masterstealth)){
-				playertp -= 90 - (12 * masterstealth);
-				playerrangedattack++;
-				goto STEALTH;
-			}
-			else{
-				cout << "You do not have enough Train Points for that!" << endl << endl;
-			}
-			break;
-		case '2' :
-			if(masterstealth >= 1){
-				if(playertp >= 240 - (30 * masterstealth)){
-					playertp -= 240 - (30 * masterstealth);
-					playermaxspbase++;
-					playersp++;
-					goto STEALTH;
-				}
-				else{
-					cout << "You do not have enough Train Points for that!" << endl << endl;
-				}
-			}
-			break;
-		case '3' :
-			if(masterstealth >= 2){
-				if(playertp >= 120 - (12 * masterstealth)){
-					playertp -= 120 - (12 * masterstealth);
-					playermaxresistance += 2;
-					playerresistance += 2;
-					goto STEALTH;
-				}
-				else{
-					cout << "You do not have enough Train Points for that!" << endl << endl;
-				}
-			}
-			break;
-		}
-		break;
-	case '2' :
-STRENGTH:
-		cout << "Parameter upgrading center | Strength tier" << endl;
-		cout << "Current TP: " << playertp << endl << endl;
-		cout << "Attack (AT)        : " << playerattack << " -> " << playerattack + 1 << endl;
-		if(masterstrength >= 1){
-			cout << "Defense (DEF)      : " << playerdefense << " -> " << playerdefense + 1 << endl;
-		}
-		cout << endl << "[1] Upgrade AT         (-" << 80 - (12 * masterstrength) << " TP)" << endl;
-		if(masterstrength >= 1){
-			cout << "[2] Upgrade DEF        (-" << 80 - (9 * masterstrength) << " TP)" << endl;
-		}
-		cout << "Type any other key to go back to the menu" << endl;
-		cin >> movement;
-		clear();
-		switch(movement){
-		case '1' :
-			if(playertp >= 80 - (12 * masterstrength)){
-				playertp -= 80 - (12 * masterstrength);
-				playerattack++;
-				goto STRENGTH;
-			}
-			else{
-				cout << "You do not have enough Train Points for that!" << endl << endl;
-			}
-			break;
-		case '2' :
-			if(masterstrength >= 1){
-				if(playertp >= 80 - (9 * masterstrength)){
-					playertp -= 80 - (9 * masterstrength);
-					playerdefense++;
-					goto STRENGTH;
-				}
-				else{
-					cout << "You do not have enough Train Points for that!" << endl << endl;
-				}
-				break;
-			}
-		}
-		break;
-	case '3' :
-MAGIC:
-		cout << "Parameter upgrading center | Magic tier" << endl;
-		cout << "Current TP: " << playertp << endl << endl;
-		cout << "Magic attack (MAT) : " << playermagicattack << " -> " << playermagicattack + 1 << endl;
-		if(mastermagic >= 2){
-			cout << "Max MP             : " << playermaxmp << " -> " << playermaxmp + 1 << endl;
-		}
-		cout << endl << "[1] Upgrade MAT        (-" << 90 - (12 * mastermagic) << " TP)" << endl;
-		if(mastermagic >= 2){
-			cout << "[2] Upgrade Max MP     (-" << 240 - (30 * mastermagic) << " TP)" << endl;
-		}
-		cout << "Type any other key to go back to the menu" << endl;
-		cin >> movement;
-		clear();
-		switch(movement){
-		case '1' :
-			if(playertp >= 90 - (12 * mastermagic)){
-				playertp -= 90 - (12 * mastermagic);
-				playermagicattack++;
-				goto MAGIC;
-			}
-			else{
-				cout << "You do not have enough Train Points for that!" << endl << endl;
-			}
-			break;
-		case '2' :
-			if(mastermagic >= 2){
-				if(playertp >= 240 - (30 * mastermagic)){
-					playertp -= 240 - (30 * mastermagic);
-					playermaxmpbase++;
-					playermp++;
-					goto MAGIC;
-				}
-				else{
-					cout << "You do not have enough Train Points for that!" << endl << endl;
-				}
-			}
-			break;
-		}
-		break;
-	case '4' :
-HEALTH:
-		cout << "Parameter upgrading center | Health tier" << endl;
-		cout << "Current TP: " << playertp << endl << endl;
-		cout << "Max Life           : " << playermaxlife << " -> " << playermaxlife + 10 << endl << endl;
-		cout << "[1] Upgrade Max Life   (-" << 90 - (9 * masterhealth) << " TP)" << endl;
-		cout << "Type any other key to go back to the menu" << endl;
-		cin >> movement;
-		clear();
-		switch(movement){
-		case '1' :
-			if(playertp >= 90 - (9 * masterhealth)){
-				playertp -= 90 - (9 * masterhealth);
-				playermaxlife += 10;
-				playerlife += 10;
-				goto HEALTH;
-			}
-			else{
-				cout << "You do not have enough Train Points for that!" << endl << endl;
-			}
-			break;
-		}
-		break;
-	}
-}
-
 class enemy : public warrior
 {
 public:
@@ -780,7 +738,7 @@ public:
 	void rangedattacked();
 	void receivedultra();
 
-	void magicattacked(int type, float strength, int mpdecrease);
+	void magicattacked(int type, float strength, int mpdecrease, string skillname);
 
 	void determinecriticalpower();
 	void limitlife();
@@ -883,44 +841,56 @@ void enemy::healthdrinktaken(){
 }
 
 void enemy::saystats(){
-	if(battletype == 2){
-		cout << "[BOSS] ";
-	}
-	if(enemytype == 1){
-		cout << "Grass ";
-	}
-	if(enemytype == 2){
-		cout << "Normal ";
-	}
-	if(enemytype == 3){
-		cout << "Dark ";
-	}
-	if(enemytype == 4){
-		cout << "Light ";
-	}
-	if(enemytype == 5){
-		cout << "Fire ";
-	}
-	if(enemytype == 6){
-		cout << "Water ";
-	}
-	if(enemytype == 7){
-		cout << "Ice ";
-	}
-	if(enemytype == 8){
-		cout << "Ground ";
-	}
-	cout << "Human" << endl;
+		if(battletype == 2){
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (12 + (backgroundcolor * 16)) );
+			cout << "[BOSS] ";
+		}
+		if(enemytype == 1){
+			cout << "Grass ";
+		}
+		if(enemytype == 2){
+			cout << "Normal ";
+		}
+		if(enemytype == 3){
+			cout << "Darkness ";
+		}
+		if(enemytype == 4){
+			cout << "Light ";
+		}
+		if(enemytype == 5){
+			cout << "Fire ";
+		}
+		if(enemytype == 6){
+			cout << "Water ";
+		}
+		if(enemytype == 7){
+			cout << "Ice ";
+		}
+		if(enemytype == 8){
+			cout << "Ground ";
+		}
+		cout << "Human" << endl;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+
 	if(piercingeyeeffect == false){
+		if(enemylife <= enemymaxlife * 0.25){
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (12 + (backgroundcolor * 16)) );
+		}
 		cout << "Life = ";
 		cout << enemylife;
 		cout << endl;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
 	}
 	else{
+		if(enemylife <= enemymaxlife * 0.25){
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (12 + (backgroundcolor * 16)) );
+		}
 		cout << "Life = " << enemylife << "/" << enemymaxlife << endl;
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
 		printf("AT = %d | DEF = %d\n",enemyattack,enemydefense);
 	}
 	if(piercingeyeeffect == true){
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (13 + (backgroundcolor * 16)) );
 		cout << "Weak to: ";
 		if(enemytype == 1){
 			cout << "[Darkness (x1.5)] [Fire (x1.5)] [Ice (x1.5)] " << endl;
@@ -946,6 +916,7 @@ void enemy::saystats(){
 		if(enemytype == 8){
 			cout << "[Water (x1.5)] [Grass (x1.5)]" << endl;
 		}
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
 	}
 	printf("Effects = ");
 	if(piercingeyeeffect == true){
@@ -963,8 +934,8 @@ void enemy::randomizeboss(){
 	enemytype = rand() % 8 + 1;
 	enemyint = 4;
 	healthdrink = 1;
-	enemymaxlife += rand() % 200 + commonenemy.saymaxlife();
+	enemymaxlife += rand() % 160 + commonenemy.saymaxlife();
 	enemyattack += rand() % 8 + commonenemy.sayattack();
-	enemydefense += rand() % 6 + commonenemy.saydefense();
+	enemydefense += rand() % 4 + commonenemy.saydefense();
 	enemylife = enemymaxlife;
 }
