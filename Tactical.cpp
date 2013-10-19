@@ -8,29 +8,27 @@
 #include <cstring>
 #include <sstream>
 #include <winuser.h>
-#include <pthread.h>
 #include "player.h"
 #include "key.h"
 #include "dialogues.h"
 #include "weapons.h"
 
-#define BLACK 0
-#define BLUE 1
-#define GREEN 2
-#define CYAN 3
-#define RED 4
-#define MAGENTA 5
-#define BROWN 6
-#define LIGHTGREY 7
-#define DARKGREY 8
-#define LIGHTBLUE 9
-#define LIGHTGREEN 10
-#define LIGHTCYAN 11
-#define LIGHTRED 12
-#define LIGHTMAGENTA 13
-#define YELLOW 14
-#define WHITE 15
-#define BLINK 128
+#define BLACK			0
+#define BLUE			1
+#define GREEN			2
+#define CYAN			3
+#define RED				4
+#define MAGENTA			5
+#define BROWN			6
+#define LIGHTGREY		7
+#define DARKGREY		8
+#define LIGHTBLUE		9
+#define LIGHTGREEN		10
+#define LIGHTCYAN		11
+#define LIGHTRED		12
+#define LIGHTMAGENTA	13
+#define YELLOW			14
+#define WHITE			15
 
 using namespace std;
 
@@ -137,15 +135,33 @@ void itemmenu(){
 	}
 }
 
-void options(){
+void player::options(){
+	string password;
 OPTIONS:
 	cout << "Options" << endl << endl;
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (8 + (backgroundcolor * 16)) );
-	cout << "There are no options at the moment" << endl;
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (7 + (backgroundcolor * 16)) );
+	cout << "[1] Enter debug mode" << endl;
 	cin >> movement;
 	clear();
 	switch(movement){
+		case '1' :
+			cout << "Enter password" << endl;
+			cin >> password;
+			if(password != key){
+				cout << "Invalid password" << endl;
+				_getch();
+				clear();
+				goto OPTIONS;
+			}
+			cout << "[1] Add 1000 experience" << endl;
+			cin >> movement;
+			switch(movement){
+			case '1' :
+				experience += 1000;
+				cout << "Done succesfully" << endl;
+				_getch();
+				clear();
+				goto OPTIONS;
+			}
 	}
 }
 
@@ -178,7 +194,7 @@ void equipment(){
 		mainplayer.upgrading();
 		break;
 	case 'o' :
-		options();
+		mainplayer.options();
 		break;
 	default:;
 	}
@@ -479,7 +495,9 @@ void savegame(int savetype){
 				decrypt(chartostring,key);
 				stringtoint(encrypter);
 			playershields.restoreshield();
-				fscanf(save,"%s",retriever);
+			mainplayer.determinemaxshields();
+			mainplayer.restoreshields();
+			fscanf(save,"%s",retriever);
 				chartostring = retriever;
 				decrypt(chartostring,key);
 				stringtoint(encrypter);
@@ -506,13 +524,18 @@ void savegame(int savetype){
 				mainplayer.sayratmeter() + mainplayer.saymatmeter() + mainplayer.saydefensemeter() + mainplayer.saylifemeter() + mainplayer.sayspmeter() +
 				mainplayer.saympmeter() + mainplayer.sayresmeter() + mainplayer.sayexperience() + weapons.sayequippedmelee() + rangedweapon.sayequippedranged() + magicweapon.sayequippedmagic() +
 				playershields.sayequippedshield() + commonenemy.saymaxlife() + commonenemy.sayattack() + commonenemy.saydefense())){
+					gotoxy(2,18);
+					cout << "                                               ";
+					gotoxy(2,18);
 					cout << "Game loaded correctly!" << endl;
 					_getch();
 					fclose(save);
 					remove("resources.txt");
 			}
 			else{
-				clear();
+				gotoxy(2,18);
+				cout << "                                               ";
+				gotoxy(2,18);
 				cout << "Save game corrupted." << endl;
 				fclose(save);
 				remove("resources.txt");
@@ -521,6 +544,9 @@ void savegame(int savetype){
 			}
 		}
 		else{
+			gotoxy(2,18);
+			cout << "                                               ";
+			gotoxy(2,18);
 			cout << "There isn't any save to load";
 			loadfailed = true;
 		}
@@ -784,7 +810,7 @@ STEALTH:
 		case '1' :
 			if(playertp >= 90 - (12 * masterstealth)){
 				playertp -= 90 - (12 * masterstealth);
-				experience += 9 - (1.2 * masterstealth);
+				experience += 9 - (0.6 * masterstealth);
 				playerrangedattack++;
 				goto STEALTH;
 			}
@@ -796,7 +822,7 @@ STEALTH:
 			if(masterstealth >= 1){
 				if(playertp >= 240 - (30 * masterstealth)){
 					playertp -= 240 - (30 * masterstealth);
-					experience += 24 - (3 * masterstealth);
+					experience += 24 - (1.5 * masterstealth);
 					playermaxspbase++;
 					playersp++;
 					goto STEALTH;
@@ -810,7 +836,7 @@ STEALTH:
 			if(masterstealth >= 2){
 				if(playertp >= 120 - (12 * masterstealth)){
 					playertp -= 120 - (12 * masterstealth);
-					experience += 12 - (1.2 * masterstealth);
+					experience += 12 - (0.6 * masterstealth);
 					playermaxresistance += 2;
 					playerresistance += 2;
 					goto STEALTH;
@@ -846,7 +872,7 @@ STRENGTH:
 		case '1' :
 			if(playertp >= 80 - (12 * masterstrength)){
 				playertp -= 80 - (12 * masterstrength);
-				experience += 8 - (1.2 * masterstrength);
+				experience += 8 - (0.6 * masterstrength);
 				playerattack++;
 				goto STRENGTH;
 			}
@@ -858,7 +884,7 @@ STRENGTH:
 			if(masterstrength >= 1){
 				if(playertp >= 80 - (9 * masterstrength)){
 					playertp -= 80 - (9 * masterstrength);
-					experience += 8 - (0.9 * masterstrength);
+					experience += 8 - (0.45 * masterstrength);
 					playerdefense++;
 					goto STRENGTH;
 				}
@@ -893,7 +919,7 @@ MAGIC:
 		case '1' :
 			if(playertp >= 90 - (12 * mastermagic)){
 				playertp -= 90 - (12 * mastermagic);
-				experience += 9 - (1.2 * mastermagic);
+				experience += 9 - (0.6 * mastermagic);
 				playermagicattack++;
 				goto MAGIC;
 			}
@@ -905,7 +931,7 @@ MAGIC:
 			if(mastermagic >= 2){
 				if(playertp >= 240 - (30 * mastermagic)){
 					playertp -= 240 - (30 * mastermagic);
-					experience += 24 - (3 * mastermagic);
+					experience += 24 - (1.5 * mastermagic);
 					playermaxmpbase++;
 					playermp++;
 					goto MAGIC;
@@ -935,7 +961,7 @@ HEALTH:
 		case '1' :
 			if(playertp >= 90 - (9 * masterhealth)){
 				playertp -= 90 - (9 * masterhealth);
-				experience += 9 - (0.9 * masterhealth);
+				experience += 9 - (0.45 * masterhealth);
 				playermaxlife += 10;
 				playerlife += 10;
 				goto HEALTH;
@@ -974,6 +1000,7 @@ XPCENTER:
 			cout << "Current TP: " << playertp << endl;
 			cout << "Current experience: " << experience << endl << endl;
 			cout << "[1] Train magic" << endl;
+			cout << "[2] Train tactics" << endl;
 			cout << endl << "[q] Go back to the upgrading menu" << endl;
 			cout << "[Any other key] Go back to the main menu" << endl;
 			cin >> movement;
@@ -1007,13 +1034,13 @@ XPCENTER:
 					subcriticalcheckerone = rand() % 101;
 					if(converter <= 25){
 						if(subcriticalcheckerone > converter * 4){
-TIER1FAILED:
+TIER1AFAILED:
 							cout << "Bad luck! Training turned up with nothing new" << endl << endl;
 						}
 						else{
-STARTTIER1:
+STARTTIER1A:
 							subcriticalcheckertwo = rand() % 7;
-TIER1:
+TIER1A:
 							if(grasslearnt == false && subcriticalcheckertwo == 1){
 								grasslearnt = true;
 								skilllearnt = 1;
@@ -1050,10 +1077,10 @@ TIER1:
 								|| (subcriticalcheckertwo == 4 && firelearnt == true) || (subcriticalcheckertwo == 5 && waterlearnt == true) || (subcriticalcheckertwo == 6 && groundlearnt == true)){
 									subcriticalcheckertwo++;
 									if(subcriticalcheckertwo > 6){
-										goto TIER1FAILED;
+										goto TIER1AFAILED;
 									}
 								}
-								goto TIER1;
+								goto TIER1A;
 							}
 							skilllearnt = 0;
 						}
@@ -1062,12 +1089,12 @@ TIER1:
 					}
 					if(converter <= 50 && converter > 25){
 						if(subcriticalcheckerone > (converter - 25) * 4){
-							goto STARTTIER1;
+							goto STARTTIER1A;
 						}
 						else{
-STARTTIER2:
+STARTTIER2A:
 							subcriticalcheckertwo = rand() % 8;
-TIER2:
+TIER2A:
 							if(frostbitelearnt == false && subcriticalcheckertwo == 1){
 								frostbitelearnt = true;
 								skilllearnt = 1;
@@ -1110,10 +1137,10 @@ TIER2:
 								|| (subcriticalcheckertwo == 7 && shakelearnt == true)){
 									subcriticalcheckertwo++;
 									if(subcriticalcheckertwo > 7){
-										goto STARTTIER1;
+										goto STARTTIER1A;
 									}
 								}
-								goto TIER2;
+								goto TIER2A;
 							}
 							skilllearnt = 0;
 						}
@@ -1122,12 +1149,11 @@ TIER2:
 					}
 					if(converter > 50){
 						if(subcriticalcheckerone > (converter - 50) * 4){
-							goto STARTTIER2;
+							goto STARTTIER2A;
 						}
 						else{
-STARTTIER3:
 							subcriticalcheckertwo = rand() % 8;
-TIER3:
+TIER3A:
 							if(hypothermialearnt == false && subcriticalcheckertwo == 1){
 								hypothermialearnt = true;
 								skilllearnt = 1;
@@ -1170,10 +1196,106 @@ TIER3:
 								|| (subcriticalcheckertwo == 7 && earthquakelearnt == true)){
 									subcriticalcheckertwo++;
 									if(subcriticalcheckertwo > 7){
-										goto STARTTIER2;
+										goto STARTTIER2A;
 									}
 								}
-								goto TIER3;
+								goto TIER3A;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+				}
+				break;
+			case '2' :
+				cout << "Current experience: " << experience << endl << endl;
+				cout << "How much XP you want to invest in training? Min 10 XP" << endl;
+				cout << endl << "{Each XP adds up 4% of learning a skill}" << endl;
+				cout << "(25 XP invested = 100% of learning a tier 1 skill)" << endl;
+				cout << "(50 XP invested = 100% of learning a tier 2 skill)" << endl;
+				cout << "(75 XP invested = 100% of learning a tier 3 skill)" << endl;
+				cout << "[Note: If a tier 1 skill has a tier 2/3 version, you wont be able" << endl << "to unlock the tier 2/3 version until you unlock the tier 1 one]" << endl << endl;
+				cin >> xpinvest;
+				randomseed();
+				stringtoint(xpinvest);
+				clear();
+				if(converter < 10){
+					converter = 0;
+					cout << "The minimum is 10 XP" << endl << endl;
+					goto XPCENTER;
+				}
+				if(converter > experience){
+					converter = 0;
+					cout << "You haven't enough experience" << endl << endl;
+					goto XPCENTER;
+				}
+				else{
+					experience -= converter;
+					subcriticalcheckerone = rand() % 101;
+					if(converter <= 25){
+						if(subcriticalcheckerone > converter * 4){
+TIER1BFAILED:
+							cout << "Bad luck! Training turned up with nothing new" << endl << endl;
+						}
+						else{
+STARTTIER1B:
+							subcriticalcheckertwo = rand() % 1;
+TIER1B:
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while(1){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 1){
+										goto TIER1BFAILED;
+									}
+								}
+								goto TIER1B;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+					if(converter <= 50 && converter > 25){
+						if(subcriticalcheckerone > (converter - 25) * 4){
+							goto STARTTIER1B;
+						}
+						else{
+STARTTIER2B:
+							subcriticalcheckertwo = rand() % 1;
+TIER2B:
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while(1){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 1){
+										goto STARTTIER1B;
+									}
+								}
+								goto TIER2B;
+							}
+							skilllearnt = 0;
+						}
+						converter = 0;
+						goto XPCENTER;
+					}
+					if(converter > 50){
+						if(subcriticalcheckerone > (converter - 50) * 4){
+							goto STARTTIER2B;
+						}
+						else{
+							subcriticalcheckertwo = rand() % 1;
+TIER3B:
+							if(skilllearnt == 0){
+								subcriticalcheckertwo = 1;
+								while(1){
+									subcriticalcheckertwo++;
+									if(subcriticalcheckertwo > 1){
+										goto STARTTIER2B;
+									}
+								}
+								goto TIER3B;
 							}
 							skilllearnt = 0;
 						}
@@ -1453,9 +1575,10 @@ CUSTOMIZATION:
 			masterhealth = converter;
 			fclose(character);
 			if((masterstealth + masterstrength + mastermagic + masterhealth) != 4){
-				cout << "character.txt is corrupted and it will be deleted.\nPlease create another character at 'Customize character'" << endl;
-				fclose(character);
-				remove("character.txt");
+				cout << "character.txt is corrupted" << endl << "You will be now redirected to the 'Character customization'" << endl;
+				_getch();
+				clearcolors(LIGHTGREY,BLACK);
+				goto CUSTOMIZATIONSTART;
 			}
 			else{
 				cout << "Loaded succesfully!" << endl;
@@ -1471,9 +1594,8 @@ CUSTOMIZATION:
 		else{
 			cout << "Warning! character.txt not found!" << endl << "You will be now redirected to the 'Character customization'" << endl;
 			_getch();
-			clearcolors(7,0);
+			clearcolors(LIGHTGREY,BLACK);
 			goto CUSTOMIZATIONSTART;
-			clear();
 		}
 	}
 }
@@ -1807,18 +1929,18 @@ void enemy::enemyattacked(){
 			cout << "\a";
 			enemylife -= mainplayer.saycriticalpower();
 			enemylife -= weapons.sayrealattack();
+			enemylife += 0.05 * (consecutiveattacks * mainplayer.saycriticalpower());
 			enemylife += enemydefense;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayrealattack() - enemydefense);
+			cout << " made a critical hit, causing " << mainplayer.saycriticalpower() + weapons.sayrealattack() - enemydefense - 0.05 * (consecutiveattacks * mainplayer.saycriticalpower()) << " damage!" << endl;
 		}
 		else{
 			enemylife -= mainplayer.attackparameter();
 			enemylife -= weapons.sayrealattack();
+			enemylife += 0.05 * (consecutiveattacks * mainplayer.attackparameter());
 			enemylife += enemydefense;
 			cout << playername;
-			cout << " inflicted ";
-			printf("%d",mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense);
-			cout << " to the enemy" << endl;
+			cout << " inflicted " << mainplayer.attackparameter() + weapons.sayrealattack() - enemydefense - 0.05 * (consecutiveattacks * mainplayer.attackparameter()) << " damage to the enemy" << endl;
 		}
 	}
 	if(damagepilleffect == true){
@@ -1826,19 +1948,23 @@ void enemy::enemyattacked(){
 			cout << "\a";
 			enemylife -= mainplayer.saycriticalpower();
 			enemylife -= weapons.sayrealattack();
+			enemylife += 0.05 * (consecutiveattacks * mainplayer.saycriticalpower());
 			enemylife += enemydefense;
 			cout << playername;
-			printf(" made a critical hit, causing %d damage!\n",mainplayer.saycriticalpower() + weapons.sayrealattack() - enemydefense);
+			cout << " made a critical hit, causing " << mainplayer.saycriticalpower() + weapons.sayrealattack() + 10 - enemydefense - 0.05 * (consecutiveattacks * mainplayer.saycriticalpower()) << " damage!" << endl;
 		}
 		else{
 			enemylife -= mainplayer.attackparameter();
 			enemylife -= weapons.sayrealattack();
+			enemylife += 0.05 * (consecutiveattacks * mainplayer.attackparameter());
 			enemylife += enemydefense;
 			enemylife -= 10;
 			cout << playername;
-			printf(" inflicted %d damage to the enemy\n",mainplayer.attackparameter() + weapons.sayrealattack() + 10 - enemydefense);
+			cout << " inflicted " << mainplayer.attackparameter() + weapons.sayrealattack() + 10 - enemydefense - 0.05 * (consecutiveattacks * mainplayer.attackparameter()) << " damage to the enemy" << endl;
 		}
 	}
+	consecutiveattacks++;
+	attackmade = true;
 }
 
 void enemy::rangedattacked(){
@@ -3208,6 +3334,16 @@ STARTBATTLE:
 			if(battletype == 2){
 				boss.limitlife();
 			}
+
+			if(attackmade == false){
+				consecutiveattacks -= 2;
+				if(consecutiveattacks < 0){
+					consecutiveattacks = 0;
+				}
+			}
+			else{
+				attackmade = false;
+			}
 		}
 	}
 }
@@ -3228,25 +3364,63 @@ void maintitle(){
 	gotoxy(2,8);
 	cout << "   ##    ##     ##  ######     ##    ####  ######  ##     ## ######## ";
 	gotoxy(2,9);
-	cout << "				                            [Alpha 2.2] ";
+	cout << "                                                        [Alpha 2.2.1] ";
 }
 
 int main(){
-	// Inicio
 	SetConsoleTitle(L"Tactical");
+	bool startupmenu;
+	bool controlsshown;
 	clearcolors(15,8);
 	randomseed();
 	mainplayer.customizecharacter(2);
+	selectory = 1;
 	while(1){
-		maintitle();
-		gotoxy(2,12);
-		cout << "[1] New Game" << endl;
-		gotoxy(2,14);
-		cout << "[2] Continue" << endl;
-		gotoxy(2,16);
-		cout << "[3] Customize Character" << endl;
-		gotoxy(2,18);
-		movement = _getch();
+		while(startupmenu == false){
+			maintitle();
+			gotoxy(2,12);
+			if(selectory == 1){
+				cout << "-> ";
+			}
+			cout << "	New Game" << endl;
+			gotoxy(2,14);
+			if(selectory == 2){
+				cout << "-> ";
+			}
+			cout << "	Continue" << endl;
+			gotoxy(2,16);
+			if(selectory == 3){
+				cout << "-> ";
+			}
+			cout << "	Customize Character" << endl;
+			if(controlsshown == false){
+				gotoxy(2,18);
+				cout << "WASD to move the cursor, space to confirm";
+				controlsshown = true;
+			}
+			gotoxy(2,18);
+			movement = _getch();
+			switch(movement){
+			case 'w' :
+				if(selectory > 1) selectory--;
+				break;
+			case 's' :
+				if(selectory < 3) selectory++;
+				break;
+			case ' ' :
+				startupmenu = true;
+				if(selectory == 1){
+					movement = '1';
+				}
+				if(selectory == 2){
+					movement = '2';
+				}
+				if(selectory == 3){
+					movement = '3';
+				}
+				break;
+			}
+		}
 		switch(movement){
 		case '1':
 			gotoxy(20,75);
@@ -3301,6 +3475,7 @@ int main(){
 			cout << "                             ";
 			break;
 		}
+		startupmenu = false;
 	}
 	return 0;
 }

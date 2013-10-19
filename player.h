@@ -29,12 +29,17 @@ bool firstbattle = true;
 int movementint;
 int movementfinal;
 
+int selectory;
+
 int section = 1;
 int zone = 1;
 int travel;
 
 int battletype;
 int backgroundcolor;
+
+int consecutiveattacks;
+bool attackmade;
 
 void gotoxy(int column, int line)
 {
@@ -164,6 +169,7 @@ public:
 
 	void upgrading();
 	void shop();
+	void options();
 
 	void determinemaxshields();
 	void restoreshields();
@@ -262,7 +268,7 @@ protected:
 	int mpmeter;
 	int resmeter;
 
-	int experience;
+	float experience;
 
 	int masterstealth;
 	int masterstrength;
@@ -765,12 +771,12 @@ protected:
 
 enemy::enemy()
 {
-	enemylife = 120;
-	enemymaxlife = 120;
-	enemytype = 1;
-	enemyattack = 10;
-	enemydefense = 1;
-	enemycriticalchecker = 20;
+	enemylife =				120;
+	enemymaxlife =			120;
+	enemytype =				1;
+	enemyattack =			10;
+	enemydefense =			1;
+	enemycriticalchecker =	20;
 }
 
 int enemy::saymaxlife(){
